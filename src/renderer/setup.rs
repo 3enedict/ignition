@@ -12,15 +12,17 @@ use vulkano::swapchain;
 use vulkano::swapchain::{AcquireError, Swapchain, SwapchainCreationError};
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
-use vulkano_win::VkSurfaceBuild;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::{Window, WindowBuilder};
+use winit::window::Window;
 
 use crate::renderer::VglRenderer;
 
 pub mod instance;
 use instance::VglInstance;
+
+pub mod surface;
+use surface::VglSurface;
 
 fn window_size_dependent_setup(
     images: &[Arc<SwapchainImage<Window>>],
@@ -53,21 +55,12 @@ impl VglRenderer {
     pub fn new() -> Self {
         let instance = VglInstance::new();
 
-        // The objective of this example is to draw a triangle on a window. To do so, we first need to
-        // create the window.
-        //
-        // This is done by creating a `WindowBuilder` from the `winit` crate, then calling the
-        // `build_vk_surface` method provided by the `VkSurfaceBuild` trait from `vulkano_win`. If you
-        // ever get an error about `build_vk_surface` being undefined in one of your projects, this
-        // probably means that you forgot to import this trait.
-        //
-        // This returns a `vulkano::swapchain::Surface` object that contains both a cross-platform winit
-        // window and a cross-platform Vulkan surface that represents the surface of the window.
         let event_loop = EventLoop::new();
-        print_type_of(&event_loop);
-        let surface = WindowBuilder::new()
-            .build_vk_surface(&event_loop, instance.clone_instance())
-            .unwrap();
+
+        let surface = VglSurface::new(
+            &instance,
+            &event_loop,
+        );
 
         // Choose device extensions that we're going to use.
         // In order to present images to a surface, we need a `Swapchain`, which is provided by the
@@ -104,7 +97,7 @@ impl VglRenderer {
                     // We select a queue family that supports graphics operations. When drawing to
                     // a window surface, as we do in this example, we also need to check that queues
                     // in this queue family are capable of presenting images to the surface.
-                    q.supports_graphics() && surface.is_supported(q).unwrap_or(false)
+                    q.supports_graphics() && surface.get_surface().is_supported(q).unwrap_or(false)
                 })
             // The code here searches for the first queue family that is suitable. If none is
             // found, `None` is returned to `filter_map`, which disqualifies this physical
@@ -181,7 +174,7 @@ impl VglRenderer {
         let (mut swapchain, images) = {
             // Querying the capabilities of the surface. When we create the swapchain we can only
             // pass values that are allowed by the capabilities.
-            let caps = surface.capabilities(physical_device).unwrap();
+            let caps = surface.get_surface().capabilities(physical_device).unwrap();
 
             // The alpha mode indicates how the alpha value of the final image will behave. For example,
             // you can choose whether the window will be opaque or transparent.
@@ -200,10 +193,10 @@ impl VglRenderer {
             // These drivers will allow anything, but the only sensible value is the window dimensions.
             //
             // Both of these cases need the swapchain to use the window dimensions, so we just use that.
-            let dimensions: [u32; 2] = surface.window().inner_size().into();
+            let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
 
             // Please take a look at the docs for the meaning of the parameters we didn't mention.
-            Swapchain::start(device.clone(), surface.clone())
+            Swapchain::start(device.clone(), surface.clone_surface())
                 .num_images(caps.min_image_count)
                 .format(format)
                 .dimensions(dimensions)
@@ -407,7 +400,7 @@ impl VglRenderer {
                     // In this example that includes the swapchain, the framebuffers and the dynamic state viewport.
                     if recreate_swapchain {
                         // Get the new dimensions of the window.
-                        let dimensions: [u32; 2] = surface.window().inner_size().into();
+                        let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
                         let (new_swapchain, new_images) =
                             match swapchain.recreate().dimensions(dimensions).build() {
                                 Ok(r) => r,
