@@ -3,12 +3,12 @@ use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
 use vulkano::device::DeviceExtensions;
 use vulkano::image::view::ImageView;
-use vulkano::image::{ImageUsage, SwapchainImage};
+use vulkano::image::SwapchainImage;
 use vulkano::pipeline::viewport::Viewport;
 use vulkano::pipeline::GraphicsPipeline;
 use vulkano::render_pass::{Framebuffer, FramebufferAbstract, RenderPass, Subpass};
-use vulkano::swapchain;
-use vulkano::swapchain::{AcquireError, Swapchain, SwapchainCreationError};
+use vulkano::swapchain as vulkano_swapchain;
+use vulkano::swapchain::AcquireError;
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use winit::event::{Event, WindowEvent};
@@ -28,6 +28,10 @@ use physical_device::VglPhysicalDevice;
 
 pub mod logical_device;
 use logical_device::VglLogicalDevice;
+
+pub mod swapchain;
+use swapchain::VglSwapchain;
+
 
 fn window_size_dependent_setup(
     images: &[Arc<SwapchainImage<Window>>],
@@ -83,41 +87,11 @@ impl VglRenderer {
             &physical_device,
         );
 
-        let (mut swapchain, images) = {
-            // Querying the capabilities of the surface. When we create the swapchain we can only
-            // pass values that are allowed by the capabilities.
-            let caps = surface.get_surface().capabilities(physical_device.get_physical_device()).unwrap();
-
-            // The alpha mode indicates how the alpha value of the final image will behave. For example,
-            // you can choose whether the window will be opaque or transparent.
-            let composite_alpha = caps.supported_composite_alpha.iter().next().unwrap();
-
-            // Choosing the internal format that the images will have.
-            let format = caps.supported_formats[0].0;
-
-            // The dimensions of the window, only used to initially setup the swapchain.
-            // NOTE:
-            // On some drivers the swapchain dimensions are specified by `caps.current_extent` and the
-            // swapchain size must use these dimensions.
-            // These dimensions are always the same as the window dimensions.
-            //
-            // However, other drivers don't specify a value, i.e. `caps.current_extent` is `None`
-            // These drivers will allow anything, but the only sensible value is the window dimensions.
-            //
-            // Both of these cases need the swapchain to use the window dimensions, so we just use that.
-            let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
-
-            // Please take a look at the docs for the meaning of the parameters we didn't mention.
-            Swapchain::start(logical_device.clone_logical_device(), surface.clone_surface())
-                .num_images(caps.min_image_count)
-                .format(format)
-                .dimensions(dimensions)
-                .usage(ImageUsage::color_attachment())
-                .sharing_mode(logical_device.get_queue())
-                .composite_alpha(composite_alpha)
-                .build()
-                .unwrap()
-        };
+        let mut swapchain = VglSwapchain::new(
+            &surface,
+            &physical_device,
+            &logical_device,
+        );
 
         // We now create a buffer that will store the shape of our triangle.
         #[derive(Default, Debug, Clone)]
@@ -132,13 +106,13 @@ impl VglRenderer {
             false,
             [
             Vertex {
-                position: [-0.5, -0.25],
+                position: [0.0, -0.5],
             },
             Vertex {
-                position: [0.0, 0.5],
+                position: [0.5, 0.5],
             },
             Vertex {
-                position: [0.25, -0.1],
+                position: [-0.5, 0.5],
             },
             ]
             .iter()
@@ -158,13 +132,27 @@ impl VglRenderer {
             vulkano_shaders::shader! {
                 ty: "vertex",
                 src: "
-        #version 450
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
-        layout(location = 0) in vec2 position;
+out gl_PerVertex {
+    vec4 gl_Position;
+};
 
-        void main() {
-          gl_Position = vec4(position, 0.0, 1.0);
-        }
+layout(location = 0) in vec2 position;
+
+layout(location = 0) out vec3 fragColor;
+
+vec3 colors[3] = vec3[](
+    vec3(1.0, 0.0, 0.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, 0.0, 1.0)
+);
+
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    fragColor = colors[gl_VertexIndex];
+}
       "
             }
             }
@@ -173,13 +161,16 @@ impl VglRenderer {
             vulkano_shaders::shader! {
                 ty: "fragment",
                 src: "
-                #version 450
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
-                layout(location = 0) out vec4 f_color;
+layout(location = 0) in vec3 fragColor;
 
-            void main() {
-                f_color = vec4(1.0, 0.0, 0.0, 1.0);
-            }
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    outColor = vec4(fragColor, 1.0);
+}
             "
             }
             }
@@ -210,7 +201,7 @@ impl VglRenderer {
                         // be one of the types of the `vulkano::format` module (or alternatively one
                         // of your structs that implements the `FormatDesc` trait). Here we use the
                         // same format as the swapchain.
-                        format: swapchain.format(),
+                        format: swapchain.get_swapchain().format(),
                         // TODO:
                         samples: 1,
                     }
@@ -264,7 +255,7 @@ impl VglRenderer {
         //
         // Since we need to draw to multiple images, we are going to create a different framebuffer for
         // each image.
-        let mut framebuffers = window_size_dependent_setup(&images, render_pass.clone(), &mut viewport);
+        let mut framebuffers = window_size_dependent_setup(swapchain.get_images(), render_pass.clone(), &mut viewport);
 
         // Initialization is finally finished!
 
@@ -311,22 +302,14 @@ impl VglRenderer {
                     // Whenever the window resizes we need to recreate everything dependent on the window size.
                     // In this example that includes the swapchain, the framebuffers and the dynamic state viewport.
                     if recreate_swapchain {
-                        // Get the new dimensions of the window.
-                        let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
-                        let (new_swapchain, new_images) =
-                            match swapchain.recreate().dimensions(dimensions).build() {
-                                Ok(r) => r,
-                                // This error tends to happen when the user is manually resizing the window.
-                                // Simply restarting the loop is the easiest way to fix this issue.
-                                Err(SwapchainCreationError::UnsupportedDimensions) => return,
-                                Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
-                            };
+                        if swapchain.recreate_swapchain(&surface) {
+                            return;
+                        }
 
-                        swapchain = new_swapchain;
                         // Because framebuffers contains an Arc on the old swapchain, we need to
                         // recreate framebuffers as well.
                         framebuffers = window_size_dependent_setup(
-                            &new_images,
+                            swapchain.get_images(),
                             render_pass.clone(),
                             &mut viewport,
                         );
@@ -341,7 +324,7 @@ impl VglRenderer {
                     // This function can block if no image is available. The parameter is an optional timeout
                     // after which the function call will return an error.
                     let (image_num, suboptimal, acquire_future) =
-                        match swapchain::acquire_next_image(swapchain.clone(), None) {
+                        match vulkano_swapchain::acquire_next_image(swapchain.clone_swapchain(), None) {
                             Ok(r) => r,
                             Err(AcquireError::OutOfDate) => {
                                 recreate_swapchain = true;
@@ -358,7 +341,7 @@ impl VglRenderer {
                     }
 
                     // Specify the color to clear the framebuffer with i.e. blue
-                    let clear_values = vec![[0.0, 0.0, 1.0, 1.0].into()];
+                    let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
                     // In order to draw, we have to build a *command buffer*. The command buffer object holds
                     // the list of commands that are going to be executed.
@@ -420,7 +403,7 @@ impl VglRenderer {
                         // This function does not actually present the image immediately. Instead it submits a
                         // present command at the end of the queue. This means that it will only be presented once
                         // the GPU has finished executing the command buffer that draws the triangle.
-                        .then_swapchain_present(logical_device.clone_queue(), swapchain.clone(), image_num)
+                        .then_swapchain_present(logical_device.clone_queue(), swapchain.clone_swapchain(), image_num)
                         .then_signal_fence_and_flush();
 
                     match future {
