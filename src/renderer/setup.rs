@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
-use vulkano::device::physical::{PhysicalDevice, PhysicalDeviceType};
 use vulkano::device::{Device, DeviceExtensions, Features};
 use vulkano::image::view::ImageView;
 use vulkano::image::{ImageUsage, SwapchainImage};
@@ -23,6 +22,9 @@ use instance::VglInstance;
 
 pub mod surface;
 use surface::VglSurface;
+
+pub mod physical_device;
+use physical_device::VglPhysicalDevice;
 
 fn window_size_dependent_setup(
     images: &[Arc<SwapchainImage<Window>>],
@@ -62,76 +64,17 @@ impl VglRenderer {
             &event_loop,
         );
 
-        // Choose device extensions that we're going to use.
-        // In order to present images to a surface, we need a `Swapchain`, which is provided by the
-        // `khr_swapchain` extension.
         let device_extensions = DeviceExtensions {
             khr_swapchain: true,
             ..DeviceExtensions::none()
         };
 
-        // We then choose which physical device to use. First, we enumerate all the available physical
-        // devices, then apply filters to narrow them down to those that can support our needs.
-        let (physical_device, queue_family) = PhysicalDevice::enumerate(instance.get_instance())
-            .filter(|&p| {
-                // Some devices may not support the extensions or features that your application, or
-                // report properties and limits that are not sufficient for your application. These
-                // should be filtered out here.
-                p.supported_extensions().is_superset_of(&device_extensions)
-            })
-        .filter_map(|p| {
-            // For each physical device, we try to find a suitable queue family that will execute
-            // our draw commands.
-            //
-            // Devices can provide multiple queues to run commands in parallel (for example a draw
-            // queue and a compute queue), similar to CPU threads. This is something you have to
-            // have to manage manually in Vulkan. Queues of the same type belong to the same
-            // queue family.
-            //
-            // Here, we look for a single queue family that is suitable for our purposes. In a
-            // real-life application, you may want to use a separate dedicated transfer queue to
-            // handle data transfers in parallel with graphics operations. You may also need a
-            // separate queue for compute operations, if your application uses those.
-            p.queue_families()
-                .find(|&q| {
-                    // We select a queue family that supports graphics operations. When drawing to
-                    // a window surface, as we do in this example, we also need to check that queues
-                    // in this queue family are capable of presenting images to the surface.
-                    q.supports_graphics() && surface.get_surface().is_supported(q).unwrap_or(false)
-                })
-            // The code here searches for the first queue family that is suitable. If none is
-            // found, `None` is returned to `filter_map`, which disqualifies this physical
-            // device.
-            .map(|q| (p, q))
-        })
-        // All the physical devices that pass the filters above are suitable for the application.
-        // However, not every device is equal, some are preferred over others. Now, we assign
-        // each physical device a score, and pick the device with the
-        // lowest ("best") score.
-        //
-        // In this example, we simply select the best-scoring device to use in the application.
-        // In a real-life setting, you may want to use the best-scoring device only as a
-        // "default" or "recommended" device, and let the user choose the device themselves.
-        .min_by_key(|(p, _)| {
-            // We assign a better score to device types that are likely to be faster/better.
-            match p.properties().device_type {
-                PhysicalDeviceType::DiscreteGpu => 0,
-                PhysicalDeviceType::IntegratedGpu => 1,
-                PhysicalDeviceType::VirtualGpu => 2,
-                PhysicalDeviceType::Cpu => 3,
-                PhysicalDeviceType::Other => 4,
-            }
-        })
-        .unwrap();
-
-        print_type_of(&physical_device);
-        print_type_of(&queue_family);
-        // Some little debug infos.
-        println!(
-            "Using device: {} (type: {:?})",
-            physical_device.properties().device_name,
-            physical_device.properties().device_type,
+        let physical_device = VglPhysicalDevice::new(
+            &instance,
+            &surface,
+            &device_extensions,
         );
+
 
         // Now initializing the device. This is probably the most important object of Vulkan.
         //
@@ -151,15 +94,15 @@ impl VglRenderer {
         //
         // The iterator of created queues is returned by the function alongside the device.
         let (device, mut queues) = Device::new(
-            physical_device,
+            physical_device.get_physical_device(),
             &Features::none(),
             // Some devices require certain extensions to be enabled if they are present
             // (e.g. `khr_portability_subset`). We add them to the device extensions that we're going to
             // enable.
-            &physical_device
+            &physical_device.get_physical_device()
             .required_extensions()
             .union(&device_extensions),
-            [(queue_family, 0.5)].iter().cloned(),
+            [(physical_device.get_queue_family(), 0.5)].iter().cloned(),
         )
             .unwrap();
 
@@ -174,7 +117,7 @@ impl VglRenderer {
         let (mut swapchain, images) = {
             // Querying the capabilities of the surface. When we create the swapchain we can only
             // pass values that are allowed by the capabilities.
-            let caps = surface.get_surface().capabilities(physical_device).unwrap();
+            let caps = surface.get_surface().capabilities(physical_device.get_physical_device()).unwrap();
 
             // The alpha mode indicates how the alpha value of the final image will behave. For example,
             // you can choose whether the window will be opaque or transparent.
