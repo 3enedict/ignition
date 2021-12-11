@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
-use vulkano::device::{Device, DeviceExtensions, Features};
+use vulkano::device::DeviceExtensions;
 use vulkano::image::view::ImageView;
 use vulkano::image::{ImageUsage, SwapchainImage};
 use vulkano::pipeline::viewport::Viewport;
@@ -25,6 +25,9 @@ use surface::VglSurface;
 
 pub mod physical_device;
 use physical_device::VglPhysicalDevice;
+
+pub mod logical_device;
+use logical_device::VglLogicalDevice;
 
 fn window_size_dependent_setup(
     images: &[Arc<SwapchainImage<Window>>],
@@ -75,45 +78,11 @@ impl VglRenderer {
             &device_extensions,
         );
 
+        let logical_device = VglLogicalDevice::new(
+            &device_extensions,
+            &physical_device,
+        );
 
-        // Now initializing the device. This is probably the most important object of Vulkan.
-        //
-        // We have to pass four parameters when creating a device:
-        //
-        // - Which physical device to connect to.
-        //
-        // - A list of optional features and extensions that our program needs to work correctly.
-        //   Some parts of the Vulkan specs are optional and must be enabled manually at device
-        //   creation. In this example the only thing we are going to need is the `khr_swapchain`
-        //   extension that allows us to draw to a window.
-        //
-        // - The list of queues that we are going to use. The exact parameter is an iterator whose
-        //   items are `(Queue, f32)` where the floating-point represents the priority of the queue
-        //   between 0.0 and 1.0. The priority of the queue is a hint to the implementation about how
-        //   much it should prioritize queues between one another.
-        //
-        // The iterator of created queues is returned by the function alongside the device.
-        let (device, mut queues) = Device::new(
-            physical_device.get_physical_device(),
-            &Features::none(),
-            // Some devices require certain extensions to be enabled if they are present
-            // (e.g. `khr_portability_subset`). We add them to the device extensions that we're going to
-            // enable.
-            &physical_device.get_physical_device()
-            .required_extensions()
-            .union(&device_extensions),
-            [(physical_device.get_queue_family(), 0.5)].iter().cloned(),
-        )
-            .unwrap();
-
-        // Since we can request multiple queues, the `queues` variable is in fact an iterator. We
-        // only use one queue in this example, so we just retrieve the first and only element of the
-        // iterator.
-        let queue = queues.next().unwrap();
-
-        // Before we can draw on the surface, we have to create what is called a swapchain. Creating
-        // a swapchain allocates the color buffers that will contain the image that will ultimately
-        // be visible on the screen. These images are returned alongside the swapchain.
         let (mut swapchain, images) = {
             // Querying the capabilities of the surface. When we create the swapchain we can only
             // pass values that are allowed by the capabilities.
@@ -139,12 +108,12 @@ impl VglRenderer {
             let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
 
             // Please take a look at the docs for the meaning of the parameters we didn't mention.
-            Swapchain::start(device.clone(), surface.clone_surface())
+            Swapchain::start(logical_device.clone_logical_device(), surface.clone_surface())
                 .num_images(caps.min_image_count)
                 .format(format)
                 .dimensions(dimensions)
                 .usage(ImageUsage::color_attachment())
-                .sharing_mode(&queue)
+                .sharing_mode(logical_device.get_queue())
                 .composite_alpha(composite_alpha)
                 .build()
                 .unwrap()
@@ -158,7 +127,7 @@ impl VglRenderer {
         vulkano::impl_vertex!(Vertex, position);
 
         let vertex_buffer = CpuAccessibleBuffer::from_iter(
-            device.clone(),
+            logical_device.clone_logical_device(),
             BufferUsage::all(),
             false,
             [
@@ -215,8 +184,8 @@ impl VglRenderer {
             }
             }
 
-        let vs = vs::Shader::load(device.clone()).unwrap();
-        let fs = fs::Shader::load(device.clone()).unwrap();
+        let vs = vs::Shader::load(logical_device.clone_logical_device()).unwrap();
+        let fs = fs::Shader::load(logical_device.clone_logical_device()).unwrap();
 
         // At this point, OpenGL initialization would be finished. However in Vulkan it is not. OpenGL
         // implicitly does a lot of computation whenever you draw. In Vulkan, you have to do all this
@@ -227,7 +196,7 @@ impl VglRenderer {
         // where the colors, depth and/or stencil information will be written.
         let render_pass = Arc::new(
             vulkano::single_pass_renderpass!(
-                device.clone(),
+                logical_device.clone_logical_device(),
                 attachments: {
                     // `color` is a custom name we give to the first and only attachment.
                     color: {
@@ -278,7 +247,7 @@ impl VglRenderer {
             // in. The pipeline will only be usable from this particular subpass.
             .render_pass(Subpass::from(render_pass.clone(), 0).unwrap())
             // Now that our builder is filled, we call `build()` to obtain an actual pipeline.
-            .build(device.clone())
+            .build(logical_device.clone_logical_device())
             .unwrap(),
         );
 
@@ -316,7 +285,7 @@ impl VglRenderer {
         //
         // Destroying the `GpuFuture` blocks until the GPU is finished executing it. In order to avoid
         // that, we store the submission of the previous frame here.
-        let mut previous_frame_end = Some(sync::now(device.clone()).boxed());
+        let mut previous_frame_end = Some(sync::now(logical_device.clone_logical_device()).boxed());
 
         event_loop.run(move |event, _, control_flow| {
             match event {
@@ -401,8 +370,8 @@ impl VglRenderer {
                     // Note that we have to pass a queue family when we create the command buffer. The command
                     // buffer will only be executable on that given queue family.
                     let mut builder = AutoCommandBufferBuilder::primary(
-                        device.clone(),
-                        queue.family(),
+                        logical_device.clone_logical_device(),
+                        logical_device.get_queue().family(),
                         CommandBufferUsage::OneTimeSubmit,
                     )
                         .unwrap();
@@ -443,7 +412,7 @@ impl VglRenderer {
                         .take()
                         .unwrap()
                         .join(acquire_future)
-                        .then_execute(queue.clone(), command_buffer)
+                        .then_execute(logical_device.clone_queue(), command_buffer)
                         .unwrap()
                         // The color output is now expected to contain our triangle. But in order to show it on
                         // the screen, we have to *present* the image by calling `present`.
@@ -451,7 +420,7 @@ impl VglRenderer {
                         // This function does not actually present the image immediately. Instead it submits a
                         // present command at the end of the queue. This means that it will only be presented once
                         // the GPU has finished executing the command buffer that draws the triangle.
-                        .then_swapchain_present(queue.clone(), swapchain.clone(), image_num)
+                        .then_swapchain_present(logical_device.clone_queue(), swapchain.clone(), image_num)
                         .then_signal_fence_and_flush();
 
                     match future {
@@ -460,11 +429,11 @@ impl VglRenderer {
                         }
                         Err(FlushError::OutOfDate) => {
                             recreate_swapchain = true;
-                            previous_frame_end = Some(sync::now(device.clone()).boxed());
+                            previous_frame_end = Some(sync::now(logical_device.clone_logical_device()).boxed());
                         }
                         Err(e) => {
                             println!("Failed to flush future: {:?}", e);
-                            previous_frame_end = Some(sync::now(device.clone()).boxed());
+                            previous_frame_end = Some(sync::now(logical_device.clone_logical_device()).boxed());
                         }
                         }
                 }
