@@ -5,8 +5,7 @@ use vulkano::device::DeviceExtensions;
 use vulkano::image::view::ImageView;
 use vulkano::image::SwapchainImage;
 use vulkano::pipeline::viewport::Viewport;
-use vulkano::pipeline::GraphicsPipeline;
-use vulkano::render_pass::{Framebuffer, FramebufferAbstract, RenderPass, Subpass};
+use vulkano::render_pass::{Framebuffer, FramebufferAbstract, RenderPass};
 use vulkano::swapchain as vulkano_swapchain;
 use vulkano::swapchain::AcquireError;
 use vulkano::sync;
@@ -34,6 +33,62 @@ use swapchain::VglSwapchain;
 
 pub mod render_pass;
 use render_pass::VglRenderPass;
+
+pub mod pipeline;
+use pipeline::VglPipeline;
+
+
+#[derive(Default, Debug, Clone)]
+struct Vertex {
+    position: [f32; 2],
+}
+
+mod vs {
+    vulkano_shaders::shader! {
+        ty: "vertex",
+        src: "
+    #version 450
+    #extension GL_ARB_separate_shader_objects : enable
+
+    out gl_PerVertex {
+        vec4 gl_Position;
+    };
+
+    layout(location = 0) in vec2 position;
+
+    layout(location = 0) out vec3 fragColor;
+
+    vec3 colors[3] = vec3[](
+        vec3(1.0, 0.0, 0.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(0.0, 0.0, 1.0)
+    );
+
+    void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+        fragColor = colors[gl_VertexIndex];
+    }
+      "
+    }
+}
+
+mod fs {
+    vulkano_shaders::shader! {
+        ty: "fragment",
+        src: "
+    #version 450
+    #extension GL_ARB_separate_shader_objects : enable
+
+    layout(location = 0) in vec3 fragColor;
+
+    layout(location = 0) out vec4 outColor;
+
+    void main() {
+        outColor = vec4(fragColor, 1.0);
+    }
+            "
+    }
+}
 
 
 fn window_size_dependent_setup(
@@ -96,11 +151,6 @@ impl VglRenderer {
             &logical_device,
         );
 
-        // We now create a buffer that will store the shape of our triangle.
-        #[derive(Default, Debug, Clone)]
-        struct Vertex {
-            position: [f32; 2],
-        }
         vulkano::impl_vertex!(Vertex, position);
 
         let vertex_buffer = CpuAccessibleBuffer::from_iter(
@@ -123,100 +173,19 @@ impl VglRenderer {
         )
             .unwrap();
 
-        // The next step is to create the shaders.
-        //
-        // The raw shader creation API provided by the vulkano library is unsafe, for various reasons.
-        //
-        // An overview of what the `vulkano_shaders::shader!` macro generates can be found in the
-        // `vulkano-shaders` crate docs. You can view them at https://docs.rs/vulkano-shaders/
-        //
-        // TODO: explain this in details
-        mod vs {
-            vulkano_shaders::shader! {
-                ty: "vertex",
-                src: "
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
-
-    out gl_PerVertex {
-        vec4 gl_Position;
-    };
-
-    layout(location = 0) in vec2 position;
-
-    layout(location = 0) out vec3 fragColor;
-
-    vec3 colors[3] = vec3[](
-        vec3(1.0, 0.0, 0.0),
-        vec3(0.0, 1.0, 0.0),
-        vec3(0.0, 0.0, 1.0)
-    );
-
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-        fragColor = colors[gl_VertexIndex];
-    }
-      "
-            }
-        }
-
-        mod fs {
-            vulkano_shaders::shader! {
-                ty: "fragment",
-                src: "
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
-
-    layout(location = 0) in vec3 fragColor;
-
-    layout(location = 0) out vec4 outColor;
-
-    void main() {
-        outColor = vec4(fragColor, 1.0);
-    }
-            "
-            }
-        }
-
         let vs = vs::Shader::load(logical_device.clone_logical_device()).unwrap();
         let fs = fs::Shader::load(logical_device.clone_logical_device()).unwrap();
 
-        // At this point, OpenGL initialization would be finished. However in Vulkan it is not. OpenGL
-        // implicitly does a lot of computation whenever you draw. In Vulkan, you have to do all this
-        // manually.
-
-        // The next step is to create a *render pass*, which is an object that describes where the
-        // output of the graphics pipeline will go. It describes the layout of the images
-        // where the colors, depth and/or stencil information will be written.
         let render_pass = VglRenderPass::new(
             &logical_device,
             &swapchain,
         );
 
-        // Before we draw we have to create what is called a pipeline. This is similar to an OpenGL
-        // program, but much more specific.
-        let pipeline = Arc::new(
-            GraphicsPipeline::start()
-            // We need to indicate the layout of the vertices.
-            // The type `SingleBufferDefinition` actually contains a template parameter corresponding
-            // to the type of each vertex. But in this code it is automatically inferred.
-            .vertex_input_single_buffer::<Vertex>()
-            // A Vulkan shader can in theory contain multiple entry points, so we have to specify
-            // which one. The `main` word of `main_entry_point` actually corresponds to the name of
-            // the entry point.
-            .vertex_shader(vs.main_entry_point(), ())
-            // The content of the vertex buffer describes a list of triangles.
-            .triangle_list()
-            // Use a resizable viewport set to draw over the entire window
-            .viewports_dynamic_scissors_irrelevant(1)
-            // See `vertex_shader`.
-            .fragment_shader(fs.main_entry_point(), ())
-            // We have to indicate which subpass of which render pass this pipeline is going to be used
-            // in. The pipeline will only be usable from this particular subpass.
-            .render_pass(Subpass::from(render_pass.clone_render_pass(), 0).unwrap())
-            // Now that our builder is filled, we call `build()` to obtain an actual pipeline.
-            .build(logical_device.clone_logical_device())
-            .unwrap(),
+        let pipeline = VglPipeline::new(
+            &logical_device,
+            &render_pass,
+            &vs,
+            &fs,
         );
 
         // Dynamic viewports allow us to recreate just the viewport when the window is resized
@@ -355,7 +324,7 @@ impl VglRenderer {
                         // The last two parameters contain the list of resources to pass to the shaders.
                         // Since we used an `EmptyPipeline` object, the objects have to be `()`.
                         .set_viewport(0, [viewport.clone()])
-                        .bind_pipeline_graphics(pipeline.clone())
+                        .bind_pipeline_graphics(pipeline.clone_pipeline())
                         .bind_vertex_buffers(0, vertex_buffer.clone())
                         .draw(vertex_buffer.len() as u32, 1, 0, 0)
                         .unwrap()
