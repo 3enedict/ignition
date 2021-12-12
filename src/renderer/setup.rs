@@ -1,18 +1,13 @@
-use std::sync::Arc;
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
 use vulkano::device::DeviceExtensions;
-use vulkano::image::view::ImageView;
-use vulkano::image::SwapchainImage;
 use vulkano::pipeline::viewport::Viewport;
-use vulkano::render_pass::{Framebuffer, FramebufferAbstract, RenderPass};
 use vulkano::swapchain as vulkano_swapchain;
 use vulkano::swapchain::AcquireError;
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::Window;
 
 use crate::renderer::VglRenderer;
 
@@ -36,6 +31,9 @@ use render_pass::VglRenderPass;
 
 pub mod pipeline;
 use pipeline::VglPipeline;
+
+pub mod framebuffers;
+use framebuffers::VglFramebuffers;
 
 
 #[derive(Default, Debug, Clone)]
@@ -88,30 +86,6 @@ mod fs {
     }
             "
     }
-}
-
-
-fn window_size_dependent_setup(
-    images: &[Arc<SwapchainImage<Window>>],
-    render_pass: Arc<RenderPass>,
-    viewport: &mut Viewport,
-) -> Vec<Arc<dyn FramebufferAbstract>> {
-    let dimensions = images[0].dimensions();
-    viewport.dimensions = [dimensions[0] as f32, dimensions[1] as f32];
-
-    images
-        .iter()
-        .map(|image| {
-            let view = ImageView::new(image.clone()).unwrap();
-            Arc::new(
-                Framebuffer::start(render_pass.clone())
-                .add(view)
-                .unwrap()
-                .build()
-                .unwrap(),
-            ) as Arc<dyn FramebufferAbstract>
-        })
-    .collect::<Vec<_>>()
 }
 
 fn print_type_of<T>(_: &T) {
@@ -201,7 +175,11 @@ impl VglRenderer {
         //
         // Since we need to draw to multiple images, we are going to create a different framebuffer for
         // each image.
-        let mut framebuffers = window_size_dependent_setup(swapchain.get_images(), render_pass.clone_render_pass(), &mut viewport);
+        let mut framebuffers = VglFramebuffers::new(
+            &swapchain,
+            &render_pass,
+            &mut viewport,
+        );
 
         // Initialization is finally finished!
 
@@ -254,9 +232,9 @@ impl VglRenderer {
 
                         // Because framebuffers contains an Arc on the old swapchain, we need to
                         // recreate framebuffers as well.
-                        framebuffers = window_size_dependent_setup(
-                            swapchain.get_images(),
-                            render_pass.clone_render_pass(),
+                        framebuffers.recreate_framebuffers(
+                            &swapchain,
+                            &render_pass,
                             &mut viewport,
                         );
                         recreate_swapchain = false;
@@ -314,7 +292,7 @@ impl VglRenderer {
                         // is similar to the list of attachments when building the framebuffers, except that
                         // only the attachments that use `load: Clear` appear in the list.
                         .begin_render_pass(
-                            framebuffers[image_num].clone(),
+                            framebuffers.get_framebuffers()[image_num].clone(),
                             SubpassContents::Inline,
                             clear_values,
                         )
