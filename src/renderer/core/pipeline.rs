@@ -3,13 +3,13 @@ use std::sync::Arc;
 use vulkano::pipeline::GraphicsPipeline;
 use vulkano::render_pass::Subpass;
 
-use crate::renderer::setup::Vertex;
-use crate::renderer::setup::vs;
-use crate::renderer::setup::fs;
+use crate::renderer::core::Vertex;
+use crate::renderer::core::vs;
+use crate::renderer::core::fs;
 
 
-use crate::renderer::setup::VglLogicalDevice;
-use crate::renderer::setup::VglRenderPass;
+use crate::renderer::core::VglLogicalDevice;
+use crate::renderer::core::VglRenderPass;
 
 pub struct VglPipeline {
     pipeline: Arc<GraphicsPipeline>,

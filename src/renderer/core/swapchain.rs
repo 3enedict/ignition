@@ -5,9 +5,9 @@ use vulkano::image::{SwapchainImage, ImageUsage};
 
 use winit::window::Window;
 
-use crate::renderer::setup::VglSurface;
-use crate::renderer::setup::VglPhysicalDevice;
-use crate::renderer::setup::VglLogicalDevice;
+use crate::renderer::core::VglSurface;
+use crate::renderer::core::VglPhysicalDevice;
+use crate::renderer::core::VglLogicalDevice;
 
 pub struct VglSwapchain {
     swapchain: Arc<Swapchain<Window>>,

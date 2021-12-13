@@ -6,19 +6,16 @@ use vulkano::sync::GpuFuture;
 
 use winit::event_loop::EventLoop;
 
-pub mod setup;
-use crate::renderer::setup::Vertex;
+pub mod core;
+use crate::renderer::core::Vertex;
 
-use crate::renderer::setup::instance::VglInstance;
-use crate::renderer::setup::surface::VglSurface;
-use crate::renderer::setup::logical_device::VglLogicalDevice;
-use crate::renderer::setup::swapchain::VglSwapchain;
-use crate::renderer::setup::render_pass::VglRenderPass;
-use crate::renderer::setup::pipeline::VglPipeline;
-use crate::renderer::setup::framebuffers::VglFramebuffers;
+use crate::renderer::core::surface::VglSurface;
+use crate::renderer::core::logical_device::VglLogicalDevice;
+use crate::renderer::core::swapchain::VglSwapchain;
+use crate::renderer::core::render_pass::VglRenderPass;
+use crate::renderer::core::pipeline::VglPipeline;
+use crate::renderer::core::framebuffers::VglFramebuffers;
 
-
-pub mod runtime;
 
 pub struct VglRenderer {
     event_loop: EventLoop<()>,

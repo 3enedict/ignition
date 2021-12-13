@@ -1,15 +1,208 @@
-use vulkano::buffer::TypedBufferAccess;
+use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
 use vulkano::swapchain as vulkano_swapchain;
 use vulkano::swapchain::AcquireError;
+use vulkano::device::DeviceExtensions;
+use vulkano::pipeline::viewport::Viewport;
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
+use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
-use winit::event_loop::ControlFlow;
 
 use crate::renderer::VglRenderer;
 
+pub mod instance;
+use instance::VglInstance;
+
+pub mod surface;
+use surface::VglSurface;
+
+pub mod physical_device;
+use physical_device::VglPhysicalDevice;
+
+pub mod logical_device;
+use logical_device::VglLogicalDevice;
+
+pub mod swapchain;
+use swapchain::VglSwapchain;
+
+pub mod render_pass;
+use render_pass::VglRenderPass;
+
+pub mod pipeline;
+use pipeline::VglPipeline;
+
+pub mod framebuffers;
+use framebuffers::VglFramebuffers;
+
+
+#[derive(Default, Debug, Clone)]
+pub struct Vertex {
+    position: [f32; 2],
+}
+
+mod vs {
+    vulkano_shaders::shader! {
+        ty: "vertex",
+        src: "
+    #version 450
+    #extension GL_ARB_separate_shader_objects : enable
+
+    out gl_PerVertex {
+        vec4 gl_Position;
+    };
+
+    layout(location = 0) in vec2 position;
+
+    layout(location = 0) out vec3 fragColor;
+
+    vec3 colors[3] = vec3[](
+        vec3(1.0, 0.0, 0.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(0.0, 0.0, 1.0)
+    );
+
+    void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+        fragColor = colors[gl_VertexIndex];
+    }
+      "
+    }
+}
+
+mod fs {
+    vulkano_shaders::shader! {
+        ty: "fragment",
+        src: "
+    #version 450
+    #extension GL_ARB_separate_shader_objects : enable
+
+    layout(location = 0) in vec3 fragColor;
+
+    layout(location = 0) out vec4 outColor;
+
+    void main() {
+        outColor = vec4(fragColor, 1.0);
+    }
+            "
+    }
+}
+
 impl VglRenderer {
+    pub fn new() -> Self {
+        let instance = VglInstance::new();
+
+        let event_loop = EventLoop::new();
+
+        let surface = VglSurface::new(
+            &instance,
+            &event_loop,
+        );
+
+        let device_extensions = DeviceExtensions {
+            khr_swapchain: true,
+            ..DeviceExtensions::none()
+        };
+
+        let physical_device = VglPhysicalDevice::new(
+            &instance,
+            &surface,
+            &device_extensions,
+        );
+
+        let logical_device = VglLogicalDevice::new(
+            &device_extensions,
+            &physical_device,
+        );
+
+        let swapchain = VglSwapchain::new(
+            &surface,
+            &physical_device,
+            &logical_device,
+        );
+
+        vulkano::impl_vertex!(Vertex, position);
+
+        let vertex_buffer = CpuAccessibleBuffer::from_iter(
+            logical_device.clone_logical_device(),
+            BufferUsage::all(),
+            false,
+            [
+            Vertex {
+                position: [0.0, -0.5],
+            },
+            Vertex {
+                position: [0.5, 0.5],
+            },
+            Vertex {
+                position: [-0.5, 0.5],
+            },
+            ]
+            .iter()
+            .cloned(),
+        )
+            .unwrap();
+
+        let vs = vs::Shader::load(logical_device.clone_logical_device()).unwrap();
+        let fs = fs::Shader::load(logical_device.clone_logical_device()).unwrap();
+
+        let render_pass = VglRenderPass::new(
+            &logical_device,
+            &swapchain,
+        );
+
+        let pipeline = VglPipeline::new(
+            &logical_device,
+            &render_pass,
+            &vs,
+            &fs,
+        );
+
+        // Dynamic viewports allow us to recreate just the viewport when the window is resized
+        // Otherwise we would have to recreate the whole pipeline.
+        let mut viewport = Viewport {
+            origin: [0.0, 0.0],
+            dimensions: [0.0, 0.0],
+            depth_range: 0.0..1.0,
+        };
+
+        // The render pass we created above only describes the layout of our framebuffers. Before we
+        // can draw we also need to create the actual framebuffers.
+        //
+        // Since we need to draw to multiple images, we are going to create a different framebuffer for
+        // each image.
+        let framebuffers = VglFramebuffers::new(
+            &swapchain,
+            &render_pass,
+            &mut viewport,
+        );
+
+        let previous_frame_end = Some(sync::now(logical_device.clone_logical_device()).boxed());
+
+        Self {
+            event_loop,
+            surface,
+
+            logical_device,
+
+            swapchain,
+
+            vertex_buffer,
+
+            render_pass,
+
+            pipeline,
+
+            viewport,
+            framebuffers,
+
+            previous_frame_end,
+
+            recreate_swapchain: false,
+        }
+    }
+
+
     pub fn run(mut self) {
         self.event_loop.run(move |event, _, control_flow| {
             match event {
@@ -26,36 +219,22 @@ impl VglRenderer {
                     self.recreate_swapchain = true;
                 }
                 Event::RedrawEventsCleared => {
-                    // It is important to call this function from time to time, otherwise resources will keep
-                    // accumulating and you will eventually reach an out of memory error.
-                    // Calling this function polls various fences in order to determine what the GPU has
-                    // already processed, and frees the resources that are no longer needed.
                     self.previous_frame_end.as_mut().unwrap().cleanup_finished();
 
-                    // Whenever the window resizes we need to recreate everything dependent on the window size.
-                    // In this example that includes the swapchain, the framebuffers and the dynamic state viewport.
                     if self.recreate_swapchain {
                         if self.swapchain.recreate_swapchain(&self.surface) {
                             return;
                         }
 
-                        // Because framebuffers contains an Arc on the old swapchain, we need to
-                        // recreate framebuffers as well.
                         self.framebuffers.recreate_framebuffers(
                             &self.swapchain,
                             &self.render_pass,
                             &mut self.viewport,
                         );
+
                         self.recreate_swapchain = false;
                     }
 
-                    // Before we can draw on the output, we have to *acquire* an image from the swapchain. If
-                    // no image is available (which happens if you submit draw commands too quickly), then the
-                    // function will block.
-                    // This operation returns the index of the image that we are allowed to draw upon.
-                    //
-                    // This function can block if no image is available. The parameter is an optional timeout
-                    // after which the function call will return an error.
                     let (image_num, suboptimal, acquire_future) =
                         match vulkano_swapchain::acquire_next_image(self.swapchain.clone_swapchain(), None) {
                             Ok(r) => r,
@@ -66,14 +245,10 @@ impl VglRenderer {
                             Err(e) => panic!("Failed to acquire next image: {:?}", e),
                         };
 
-                    // acquire_next_image can be successful, but suboptimal. This means that the swapchain image
-                    // will still work, but it may not display correctly. With some drivers this can be when
-                    // the window resizes, but it may not cause the swapchain to become out of date.
                     if suboptimal {
                         self.recreate_swapchain = true;
                     }
 
-                    // Specify the color to clear the framebuffer with i.e. blue
                     let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
                     // In order to draw, we have to build a *command buffer*. The command buffer object holds
