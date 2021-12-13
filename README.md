@@ -2,7 +2,7 @@ VGL is a graphics library that tries to be way more easier to use than raw vulka
 
 # IMPORTANT
 
-THIS PROJECT IS STILL IN DEVELOPMENT. If you want to use have a vulkan graphics library that is actually fully featured, Bevy is probably a better fit. That said, if ever you want to program in vulkan and understand it without having to bother with boilerplate code, have at it.  
+THIS PROJECT IS STILL IN DEVELOPMENT. If you want to use a vulkan graphics library that is actually fully featured, Bevy is probably a better fit for you. That said, if ever you want to program in vulkan and understand it without having to bother with boilerplate code, have at it using this repo.  
 
 # Downloading and building
 
