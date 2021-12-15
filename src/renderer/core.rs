@@ -1,4 +1,3 @@
-use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
 use vulkano::device::DeviceExtensions;
 use vulkano::pipeline::viewport::Viewport;
 use winit::event_loop::{EventLoop, ControlFlow};
@@ -40,11 +39,6 @@ use command_buffer::VglCommandBuffer;
 pub mod future;
 use future::VglFuture;
 
-
-#[derive(Default, Debug, Clone)]
-pub struct Vertex {
-    position: [f32; 2],
-}
 
 mod vs {
     vulkano_shaders::shader! {
@@ -126,28 +120,6 @@ impl VglRenderer {
             &logical_device,
         );
 
-        vulkano::impl_vertex!(Vertex, position);
-
-        let vertex_buffer = CpuAccessibleBuffer::from_iter(
-            logical_device.clone_logical_device(),
-            BufferUsage::all(),
-            false,
-            [
-            Vertex {
-                position: [0.0, -0.5],
-            },
-            Vertex {
-                position: [0.5, 0.5],
-            },
-            Vertex {
-                position: [-0.5, 0.5],
-            },
-            ]
-            .iter()
-            .cloned(),
-        )
-            .unwrap();
-
         let vs = vs::Shader::load(logical_device.clone_logical_device()).unwrap();
         let fs = fs::Shader::load(logical_device.clone_logical_device()).unwrap();
 
@@ -194,7 +166,7 @@ impl VglRenderer {
 
             swapchain,
 
-            vertex_buffer,
+            vertex_buffer: None,
 
             render_pass,
 
@@ -252,7 +224,7 @@ impl VglRenderer {
                         &self.viewport,
                         &self.framebuffers,
                         &swapchain_image,
-                        &self.vertex_buffer,
+                        self.vertex_buffer.as_ref().unwrap(),
                     );
 
                     self.future.update_future(

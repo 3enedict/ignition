@@ -3,7 +3,8 @@ use std::sync::Arc;
 use vulkano::pipeline::GraphicsPipeline;
 use vulkano::render_pass::Subpass;
 
-use crate::renderer::core::Vertex;
+use crate::objects::vertex::Vertex;
+
 use crate::renderer::core::vs;
 use crate::renderer::core::fs;
 

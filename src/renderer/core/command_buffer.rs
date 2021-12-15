@@ -6,7 +6,7 @@ use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, Subp
 use vulkano::pipeline::viewport::Viewport;
 
 
-use crate::renderer::Vertex;
+use crate::objects::vertex::Vertex;
 
 use crate::renderer::core::VglLogicalDevice;
 use crate::renderer::core::VglPipeline;
