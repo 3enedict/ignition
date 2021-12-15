@@ -1,7 +1,5 @@
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
-use vulkano::swapchain as vulkano_swapchain;
-use vulkano::swapchain::AcquireError;
 use vulkano::device::DeviceExtensions;
 use vulkano::pipeline::viewport::Viewport;
 use vulkano::sync;
@@ -34,6 +32,10 @@ use pipeline::VglPipeline;
 
 pub mod framebuffers;
 use framebuffers::VglFramebuffers;
+
+
+pub mod swapchain_image;
+use swapchain_image::VglSwapchainImage;
 
 
 #[derive(Default, Debug, Clone)]
@@ -235,19 +237,10 @@ impl VglRenderer {
                         self.recreate_swapchain = false;
                     }
 
-                    let (image_num, suboptimal, acquire_future) =
-                        match vulkano_swapchain::acquire_next_image(self.swapchain.clone_swapchain(), None) {
-                            Ok(r) => r,
-                            Err(AcquireError::OutOfDate) => {
-                                self.recreate_swapchain = true;
-                                return;
-                            }
-                            Err(e) => panic!("Failed to acquire next image: {:?}", e),
-                        };
 
-                    if suboptimal {
-                        self.recreate_swapchain = true;
-                    }
+                    let mut swapchain_image = VglSwapchainImage::new(&self.swapchain);
+                    if swapchain_image.suboptimal() { return; }
+
 
                     let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -276,7 +269,7 @@ impl VglRenderer {
                         // is similar to the list of attachments when building the framebuffers, except that
                         // only the attachments that use `load: Clear` appear in the list.
                         .begin_render_pass(
-                            self.framebuffers.get_framebuffers()[image_num].clone(),
+                            self.framebuffers.get_framebuffers()[swapchain_image.get_image_num()].clone(),
                             SubpassContents::Inline,
                             clear_values,
                         )
@@ -302,7 +295,7 @@ impl VglRenderer {
                     let future = self.previous_frame_end
                         .take()
                         .unwrap()
-                        .join(acquire_future)
+                        .join(swapchain_image.get_acquire_future())
                         .then_execute(self.logical_device.clone_queue(), command_buffer)
                         .unwrap()
                         // The color output is now expected to contain our triangle. But in order to show it on
@@ -311,7 +304,7 @@ impl VglRenderer {
                         // This function does not actually present the image immediately. Instead it submits a
                         // present command at the end of the queue. This means that it will only be presented once
                         // the GPU has finished executing the command buffer that draws the triangle.
-                        .then_swapchain_present(self.logical_device.clone_queue(), self.swapchain.clone_swapchain(), image_num)
+                        .then_swapchain_present(self.logical_device.clone_queue(), self.swapchain.clone_swapchain(), swapchain_image.get_image_num())
                         .then_signal_fence_and_flush();
 
                     match future {
