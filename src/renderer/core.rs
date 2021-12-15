@@ -1,8 +1,6 @@
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
 use vulkano::device::DeviceExtensions;
 use vulkano::pipeline::viewport::Viewport;
-use vulkano::sync;
-use vulkano::sync::{FlushError, GpuFuture};
 use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
 
@@ -38,6 +36,9 @@ use swapchain_image::VglSwapchainImage;
 
 pub mod command_buffer;
 use command_buffer::VglCommandBuffer;
+
+pub mod future;
+use future::VglFuture;
 
 
 #[derive(Default, Debug, Clone)]
@@ -181,7 +182,9 @@ impl VglRenderer {
             &mut viewport,
         );
 
-        let previous_frame_end = Some(sync::now(logical_device.clone_logical_device()).boxed());
+        let future = VglFuture::new(
+            &logical_device,
+        );
 
         Self {
             event_loop,
@@ -200,7 +203,7 @@ impl VglRenderer {
             viewport,
             framebuffers,
 
-            previous_frame_end,
+            future,
 
             recreate_swapchain: false,
         }
@@ -223,7 +226,7 @@ impl VglRenderer {
                     self.recreate_swapchain = true;
                 }
                 Event::RedrawEventsCleared => {
-                    self.previous_frame_end.as_mut().unwrap().cleanup_finished();
+                    self.future.cleanup();
 
                     if self.recreate_swapchain {
                         if self.swapchain.recreate_swapchain(&self.surface) {
@@ -240,7 +243,7 @@ impl VglRenderer {
                     }
 
 
-                    let mut swapchain_image = VglSwapchainImage::new(&self.swapchain);
+                    let swapchain_image = VglSwapchainImage::new(&self.swapchain);
                     if swapchain_image.suboptimal() { return; }
 
                     let command_buffer = VglCommandBuffer::new(
@@ -252,34 +255,12 @@ impl VglRenderer {
                         &self.vertex_buffer,
                     );
 
-                    let future = self.previous_frame_end
-                        .take()
-                        .unwrap()
-                        .join(swapchain_image.get_acquire_future())
-                        .then_execute(self.logical_device.clone_queue(), command_buffer.get_command_buffer())
-                        .unwrap()
-                        // The color output is now expected to contain our triangle. But in order to show it on
-                        // the screen, we have to *present* the image by calling `present`.
-                        //
-                        // This function does not actually present the image immediately. Instead it submits a
-                        // present command at the end of the queue. This means that it will only be presented once
-                        // the GPU has finished executing the command buffer that draws the triangle.
-                        .then_swapchain_present(self.logical_device.clone_queue(), self.swapchain.clone_swapchain(), swapchain_image.get_image_num())
-                        .then_signal_fence_and_flush();
-
-                    match future {
-                        Ok(future) => {
-                            self.previous_frame_end = Some(future.boxed());
-                        }
-                        Err(FlushError::OutOfDate) => {
-                            self.recreate_swapchain = true;
-                            self.previous_frame_end = Some(sync::now(self.logical_device.clone_logical_device()).boxed());
-                        }
-                        Err(e) => {
-                            println!("Failed to flush future: {:?}", e);
-                            self.previous_frame_end = Some(sync::now(self.logical_device.clone_logical_device()).boxed());
-                        }
-                        }
+                    self.future.update_future(
+                        &self.logical_device,
+                        &self.swapchain,
+                        swapchain_image,
+                        command_buffer,
+                    );
                 }
                 _ => (),
             }

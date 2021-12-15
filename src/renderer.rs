@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use vulkano::buffer::CpuAccessibleBuffer;
 use vulkano::pipeline::viewport::Viewport;
-use vulkano::sync::GpuFuture;
 
 use winit::event_loop::EventLoop;
 
@@ -15,6 +14,7 @@ use crate::renderer::core::swapchain::VglSwapchain;
 use crate::renderer::core::render_pass::VglRenderPass;
 use crate::renderer::core::pipeline::VglPipeline;
 use crate::renderer::core::framebuffers::VglFramebuffers;
+use crate::renderer::core::future::VglFuture;
 
 
 pub struct VglRenderer {
@@ -34,7 +34,7 @@ pub struct VglRenderer {
     viewport: Viewport,
     framebuffers: VglFramebuffers,
 
-    previous_frame_end: Option<Box<dyn GpuFuture>>,
+    future: VglFuture,
 
     recreate_swapchain: bool,
 }
