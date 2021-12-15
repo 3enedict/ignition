@@ -1,5 +1,4 @@
-use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer, TypedBufferAccess};
-use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents};
+use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
 use vulkano::device::DeviceExtensions;
 use vulkano::pipeline::viewport::Viewport;
 use vulkano::sync;
@@ -36,6 +35,9 @@ use framebuffers::VglFramebuffers;
 
 pub mod swapchain_image;
 use swapchain_image::VglSwapchainImage;
+
+pub mod command_buffer;
+use command_buffer::VglCommandBuffer;
 
 
 #[derive(Default, Debug, Clone)]
@@ -241,62 +243,20 @@ impl VglRenderer {
                     let mut swapchain_image = VglSwapchainImage::new(&self.swapchain);
                     if swapchain_image.suboptimal() { return; }
 
-
-                    let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
-
-                    // In order to draw, we have to build a *command buffer*. The command buffer object holds
-                    // the list of commands that are going to be executed.
-                    //
-                    // Building a command buffer is an expensive operation (usually a few hundred
-                    // microseconds), but it is known to be a hot path in the driver and is expected to be
-                    // optimized.
-                    //
-                    // Note that we have to pass a queue family when we create the command buffer. The command
-                    // buffer will only be executable on that given queue family.
-                    let mut builder = AutoCommandBufferBuilder::primary(
-                        self.logical_device.clone_logical_device(),
-                        self.logical_device.get_queue().family(),
-                        CommandBufferUsage::OneTimeSubmit,
-                    )
-                        .unwrap();
-
-                    builder
-                        // Before we can draw, we have to *enter a render pass*. There are two methods to do
-                        // this: `draw_inline` and `draw_secondary`. The latter is a bit more advanced and is
-                        // not covered here.
-                        //
-                        // The third parameter builds the list of values to clear the attachments with. The API
-                        // is similar to the list of attachments when building the framebuffers, except that
-                        // only the attachments that use `load: Clear` appear in the list.
-                        .begin_render_pass(
-                            self.framebuffers.get_framebuffers()[swapchain_image.get_image_num()].clone(),
-                            SubpassContents::Inline,
-                            clear_values,
-                        )
-                        .unwrap()
-                        // We are now inside the first subpass of the render pass. We add a draw command.
-                        //
-                        // The last two parameters contain the list of resources to pass to the shaders.
-                        // Since we used an `EmptyPipeline` object, the objects have to be `()`.
-                        .set_viewport(0, [self.viewport.clone()])
-                        .bind_pipeline_graphics(self.pipeline.clone_pipeline())
-                        .bind_vertex_buffers(0, self.vertex_buffer.clone())
-                        .draw(self.vertex_buffer.len() as u32, 1, 0, 0)
-                        .unwrap()
-                        // We leave the render pass by calling `draw_end`. Note that if we had multiple
-                        // subpasses we could have called `next_inline` (or `next_secondary`) to jump to the
-                        // next subpass.
-                        .end_render_pass()
-                        .unwrap();
-
-                    // Finish building the command buffer by calling `build`.
-                    let command_buffer = builder.build().unwrap();
+                    let command_buffer = VglCommandBuffer::new(
+                        &self.logical_device,
+                        &self.pipeline,
+                        &self.viewport,
+                        &self.framebuffers,
+                        &swapchain_image,
+                        &self.vertex_buffer,
+                    );
 
                     let future = self.previous_frame_end
                         .take()
                         .unwrap()
                         .join(swapchain_image.get_acquire_future())
-                        .then_execute(self.logical_device.clone_queue(), command_buffer)
+                        .then_execute(self.logical_device.clone_queue(), command_buffer.get_command_buffer())
                         .unwrap()
                         // The color output is now expected to contain our triangle. But in order to show it on
                         // the screen, we have to *present* the image by calling `present`.
