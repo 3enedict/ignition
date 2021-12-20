@@ -1,6 +1,3 @@
-use std::sync::Arc;
-
-use vulkano::buffer::CpuAccessibleBuffer;
 use vulkano::pipeline::viewport::Viewport;
 
 use winit::event_loop::EventLoop;
@@ -15,7 +12,7 @@ use crate::renderer::core::pipeline::VglPipeline;
 use crate::renderer::core::framebuffers::VglFramebuffers;
 use crate::renderer::core::future::VglFuture;
 
-use crate::objects::vertex::Vertex;
+
 use crate::objects::triangle::VglTriangle;
 
 
@@ -27,7 +24,8 @@ pub struct VglRenderer {
 
     swapchain: VglSwapchain,
 
-    vertex_buffer: Option<Arc<CpuAccessibleBuffer<[Vertex]>>>,
+    triangle: Option<VglTriangle>,
+    setup: Option<fn(&mut VglRenderer)>,
 
     render_pass: VglRenderPass,
 
@@ -48,8 +46,19 @@ impl VglRenderer {
 
     pub fn add_triangle(
         &mut self,
-        triangle: VglTriangle,
+        mut triangle: VglTriangle,
     ) {
-        self.vertex_buffer = Some(triangle.get_vertex_buffer());
+        triangle.setup(&self.logical_device, 0);
+
+        self.triangle = Some(triangle);
     }
+
+    pub fn add_system_setup(
+        mut self,
+        setup: fn(&mut VglRenderer),
+    ) -> Self {
+        self.setup = Some(setup);
+
+        self
+        }
 }

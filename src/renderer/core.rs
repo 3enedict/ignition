@@ -166,7 +166,8 @@ impl VglRenderer {
 
             swapchain,
 
-            vertex_buffer: None,
+            triangle: None,
+            setup: None,
 
             render_pass,
 
@@ -183,6 +184,8 @@ impl VglRenderer {
 
 
     pub fn run(mut self) {
+        self.setup.unwrap()(&mut self);
+
         self.event_loop.run(move |event, _, control_flow| {
             match event {
                 Event::WindowEvent {
@@ -224,7 +227,7 @@ impl VglRenderer {
                         &self.viewport,
                         &self.framebuffers,
                         &swapchain_image,
-                        self.vertex_buffer.as_ref().unwrap(),
+                        self.triangle.as_ref().unwrap(),
                     );
 
                     self.future.update_future(

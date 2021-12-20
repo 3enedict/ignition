@@ -1,17 +1,13 @@
-use std::sync::Arc;
-
-
-use vulkano::buffer::{CpuAccessibleBuffer, TypedBufferAccess};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents, PrimaryAutoCommandBuffer};
 use vulkano::pipeline::viewport::Viewport;
 
-
-use crate::objects::vertex::Vertex;
 
 use crate::renderer::core::VglLogicalDevice;
 use crate::renderer::core::VglPipeline;
 use crate::renderer::core::VglFramebuffers;
 use crate::renderer::core::VglSwapchainImage;
+
+use crate::objects::triangle::VglTriangle;
 
 pub struct VglCommandBuffer {
     command_buffer: PrimaryAutoCommandBuffer,
@@ -24,7 +20,7 @@ impl VglCommandBuffer {
         viewport: &Viewport,
         framebuffers: &VglFramebuffers,
         swapchain_image: &VglSwapchainImage,
-        vertex_buffer: &Arc<CpuAccessibleBuffer<[Vertex]>>,
+        triangle: &VglTriangle,
     ) -> Self {
         let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -42,10 +38,11 @@ impl VglCommandBuffer {
             )
             .unwrap()
             .set_viewport(0, [viewport.clone()])
-            .bind_pipeline_graphics(pipeline.clone_pipeline())
-            .bind_vertex_buffers(0, vertex_buffer.clone())
-            .draw(vertex_buffer.len() as u32, 1, 0, 0)
-            .unwrap()
+            .bind_pipeline_graphics(pipeline.clone_pipeline());
+
+        triangle.render(&mut builder);
+
+        builder
             .end_render_pass()
             .unwrap();
 
