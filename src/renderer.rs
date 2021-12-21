@@ -1,4 +1,4 @@
-use vulkano::pipeline::viewport::Viewport;
+use vulkano::pipeline::graphics::viewport::Viewport;
 
 use winit::event_loop::EventLoop;
 

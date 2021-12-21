@@ -1,6 +1,6 @@
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents, PrimaryAutoCommandBuffer};
 use vulkano::buffer::TypedBufferAccess;
-use vulkano::pipeline::viewport::Viewport;
+use vulkano::pipeline::graphics::viewport::Viewport;
 
 
 use crate::renderer::core::VglLogicalDevice;

@@ -1,5 +1,5 @@
 use vulkano::device::DeviceExtensions;
-use vulkano::pipeline::viewport::Viewport;
+use vulkano::pipeline::graphics::viewport::Viewport;
 use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
 
@@ -104,8 +104,8 @@ impl VglRenderer {
             &logical_device,
         );
 
-        let vs = vs::Shader::load(logical_device.clone_logical_device()).unwrap();
-        let fs = fs::Shader::load(logical_device.clone_logical_device()).unwrap();
+        let vs = vs::load(logical_device.clone_logical_device()).unwrap();
+        let fs = fs::load(logical_device.clone_logical_device()).unwrap();
 
         let render_pass = VglRenderPass::new(
             &logical_device,

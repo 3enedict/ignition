@@ -14,24 +14,22 @@ impl VglRenderPass {
         logical_device: &VglLogicalDevice,
         swapchain: &VglSwapchain,
     ) -> Self {
-        let render_pass = Arc::new(
-            vulkano::single_pass_renderpass!(
-                logical_device.clone_logical_device(),
-                attachments: {
-                    color: {
-                        load: Clear,
-                        store: Store,
-                        format: swapchain.get_swapchain().format(),
-                        samples: 1,
-                    }
-                },
-                pass: {
-                    color: [color],
-                    depth_stencil: {}
+        let render_pass = vulkano::single_pass_renderpass!(
+            logical_device.clone_logical_device(),
+            attachments: {
+                color: {
+                    load: Clear,
+                    store: Store,
+                    format: swapchain.get_swapchain().format(),
+                    samples: 1,
+                }
+            },
+            pass: {
+                color: [color],
+                depth_stencil: {}
             }
         )
-            .unwrap(),
-        );
+            .unwrap();
 
         Self {
             render_pass,

@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use vulkano::render_pass::{Framebuffer, FramebufferAbstract};
+use vulkano::render_pass::Framebuffer;
 use vulkano::image::view::ImageView;
-use vulkano::image::SwapchainImage;
-use vulkano::pipeline::viewport::Viewport;
+use vulkano::image::{SwapchainImage, ImageAccess};
+use vulkano::pipeline::graphics::viewport::Viewport;
 
 use winit::window::Window;
 
@@ -11,7 +11,7 @@ use crate::renderer::core::VglSwapchain;
 use crate::renderer::core::VglRenderPass;
 
 pub struct VglFramebuffers {
-    framebuffers: Vec<Arc<dyn FramebufferAbstract>>,
+    framebuffers: Vec<Arc<Framebuffer>>,
 }
 
 impl VglFramebuffers {
@@ -52,30 +52,28 @@ impl VglFramebuffers {
         images: &[Arc<SwapchainImage<Window>>],
         render_pass: &VglRenderPass,
         viewport: &mut Viewport,
-    ) -> Vec<Arc<dyn FramebufferAbstract>> {
-        let dimensions = images[0].dimensions();
+    ) -> Vec<Arc<Framebuffer>> {
+        let dimensions = images[0].dimensions().width_height();
         viewport.dimensions = [dimensions[0] as f32, dimensions[1] as f32];
 
         images
             .iter()
             .map(|image| {
                 let view = ImageView::new(image.clone()).unwrap();
-                Arc::new(
-                    Framebuffer::start(render_pass.clone_render_pass())
+                Framebuffer::start(render_pass.clone_render_pass())
                     .add(view)
                     .unwrap()
                     .build()
-                    .unwrap(),
-                ) as Arc<dyn FramebufferAbstract>
+                    .unwrap()
             })
         .collect::<Vec<_>>()
     }
 
-    pub fn get_framebuffers(&self) -> &Vec<Arc<dyn FramebufferAbstract>> {
+    pub fn get_framebuffers(&self) -> &Vec<Arc<Framebuffer>> {
         &self.framebuffers
     }
 
-    pub fn clone_framebuffers(&self) -> Vec<Arc<dyn FramebufferAbstract>> {
+    pub fn clone_framebuffers(&self) -> Vec<Arc<Framebuffer>> {
         self.framebuffers.clone()
     }
 }
