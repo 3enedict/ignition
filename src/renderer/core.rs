@@ -5,6 +5,9 @@ use winit::event::{Event, WindowEvent};
 
 use crate::renderer::VglRenderer;
 
+pub mod validation_layers;
+use validation_layers::VglValidationLayers;
+
 pub mod instance;
 use instance::VglInstance;
 
@@ -87,7 +90,11 @@ mod fs {
 
 impl VglRenderer {
     pub fn new() -> Self {
-        let instance = VglInstance::new();
+        let mut validation_layers = VglValidationLayers::new();
+
+        let instance = VglInstance::new(&validation_layers);
+
+        validation_layers.setup_debug_callback(&instance);
 
         let event_loop = EventLoop::new();
 
