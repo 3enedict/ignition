@@ -1,4 +1,5 @@
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents, PrimaryAutoCommandBuffer};
+use vulkano::buffer::TypedBufferAccess;
 use vulkano::pipeline::viewport::Viewport;
 
 
@@ -20,7 +21,7 @@ impl VglCommandBuffer {
         viewport: &Viewport,
         framebuffers: &VglFramebuffers,
         swapchain_image: &VglSwapchainImage,
-        triangle: &VglTriangle,
+        triangles: &VglTriangle,
     ) -> Self {
         let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -38,11 +39,10 @@ impl VglCommandBuffer {
             )
             .unwrap()
             .set_viewport(0, [viewport.clone()])
-            .bind_pipeline_graphics(pipeline.clone_pipeline());
-
-        triangle.render(&mut builder);
-
-        builder
+            .bind_pipeline_graphics(pipeline.clone_pipeline())
+            .bind_vertex_buffers(0, triangles.get_vertex_buffer())
+            .draw(triangles.get_vertex_buffer().len() as u32, 1, 0, 0)
+            .unwrap()
             .end_render_pass()
             .unwrap();
 

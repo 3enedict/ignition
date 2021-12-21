@@ -39,31 +39,18 @@ use command_buffer::VglCommandBuffer;
 pub mod future;
 use future::VglFuture;
 
+use crate::objects::triangle::VglTriangle;
+
 
 mod vs {
     vulkano_shaders::shader! {
         ty: "vertex",
         src: "
     #version 450
-    #extension GL_ARB_separate_shader_objects : enable
-
-    out gl_PerVertex {
-        vec4 gl_Position;
-    };
-
     layout(location = 0) in vec2 position;
-
-    layout(location = 0) out vec3 fragColor;
-
-    vec3 colors[3] = vec3[](
-        vec3(1.0, 0.0, 0.0),
-        vec3(0.0, 1.0, 0.0),
-        vec3(0.0, 0.0, 1.0)
-    );
 
     void main() {
         gl_Position = vec4(position, 0.0, 1.0);
-        fragColor = colors[gl_VertexIndex];
     }
       "
     }
@@ -74,14 +61,11 @@ mod fs {
         ty: "fragment",
         src: "
     #version 450
-    #extension GL_ARB_separate_shader_objects : enable
-
-    layout(location = 0) in vec3 fragColor;
 
     layout(location = 0) out vec4 outColor;
 
     void main() {
-        outColor = vec4(fragColor, 1.0);
+        outColor = vec4(0.75, 0.75, 0.75, 0.5);
     }
             "
     }
@@ -166,7 +150,7 @@ impl VglRenderer {
 
             swapchain,
 
-            triangle: None,
+            triangles: VglTriangle::new(),
             setup: None,
 
             render_pass,
@@ -227,7 +211,7 @@ impl VglRenderer {
                         &self.viewport,
                         &self.framebuffers,
                         &swapchain_image,
-                        self.triangle.as_ref().unwrap(),
+                        &self.triangles,
                     );
 
                     self.future.update_future(
