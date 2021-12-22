@@ -5,6 +5,9 @@ use winit::event::{Event, WindowEvent};
 
 use crate::renderer::VglRenderer;
 
+pub mod parameters;
+use parameters::VglRendererParameters;
+
 pub mod validation_layers;
 use validation_layers::VglValidationLayers;
 
@@ -89,7 +92,9 @@ mod fs {
 }
 
 impl VglRenderer {
-    pub fn new() -> Self {
+    pub fn new(
+        parameters: VglRendererParameters,
+    ) -> Self {
         let mut validation_layers = VglValidationLayers::new();
 
         let instance = VglInstance::new(&validation_layers);
@@ -140,19 +145,12 @@ impl VglRenderer {
             &fs,
         );
 
-        // Dynamic viewports allow us to recreate just the viewport when the window is resized
-        // Otherwise we would have to recreate the whole pipeline.
         let mut viewport = Viewport {
             origin: [0.0, 0.0],
             dimensions: [0.0, 0.0],
             depth_range: 0.0..1.0,
         };
 
-        // The render pass we created above only describes the layout of our framebuffers. Before we
-        // can draw we also need to create the actual framebuffers.
-        //
-        // Since we need to draw to multiple images, we are going to create a different framebuffer for
-        // each image.
         let framebuffers = VglFramebuffers::new(
             &swapchain,
             &render_pass,
@@ -164,7 +162,9 @@ impl VglRenderer {
         );
 
         Self {
-            event_loop,
+            parameters,
+
+            event_loop: Some(event_loop),
             surface,
 
             logical_device,
@@ -172,7 +172,6 @@ impl VglRenderer {
             swapchain,
 
             triangles: VglTriangle::new(),
-            setup: None,
 
             render_pass,
 
@@ -187,11 +186,49 @@ impl VglRenderer {
         }
     }
 
+    pub fn draw(
+        &mut self,
+    ) {
+        self.future.cleanup();
+
+        if self.recreate_swapchain {
+            if self.swapchain.recreate_swapchain(&self.surface) {
+                return;
+            }
+
+            self.framebuffers.recreate_framebuffers(
+                &self.swapchain,
+                &self.render_pass,
+                &mut self.viewport,
+            );
+
+            self.recreate_swapchain = false;
+        }
+
+
+        let swapchain_image = VglSwapchainImage::new(&self.swapchain);
+        if swapchain_image.suboptimal() { return; }
+
+        let command_buffer = VglCommandBuffer::new(
+            &self.logical_device,
+            &self.pipeline,
+            &self.viewport,
+            &self.framebuffers,
+            &swapchain_image,
+            &self.triangles,
+        );
+
+        self.future.update_future(
+            &self.logical_device,
+            &self.swapchain,
+            swapchain_image,
+            command_buffer,
+        );
+    }
+
 
     pub fn run(mut self) {
-        self.setup.unwrap()(&mut self);
-
-        self.event_loop.run(move |event, _, control_flow| {
+        self.event_loop.take().unwrap().run(move |event, _, control_flow| {
             match event {
                 Event::WindowEvent {
                     event: WindowEvent::CloseRequested,
@@ -206,44 +243,59 @@ impl VglRenderer {
                     self.recreate_swapchain = true;
                 }
                 Event::RedrawEventsCleared => {
-                    self.future.cleanup();
-
-                    if self.recreate_swapchain {
-                        if self.swapchain.recreate_swapchain(&self.surface) {
-                            return;
-                        }
-
-                        self.framebuffers.recreate_framebuffers(
-                            &self.swapchain,
-                            &self.render_pass,
-                            &mut self.viewport,
-                        );
-
-                        self.recreate_swapchain = false;
-                    }
-
-
-                    let swapchain_image = VglSwapchainImage::new(&self.swapchain);
-                    if swapchain_image.suboptimal() { return; }
-
-                    let command_buffer = VglCommandBuffer::new(
-                        &self.logical_device,
-                        &self.pipeline,
-                        &self.viewport,
-                        &self.framebuffers,
-                        &swapchain_image,
-                        &self.triangles,
-                    );
-
-                    self.future.update_future(
-                        &self.logical_device,
-                        &self.swapchain,
-                        swapchain_image,
-                        command_buffer,
-                    );
+                    self.draw();
                 }
                 _ => (),
             }
         });
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::renderer::VglRenderer;
+    use crate::renderer::core::parameters::VglRendererParameters;
+
+    use crate::objects::vertex::Vertex;
+
+    fn one_triangle(renderer: &mut VglRenderer) {
+        let mut triangle = vec!
+            [
+            Vertex { position: [ 0.0, -0.5] },
+            Vertex { position: [ 0.5,  0.5] },
+            Vertex { position: [-0.5,  0.5] },
+            ];
+
+        renderer.add_triangles(&mut triangle);
+    }
+
+    fn two_triangles(renderer: &mut VglRenderer) {
+        let mut triangles = vec!
+            [
+            Vertex { position: [ 0.55, -0.5 ] },
+            Vertex { position: [ 0.55,  0.55] },
+            Vertex { position: [-0.5 ,  0.55] },
+
+            Vertex { position: [-0.55,  0.5 ] },
+            Vertex { position: [-0.55, -0.55] },
+            Vertex { position: [ 0.5 , -0.55] },
+            ];
+
+        renderer.add_triangles(&mut triangles);
+    }
+
+    #[test]
+    fn render_one_triangle() {
+        VglRenderer::new(VglRendererParameters::default())
+            .add_system_setup(one_triangle)
+            .draw();
+    }
+
+    #[test]
+    fn render_two_triangles() {
+        VglRenderer::new(VglRendererParameters::default())
+            .add_system_setup(two_triangles)
+            .draw();
     }
 }

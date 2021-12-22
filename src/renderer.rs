@@ -4,6 +4,7 @@ use winit::event_loop::EventLoop;
 
 pub mod core;
 
+use crate::renderer::core::parameters::VglRendererParameters;
 use crate::renderer::core::surface::VglSurface;
 use crate::renderer::core::logical_device::VglLogicalDevice;
 use crate::renderer::core::swapchain::VglSwapchain;
@@ -18,7 +19,9 @@ use crate::objects::vertex::Vertex;
 
 
 pub struct VglRenderer {
-    event_loop: EventLoop<()>,
+    parameters: VglRendererParameters,
+
+    event_loop: Option<EventLoop<()>>,
     surface: VglSurface,
 
     logical_device: VglLogicalDevice,
@@ -26,7 +29,6 @@ pub struct VglRenderer {
     swapchain: VglSwapchain,
 
     triangles: VglTriangle,
-    setup: Option<fn(&mut VglRenderer)>,
 
     render_pass: VglRenderPass,
 
@@ -49,14 +51,16 @@ impl VglRenderer {
         &mut self,
         vertices: &mut Vec<Vertex>,
     ) {
-        self.triangles.add_triangles(&self.logical_device, vertices);
+        self.triangles.add_triangles(vertices);
+
+        self.triangles.generate_vertex_buffer(&self.logical_device);
     }
 
     pub fn add_system_setup(
         mut self,
         setup: fn(&mut VglRenderer),
     ) -> Self {
-        self.setup = Some(setup);
+        setup(&mut self);
 
         self
         }

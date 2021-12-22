@@ -62,6 +62,10 @@ impl VglValidationLayers<'_> {
 
             self.debug_callback = DebugCallback::new(instance.get_instance(), msg_severity, msg_types, |msg| {
                 println!("validation layer: {:?}", msg.description);
+
+                if msg.severity.error == true || msg.severity.warning == true {
+                    panic!();
+                }
             }).ok()
         }
     }
@@ -76,5 +80,19 @@ impl VglValidationLayers<'_> {
         &self,
     ) -> Cloned<Iter<&str>> {
         self.validation_layers.clone().unwrap()
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::renderer::core::validation_layers::VglValidationLayers;
+    use crate::DEBUG;
+
+    #[test]
+    fn check_if_validation_layers_are_only_enabled_if_in_debug_mode() {
+        let validation_layers = VglValidationLayers::new();
+
+        assert_eq!(DEBUG, validation_layers.is_enabled())
     }
 }

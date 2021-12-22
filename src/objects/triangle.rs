@@ -24,15 +24,12 @@ impl VglTriangle {
 
     pub fn add_triangles(
         &mut self,
-        logical_device: &VglLogicalDevice,
-        vertices: &mut Vec<Vertex>,
+        vertices: &Vec<Vertex>,
     ) {
-        self.vertices.append(vertices);
-
-        self.generate_vertex_buffer(logical_device);
+        self.vertices.extend(vertices.iter().cloned());
     }
 
-    fn generate_vertex_buffer(
+    pub fn generate_vertex_buffer(
         &mut self,
         logical_device: &VglLogicalDevice,
     ) {
@@ -48,5 +45,36 @@ impl VglTriangle {
         &self,
     ) -> Arc<CpuAccessibleBuffer<[Vertex]>> {
         self.vertex_buffer.clone().unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::objects::vertex::Vertex;
+    use crate::objects::triangle::VglTriangle;
+
+    fn compare_vecs<T: PartialEq>(a: &Vec<T>, b: &Vec<T>) -> bool {
+        let matching = a.iter().zip(b.iter()).filter(|&(a, b)| a == b).count();
+        matching == a.len() && matching == b.len()
+    }
+
+    #[test]
+    fn add_triangles_works() {
+        let triangles = vec!
+            [
+            Vertex { position: [ 0.55, -0.5 ] },
+            Vertex { position: [ 0.55,  0.55] },
+            Vertex { position: [-0.5 ,  0.55] },
+
+            Vertex { position: [-0.55,  0.5 ] },
+            Vertex { position: [-0.55, -0.55] },
+            Vertex { position: [ 0.5 , -0.55] },
+            ];
+
+        let mut triangle = VglTriangle::new();
+
+        triangle.add_triangles(&triangles);
+
+        assert!(compare_vecs(&triangle.vertices, &triangles))
     }
 }

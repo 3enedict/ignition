@@ -1,4 +1,4 @@
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Copy, Clone, Debug, PartialEq)]
 pub struct Vertex {
   pub position: [f32; 2],
 }
