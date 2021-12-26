@@ -7,3 +7,11 @@ THIS PROJECT IS STILL IN DEVELOPMENT. If you want to use a vulkan graphics libra
 # Downloading and building
 
 Just go to my snake_game repo and see how it's done. Vgl is just a simple rust library so I don't think you need I need to go over it too much.
+
+# Testing
+
+```bash
+cargo test -- --test-threads=1
+```
+
+The test-threads option needed to be added because winit only supports being run in the main thread. 
