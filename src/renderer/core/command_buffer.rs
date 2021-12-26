@@ -9,6 +9,7 @@ use crate::renderer::core::VglFramebuffers;
 use crate::renderer::core::VglSwapchainImage;
 
 use crate::objects::triangle::VglTriangle;
+use crate::objects::rectangle::VglRectangle;
 
 pub struct VglCommandBuffer {
     command_buffer: PrimaryAutoCommandBuffer,
@@ -21,7 +22,7 @@ impl VglCommandBuffer {
         viewport: &Viewport,
         framebuffers: &VglFramebuffers,
         swapchain_image: &VglSwapchainImage,
-        triangles: &VglTriangle,
+        rectangles: &VglRectangle,
     ) -> Self {
         let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -30,6 +31,12 @@ impl VglCommandBuffer {
             logical_device.get_queue().family(),
             CommandBufferUsage::OneTimeSubmit,
         ).unwrap();
+
+        /* .set_viewport(0, [viewport.clone()])
+            .bind_pipeline_graphics(pipeline.clone_pipeline())
+            .bind_vertex_buffers(0, triangles.get_vertex_buffer())
+            .draw(triangles.get_vertex_buffer().len() as u32, 1, 0, 0)
+        */
 
         builder
             .begin_render_pass(
@@ -40,8 +47,9 @@ impl VglCommandBuffer {
             .unwrap()
             .set_viewport(0, [viewport.clone()])
             .bind_pipeline_graphics(pipeline.clone_pipeline())
-            .bind_vertex_buffers(0, triangles.get_vertex_buffer())
-            .draw(triangles.get_vertex_buffer().len() as u32, 1, 0, 0)
+            .bind_vertex_buffers(0, rectangles.get_vertex_buffer())
+            .bind_index_buffer(rectangles.get_index_buffer())
+            .draw_indexed(rectangles.get_index_buffer().len() as u32, 1, 0, 0, 0)
             .unwrap()
             .end_render_pass()
             .unwrap();

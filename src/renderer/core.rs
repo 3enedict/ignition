@@ -46,8 +46,37 @@ pub mod future;
 use future::VglFuture;
 
 use crate::objects::triangle::VglTriangle;
+use crate::objects::rectangle::VglRectangle;
 
+mod vs {
+    vulkano_shaders::shader! {
+        ty: "vertex",
+        src: "
+    #version 450
+    layout(location = 0) in vec2 position;
 
+    void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+    }
+      "
+    }
+}
+
+mod fs {
+    vulkano_shaders::shader! {
+        ty: "fragment",
+        src: "
+    #version 450
+    layout(location = 0) out vec4 outColor;
+
+    void main() {
+        outColor = vec4(0.6, 0.6, 0.6, 1.0);
+    }
+            "
+    }
+}
+
+/*
 mod vs {
     vulkano_shaders::shader! {
         ty: "vertex",
@@ -90,6 +119,7 @@ mod fs {
             "
     }
 }
+*/
 
 impl VglRenderer {
     pub fn new(
@@ -171,7 +201,7 @@ impl VglRenderer {
 
             swapchain,
 
-            triangles: VglTriangle::new(),
+            rectangles: VglRectangle::new(),
 
             render_pass,
 
@@ -215,7 +245,7 @@ impl VglRenderer {
             &self.viewport,
             &self.framebuffers,
             &swapchain_image,
-            &self.triangles,
+            &self.rectangles,
         );
 
         self.future.update_future(
