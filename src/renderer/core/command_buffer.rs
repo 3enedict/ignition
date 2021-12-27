@@ -1,5 +1,4 @@
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, SubpassContents, PrimaryAutoCommandBuffer};
-use vulkano::buffer::TypedBufferAccess;
 use vulkano::pipeline::graphics::viewport::Viewport;
 
 
@@ -8,8 +7,7 @@ use crate::renderer::core::VglPipeline;
 use crate::renderer::core::VglFramebuffers;
 use crate::renderer::core::VglSwapchainImage;
 
-use crate::objects::triangle::VglTriangle;
-use crate::objects::rectangle::VglRectangle;
+use crate::objects::VglObjects;
 
 pub struct VglCommandBuffer {
     command_buffer: PrimaryAutoCommandBuffer,
@@ -22,7 +20,7 @@ impl VglCommandBuffer {
         viewport: &Viewport,
         framebuffers: &VglFramebuffers,
         swapchain_image: &VglSwapchainImage,
-        rectangles: &VglRectangle,
+        objects: &mut VglObjects,
     ) -> Self {
         let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -46,11 +44,11 @@ impl VglCommandBuffer {
             )
             .unwrap()
             .set_viewport(0, [viewport.clone()])
-            .bind_pipeline_graphics(pipeline.clone_pipeline())
-            .bind_vertex_buffers(0, rectangles.get_vertex_buffer())
-            .bind_index_buffer(rectangles.get_index_buffer())
-            .draw_indexed(rectangles.get_index_buffer().len() as u32, 1, 0, 0, 0)
-            .unwrap()
+            .bind_pipeline_graphics(pipeline.clone_pipeline());
+
+        objects.draw(&mut builder);
+
+        builder
             .end_render_pass()
             .unwrap();
 

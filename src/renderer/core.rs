@@ -4,6 +4,7 @@ use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
 
 use crate::renderer::VglRenderer;
+use crate::objects::VglObjects;
 
 pub mod parameters;
 use parameters::VglRendererParameters;
@@ -44,9 +45,6 @@ use command_buffer::VglCommandBuffer;
 
 pub mod future;
 use future::VglFuture;
-
-use crate::objects::triangle::VglTriangle;
-use crate::objects::rectangle::VglRectangle;
 
 mod vs {
     vulkano_shaders::shader! {
@@ -201,7 +199,7 @@ impl VglRenderer {
 
             swapchain,
 
-            rectangles: VglRectangle::new(),
+            objects: VglObjects::new(),
 
             render_pass,
 
@@ -245,7 +243,7 @@ impl VglRenderer {
             &self.viewport,
             &self.framebuffers,
             &swapchain_image,
-            &self.rectangles,
+            &mut self.objects,
         );
 
         self.future.update_future(

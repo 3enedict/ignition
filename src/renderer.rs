@@ -14,8 +14,7 @@ use crate::renderer::core::framebuffers::VglFramebuffers;
 use crate::renderer::core::future::VglFuture;
 
 
-use crate::objects::triangle::VglTriangle;
-use crate::objects::rectangle::VglRectangle;
+use crate::objects::VglObjects;
 use crate::objects::vertex::Vertex;
 
 
@@ -29,7 +28,7 @@ pub struct VglRenderer {
 
     swapchain: VglSwapchain,
 
-    rectangles: VglRectangle,
+    objects: VglObjects,
 
     render_pass: VglRenderPass,
 
@@ -48,14 +47,19 @@ impl VglRenderer {
         &self.logical_device
     }
 
+    pub fn add_triangles(
+        &mut self,
+        vertices: &mut Vec<Vertex>,
+    ) {
+        self.objects.add_triangles(&self.logical_device, vertices);
+    }
+
     pub fn add_rectangles(
         &mut self,
         vertices: &mut Vec<Vertex>,
         indices: &mut Vec<u16>,
     ) {
-        self.rectangles.add(vertices, indices);
-
-        self.rectangles.generate_buffers(&self.logical_device);
+        self.objects.add_rectangles(&self.logical_device, vertices, indices);
     }
 
     pub fn add_system_setup(
