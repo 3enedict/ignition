@@ -284,7 +284,7 @@ mod tests {
     use crate::renderer::VglRenderer;
     use crate::renderer::core::parameters::VglRendererParameters;
 
-    use crate::objects::vertex::Vertex;
+    use crate::object::vertex::Vertex;
 
     fn one_triangle(renderer: &mut VglRenderer) {
         let mut triangle = vec!
