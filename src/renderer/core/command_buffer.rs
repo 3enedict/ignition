@@ -7,7 +7,7 @@ use crate::renderer::core::VglPipeline;
 use crate::renderer::core::VglFramebuffers;
 use crate::renderer::core::VglSwapchainImage;
 
-use crate::objects::VglObjects;
+use crate::object::VglObject;
 
 pub struct VglCommandBuffer {
     command_buffer: PrimaryAutoCommandBuffer,
@@ -20,7 +20,7 @@ impl VglCommandBuffer {
         viewport: &Viewport,
         framebuffers: &VglFramebuffers,
         swapchain_image: &VglSwapchainImage,
-        objects: &mut VglObjects,
+        objects: &mut Vec<VglObject>,
     ) -> Self {
         let clear_values = vec![[0.0, 0.0, 0.0, 1.0].into()];
 
@@ -31,10 +31,10 @@ impl VglCommandBuffer {
         ).unwrap();
 
         /* .set_viewport(0, [viewport.clone()])
-            .bind_pipeline_graphics(pipeline.clone_pipeline())
-            .bind_vertex_buffers(0, triangles.get_vertex_buffer())
-            .draw(triangles.get_vertex_buffer().len() as u32, 1, 0, 0)
-        */
+           .bind_pipeline_graphics(pipeline.clone_pipeline())
+           .bind_vertex_buffers(0, triangles.get_vertex_buffer())
+           .draw(triangles.get_vertex_buffer().len() as u32, 1, 0, 0)
+           */
 
         builder
             .begin_render_pass(
@@ -46,7 +46,9 @@ impl VglCommandBuffer {
             .set_viewport(0, [viewport.clone()])
             .bind_pipeline_graphics(pipeline.clone_pipeline());
 
-        objects.draw(&mut builder);
+        for object in objects {
+            object.draw(&mut builder);
+        }
 
         builder
             .end_render_pass()

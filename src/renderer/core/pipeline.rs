@@ -7,7 +7,7 @@ use vulkano::pipeline::graphics::vertex_input::BuffersDefinition;
 use vulkano::shader::ShaderModule;
 use vulkano::render_pass::Subpass;
 
-use crate::objects::vertex::Vertex;
+use crate::object::vertex::Vertex;
 
 use crate::renderer::core::VglLogicalDevice;
 use crate::renderer::core::VglRenderPass;

@@ -4,7 +4,6 @@ use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
 
 use crate::renderer::VglRenderer;
-use crate::objects::VglObjects;
 
 pub mod parameters;
 use parameters::VglRendererParameters;
@@ -199,7 +198,7 @@ impl VglRenderer {
 
             swapchain,
 
-            objects: VglObjects::new(),
+            objects: Vec::new(),
 
             render_pass,
 

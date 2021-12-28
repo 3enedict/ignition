@@ -1,5 +1,5 @@
 pub mod renderer;
-pub mod objects;
+pub mod object;
 
 #[cfg(all(debug_assertions))]
 const DEBUG: bool = true;
