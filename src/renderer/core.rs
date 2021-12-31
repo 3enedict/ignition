@@ -74,49 +74,49 @@ mod fs {
 }
 
 /*
-mod vs {
-    vulkano_shaders::shader! {
-        ty: "vertex",
-        src: "
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
+   mod vs {
+   vulkano_shaders::shader! {
+   ty: "vertex",
+   src: "
+   #version 450
+   #extension GL_ARB_separate_shader_objects : enable
 
-    layout(location = 0) out vec3 fragColor;
+   layout(location = 0) out vec3 fragColor;
 
-    layout(location = 0) in vec2 position;
+   layout(location = 0) in vec2 position;
 
-    vec3 colors[3] = vec3[](
-        vec3(1.0, 0.0, 0.0),
-        vec3(0.0, 1.0, 0.0),
-        vec3(0.0, 0.0, 1.0)
-    );
+   vec3 colors[3] = vec3[](
+   vec3(1.0, 0.0, 0.0),
+   vec3(0.0, 1.0, 0.0),
+   vec3(0.0, 0.0, 1.0)
+   );
 
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-        fragColor = colors[gl_VertexIndex % 3];
-    }
-      "
-    }
-}
+   void main() {
+   gl_Position = vec4(position, 0.0, 1.0);
+   fragColor = colors[gl_VertexIndex % 3];
+   }
+   "
+   }
+   }
 
-mod fs {
-    vulkano_shaders::shader! {
-        ty: "fragment",
-        src: "
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
+   mod fs {
+   vulkano_shaders::shader! {
+   ty: "fragment",
+   src: "
+   #version 450
+   #extension GL_ARB_separate_shader_objects : enable
 
-    layout(location = 0) in vec3 fragColor;
+   layout(location = 0) in vec3 fragColor;
 
-    layout(location = 0) out vec4 outColor;
+   layout(location = 0) out vec4 outColor;
 
-    void main() {
-        outColor = vec4(fragColor, 1.0);
-    }
-            "
-    }
-}
-*/
+   void main() {
+   outColor = vec4(fragColor, 1.0);
+   }
+   "
+   }
+   }
+   */
 
 impl VglRenderer {
     pub fn new(
@@ -275,54 +275,5 @@ impl VglRenderer {
                 _ => (),
             }
         });
-    }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use crate::renderer::VglRenderer;
-    use crate::renderer::core::parameters::VglRendererParameters;
-
-    use crate::object::vertex::Vertex;
-
-    fn one_triangle(renderer: &mut VglRenderer) {
-        let mut triangle = vec!
-            [
-            Vertex { position: [ 0.0, -0.5] },
-            Vertex { position: [ 0.5,  0.5] },
-            Vertex { position: [-0.5,  0.5] },
-            ];
-
-        renderer.add_triangles(&mut triangle);
-    }
-
-    fn two_triangles(renderer: &mut VglRenderer) {
-        let mut triangles = vec!
-            [
-            Vertex { position: [ 0.55, -0.5 ] },
-            Vertex { position: [ 0.55,  0.55] },
-            Vertex { position: [-0.5 ,  0.55] },
-
-            Vertex { position: [-0.55,  0.5 ] },
-            Vertex { position: [-0.55, -0.55] },
-            Vertex { position: [ 0.5 , -0.55] },
-            ];
-
-        renderer.add_triangles(&mut triangles);
-    }
-
-    #[test]
-    fn render_one_triangle() {
-        VglRenderer::new(VglRendererParameters::default())
-            .add_system_setup(one_triangle)
-            .draw();
-    }
-
-    #[test]
-    fn render_two_triangles() {
-        VglRenderer::new(VglRendererParameters::default())
-            .add_system_setup(two_triangles)
-            .draw();
     }
 }

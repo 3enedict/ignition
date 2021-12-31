@@ -10,8 +10,14 @@ Just go to my snake_game repo and see how it's done. Vgl is just a simple rust l
 
 # Testing
 
+In this project, I divided tests into two categories : the normal logic ones and the ones that verify that running all the library does not crash (notably with vulkano). One of the major reasons for this is that running vulkano needs to be on the main thread which means no multithreading for all the unit tests. As such, to verify the entirety of the library, use the following command : 
+
 ```bash
-cargo test -- --test-threads=1
+cargo test -- --ignored --test-threads=1
 ```
 
-The test-threads option needed to be added because winit only supports being run in the main thread. 
+And if you want to run all the other unit tests, just use the default command : 
+
+```bash
+cargo test
+```
