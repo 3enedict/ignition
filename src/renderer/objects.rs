@@ -16,9 +16,8 @@ impl VglRenderer {
     pub fn add_rectangles(
         &mut self,
         vertices: &mut Vec<Vertex>,
-        indices: &mut Vec<u16>,
     ) {
-        let rectangle = VglObject::rectangle(&self.logical_device, vertices, indices);
+        let rectangle = VglObject::rectangle(&self.logical_device, vertices);
         self.objects.push(rectangle);
     }
 }

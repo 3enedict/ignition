@@ -1,7 +1,3 @@
-use std::sync::Arc;
-
-use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
-
 use crate::renderer::core::logical_device::VglLogicalDevice;
 
 
@@ -18,7 +14,7 @@ impl VglObject {
         Self::check_triangle_parameters(vertices);
 
         Self {
-            vertex_buffer: Some(Self::generate_vertex_buffer(logical_device, vertices)),
+            vertex_buffer: Self::generate_vertex_buffer(logical_device, vertices),
             index_buffer: None,
         }
     }
@@ -27,18 +23,6 @@ impl VglObject {
         vertices: &Vec<Vertex>,
     ) {
         if DEBUG { if vertices.len() % 3 != 0 { panic!("Supplied triangles don't have 3 vertices each") } }
-    }
-
-    fn generate_vertex_buffer(
-        logical_device: &VglLogicalDevice,
-        vertices: &Vec<Vertex>,
-    ) -> Arc<CpuAccessibleBuffer<[Vertex]>> {
-        CpuAccessibleBuffer::from_iter(
-            logical_device.clone_logical_device(),
-            BufferUsage::all(),
-            false,
-            vertices.iter().cloned(),
-        ).unwrap()
     }
 }
 

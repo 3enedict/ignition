@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use vulkano::buffer::{TypedBufferAccess, CpuAccessibleBuffer};
+use vulkano::buffer::{BufferUsage, TypedBufferAccess, CpuAccessibleBuffer};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, PrimaryAutoCommandBuffer};
 use vulkano::command_buffer::pool::standard::StandardCommandPoolBuilder;
+
+
+use crate::renderer::core::logical_device::VglLogicalDevice;
 
 
 pub mod vertex;
@@ -34,6 +37,30 @@ impl VglObject {
                 .draw(self.get_vertex_buffer().len() as u32, 1, 0, 0)
                 .unwrap();
         }
+    }
+
+    fn generate_vertex_buffer(
+        logical_device: &VglLogicalDevice,
+        vertices: &Vec<Vertex>,
+    ) -> Option<Arc<CpuAccessibleBuffer<[Vertex]>>> {
+        Some(CpuAccessibleBuffer::from_iter(
+            logical_device.clone_logical_device(),
+            BufferUsage::all(),
+            false,
+            vertices.iter().cloned(),
+        ).unwrap())
+    }
+
+    fn generate_index_buffer(
+        logical_device: &VglLogicalDevice,
+        indices: &Vec<u16>,
+    ) -> Option<Arc<CpuAccessibleBuffer<[u16]>>> {
+        Some(CpuAccessibleBuffer::from_iter(
+            logical_device.clone_logical_device(),
+            BufferUsage::index_buffer(),
+            false,
+            indices.iter().cloned(),
+        ).unwrap())
     }
 
     pub fn get_vertex_buffer(&self) -> Arc<CpuAccessibleBuffer<[Vertex]>> {

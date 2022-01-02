@@ -8,14 +8,22 @@ use vgl::renderer::core::parameters::VglRendererParameters;
 
 use vgl::object::vertex::Vertex;
 
-const WAIT_TIME: u64 = 200;
+const WAIT_TIME: u64 = 500;
+
+
+
+
+// Triangles
+
+
+
 
 fn one_triangle(renderer: &mut VglRenderer) {
     let mut triangle = vec!
         [
-        Vertex { position: [ 0.0, -0.5] },
-        Vertex { position: [ 0.5,  0.5] },
-        Vertex { position: [-0.5,  0.5] },
+            Vertex { position: [ 0.0, -0.5] },
+            Vertex { position: [ 0.5,  0.5] },
+            Vertex { position: [-0.5,  0.5] },
         ];
 
     renderer.add_triangles(&mut triangle);
@@ -36,13 +44,13 @@ fn render_one_triangle() {
 fn two_triangles(renderer: &mut VglRenderer) {
     let mut triangles = vec!
         [
-        Vertex { position: [ 0.55, -0.5 ] },
-        Vertex { position: [ 0.55,  0.55] },
-        Vertex { position: [-0.5 ,  0.55] },
+            Vertex { position: [ 0.55, -0.5 ] },
+            Vertex { position: [ 0.55,  0.55] },
+            Vertex { position: [-0.5 ,  0.55] },
 
-        Vertex { position: [-0.55,  0.5 ] },
-        Vertex { position: [-0.55, -0.55] },
-        Vertex { position: [ 0.5 , -0.55] },
+            Vertex { position: [-0.55,  0.5 ] },
+            Vertex { position: [-0.55, -0.55] },
+            Vertex { position: [ 0.5 , -0.55] },
         ];
 
     renderer.add_triangles(&mut triangles);
@@ -60,18 +68,20 @@ fn render_two_triangles() {
 
 
 
+
+// Rectangle
+
+
+
+
 fn one_rectangle(renderer: &mut VglRenderer) {
     let mut rectangle = vec!
         [
-        Vertex{ position: [-0.5, -0.5] },
-        Vertex{ position: [ 0.5, -0.5] },
-        Vertex{ position: [ 0.5,  0.5] },
-        Vertex{ position: [-0.5,  0.5] },
+            Vertex{ position: [-0.5,  0.5] },
+            Vertex{ position: [ 0.5, -0.5] },
         ];
 
-    let mut indices = vec![0, 1, 2, 2, 3, 0];
-
-    renderer.add_rectangles(&mut rectangle, &mut indices);
+    renderer.add_rectangles(&mut rectangle);
 }
 
 #[ignore]
@@ -89,20 +99,14 @@ fn render_one_rectangle() {
 fn two_rectangles(renderer: &mut VglRenderer) {
     let mut rectangle = vec!
         [
-        Vertex{ position: [-0.75, -0.75] },
-        Vertex{ position: [-0.25, -0.75] },
-        Vertex{ position: [-0.25,  0.75] },
-        Vertex{ position: [-0.75,  0.75] },
+            Vertex{ position: [-0.25,  0.75] },
+            Vertex{ position: [-0.75, -0.75] },
 
-        Vertex{ position: [ 0.25, -0.75] },
-        Vertex{ position: [ 0.75, -0.75] },
-        Vertex{ position: [ 0.75,  0.75] },
-        Vertex{ position: [ 0.25,  0.75] },
+            Vertex{ position: [ 0.75,  0.75] },
+            Vertex{ position: [ 0.25, -0.75] },
         ];
 
-    let mut indices = vec![0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4];
-
-    renderer.add_rectangles(&mut rectangle, &mut indices);
+    renderer.add_rectangles(&mut rectangle);
 }
 
 #[ignore]
