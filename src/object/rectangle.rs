@@ -108,10 +108,11 @@ mod tests {
     use crate::object::vertex::Vertex;
     use crate::object::VglObject;
 
+    use crate::DEBUG;
+
     // Check input
 
     #[test]
-    #[should_panic]
     fn vertices_not_multiple_of_two_panics_in_debug_mode() {
         let vertices = vec!
             [
@@ -120,11 +121,12 @@ mod tests {
                 Vertex { position: [-0.5,  0.5] },
             ];
 
-        VglObject::generate_rectangle(&vertices);
+        let result = std::panic::catch_unwind(|| VglObject::generate_rectangle(&vertices));
+
+        assert_eq!(result.is_err(), DEBUG)
     }
 
     #[test]
-    #[should_panic]
     fn vertices_out_of_range_panics_in_debug_mode() {
         let vertices = vec!
             [
@@ -132,7 +134,9 @@ mod tests {
                 Vertex{ position: [ 0.5, -0.5] },
             ];
 
-        VglObject::generate_rectangle(&vertices);
+        let result = std::panic::catch_unwind(|| VglObject::generate_rectangle(&vertices));
+
+        assert_eq!(result.is_err(), DEBUG)
     }
 
 

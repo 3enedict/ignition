@@ -18,16 +18,13 @@ pub struct VglValidationLayers<'a> {
 
 impl VglValidationLayers<'_> {
     pub fn new() -> Self {
-
         let validation_layers: &[&str] =  &[
             "VK_LAYER_KHRONOS_validation"
         ];
 
-        if DEBUG && !Self::check_validation_layer_support(validation_layers) {
-            println!("Validation layers requested, but not available!");
+        if !Self::check_validation_layer_support(validation_layers) { println!("Warning : Validation layers are not available!"); }
 
-            return Self { validation_layers: None, debug_callback: None };
-        }
+        if !DEBUG { return Self { validation_layers: None, debug_callback: None }; }
 
         Self {
             validation_layers: Some(validation_layers.iter().cloned()),
