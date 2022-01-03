@@ -20,4 +20,13 @@ impl VglRenderer {
         let rectangle = VglObject::rectangle(&self.logical_device, vertices);
         self.objects.push(rectangle);
     }
+
+    pub fn add_squares(
+        &mut self,
+        vertices: &mut Vec<Vertex>,
+        sizes: &mut Vec<f32>,
+    ) {
+        let square = VglObject::square(&self.logical_device, vertices, sizes);
+        self.objects.push(square);
+    }
 }

@@ -13,6 +13,7 @@ use crate::object::vertex::Vertex;
 
 pub mod triangle;
 pub mod rectangle;
+pub mod square;
 
 pub struct VglObject {
     vertex_buffer: Option<Arc<CpuAccessibleBuffer<[Vertex]>>>,

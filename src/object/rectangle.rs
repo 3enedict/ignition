@@ -28,7 +28,7 @@ impl VglObject {
     pub fn generate_rectangle(
         vertices: &Vec<Vertex>,
     ) -> (Vec<Vertex>, Vec<u16>) {
-        Self::check_rectangle_paramaters(vertices);
+        Self::check_rectangle_parameters(vertices);
 
         let mut rectangle_vertices = Vec::new();
         let mut rectangle_indices = Vec::new();
@@ -42,7 +42,7 @@ impl VglObject {
         (rectangle_vertices, rectangle_indices)
     }
 
-    pub fn check_rectangle_paramaters(
+    pub fn check_rectangle_parameters(
         vertices: &Vec<Vertex>,
     ) {
         if DEBUG { 
@@ -75,6 +75,7 @@ impl VglObject {
                     ].iter().copied()
             );
     }
+
     fn generate_rectangle_indices(
         rectangle_indices: &mut Vec<u16>,
         increment: usize,
@@ -113,7 +114,18 @@ mod tests {
     // Check input
 
     #[test]
-    fn vertices_not_multiple_of_two_panics_in_debug_mode() {
+    fn normal_vertices_do_not_panic() {
+        let vertices = vec!
+            [
+                Vertex { position: [ 0.0, -0.5] },
+                Vertex { position: [ 0.5,  0.5] },
+            ];
+
+        VglObject::generate_rectangle(&vertices);
+    }
+
+    #[test]
+    fn number_of_vertices_not_multiple_of_two_panics_in_debug_mode() {
         let vertices = vec!
             [
                 Vertex { position: [ 0.0, -0.5] },
@@ -127,14 +139,53 @@ mod tests {
     }
 
     #[test]
-    fn vertices_out_of_range_panics_in_debug_mode() {
+    fn first_position_in_first_vertex_littler_than_minus_one_panics_in_debug_mode() {
         let vertices = vec!
             [
-                Vertex{ position: [-1.5, -0.5] },
-                Vertex{ position: [ 0.5, -0.5] },
+                Vertex { position: [-1.3,  0.0] },
+                Vertex { position: [ 0.0,  0.0] },
             ];
 
-        let result = std::panic::catch_unwind(|| VglObject::generate_rectangle(&vertices));
+        let result = std::panic::catch_unwind(|| VglObject::check_rectangle_parameters(&vertices));
+
+        assert_eq!(result.is_err(), DEBUG)
+    }
+
+    #[test]
+    fn second_position_in_first_vertex_littler_than_minus_one_panics_in_debug_mode() {
+        let vertices = vec!
+            [
+                Vertex { position: [ 0.0, -1.3] },
+                Vertex { position: [ 0.0,  0.0] },
+            ];
+
+        let result = std::panic::catch_unwind(|| VglObject::check_rectangle_parameters(&vertices));
+
+        assert_eq!(result.is_err(), DEBUG)
+    }
+
+    #[test]
+    fn first_position_in_first_vertex_bigger_than_one_panics_in_debug_mode() {
+        let vertices = vec!
+            [
+                Vertex { position: [ 1.3,  0.0] },
+                Vertex { position: [ 0.0,  0.0] },
+            ];
+
+        let result = std::panic::catch_unwind(|| VglObject::check_rectangle_parameters(&vertices));
+
+        assert_eq!(result.is_err(), DEBUG)
+    }
+
+    #[test]
+    fn second_position_in_first_vertex_bigger_than_one_panics_in_debug_mode() {
+        let vertices = vec!
+            [
+                Vertex { position: [ 0.0,  1.3] },
+                Vertex { position: [ 0.0,  0.0] },
+            ];
+
+        let result = std::panic::catch_unwind(|| VglObject::check_rectangle_parameters(&vertices));
 
         assert_eq!(result.is_err(), DEBUG)
     }
