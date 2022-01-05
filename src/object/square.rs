@@ -1,7 +1,3 @@
-use std::sync::Arc;
-
-use vulkano::buffer::CpuAccessibleBuffer;
-
 use crate::renderer::core::logical_device::VglLogicalDevice;
 
 use crate::object::vertex::Vertex;
@@ -17,13 +13,15 @@ impl VglObject {
     ) -> Self {
         let (square_vertices, square_indices) = Self::generate_square(vertices, sizes);
 
-        let (vertex_buffer, index_buffer) = Self::generate_square_buffers(logical_device, &square_vertices, &square_indices);
-
         Self {
-            vertex_buffer,
-            index_buffer,
+            vertex_buffer: Self::generate_vertex_buffer(logical_device, &square_vertices),
+            index_buffer: Self::generate_index_buffer(logical_device, &square_indices),
         }
     }
+
+
+
+
 
     pub fn generate_square(
         vertices: &Vec<Vertex>,
@@ -37,28 +35,10 @@ impl VglObject {
         for i in 0..vertices.len() {
             Self::generate_square_vertices(&vertices[i], &mut square_vertices, &sizes[i]);
 
-            Self::generate_square_indices(&mut square_indices, i)
+            Self::generate_quadrilateral_indices(&mut square_indices, i)
         }
 
         (square_vertices, square_indices)
-    }
-
-    pub fn check_square_parameters(
-        vertices: &Vec<Vertex>,
-        sizes: &Vec<f32>,
-    ) {
-        for i in 0..vertices.len() {
-            let vertex = vertices[i];
-            let size = sizes[i];
-
-            if vertex.position[0] < -1.0 || vertex.position[1] < -1.0 || vertex.position[0] > 1.0 || vertex.position[1] > 1.0 {
-                panic!("Vertex out of range. (help: Make sure that supplied positions are between -1.0 and 1.0)")
-            }
-
-            if vertex.position[0] + size > 1.0 || vertex.position[0] - size < -1.0 || vertex.position[1] + size > 1.0 || vertex.position[1] - size < -1.0 {
-                panic!("Square out of range. (help: Make sure that supplied sizes don't make the square go out of bounds)")
-            }
-        }
     }
 
     pub fn generate_square_vertices(
@@ -68,41 +48,45 @@ impl VglObject {
     ) {
         square_vertices
             .extend(vec!
-                    [
-                        Vertex { position: [vertex.position[0] - size, vertex.position[1] - size] },
-                        Vertex { position: [vertex.position[0] + size, vertex.position[1] - size] },
-                        Vertex { position: [vertex.position[0] + size, vertex.position[1] + size] },
-                        Vertex { position: [vertex.position[0] - size, vertex.position[1] + size] },
-                    ].iter().copied()
+                [
+                Vertex { position: [vertex.position[0] - size, vertex.position[1] - size] },
+                Vertex { position: [vertex.position[0] + size, vertex.position[1] - size] },
+                Vertex { position: [vertex.position[0] + size, vertex.position[1] + size] },
+                Vertex { position: [vertex.position[0] - size, vertex.position[1] + size] },
+                ].iter().copied()
             );
     }
 
-    fn generate_square_indices(
-        square_indices: &mut Vec<u16>,
-        increment: usize,
-    ) {
-        let index_increment = increment as u16 * 4;
 
-        square_indices
-            .extend(vec!
-                    [
-                        0 + index_increment,
-                        1 + index_increment,
-                        2 + index_increment,
-                        2 + index_increment,
-                        3 + index_increment,
-                        0 + index_increment,
-                    ].iter().copied()
-            );
-    }
 
-    pub fn generate_square_buffers(
-        logical_device: &VglLogicalDevice,
+
+
+
+    pub fn check_square_parameters(
         vertices: &Vec<Vertex>,
-        indices: &Vec<u16>,
-    ) -> (Option<Arc<CpuAccessibleBuffer<[Vertex]>>>, Option<Arc<CpuAccessibleBuffer<[u16]>>>) {
-        (Self::generate_vertex_buffer(logical_device, vertices), Self::generate_index_buffer(logical_device, indices))
+        sizes: &Vec<f32>,
+    ) {
+        Self::check_vertices(vertices);
+        Self::check_generated_square_not_out_of_bounds(vertices, sizes);
     }
+
+    pub fn check_generated_square_not_out_of_bounds(
+        vertices: &Vec<Vertex>,
+        sizes: &Vec<f32>,
+    ) {
+        if DEBUG {
+            for i in 0..vertices.len() {
+                let vertex = vertices[i];
+                let size = sizes[i];
+
+                if vertex.position[0] + size > 1.0 || vertex.position[0] - size < -1.0 || vertex.position[1] + size > 1.0 || vertex.position[1] - size < -1.0 {
+                    panic!("Square out of range. (help: Make sure that supplied sizes don't make the square go out of bounds)")
+                }
+            }
+        }
+    }
+
+
 }
 
 #[cfg(test)]
@@ -113,71 +97,10 @@ mod tests {
     use crate::DEBUG;
 
     #[test]
-    fn first_position_in_first_vertex_littler_than_minus_one_panics_in_debug_mode() {
-        let vertex = vec!
-            [
-                Vertex { position: [-1.3,  0.0] },
-            ];
-
-        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertex, &vec![0.01]));
-
-        assert_eq!(result.is_err(), DEBUG)
-    }
-
-    #[test]
-    fn second_position_in_first_vertex_littler_than_minus_one_panics_in_debug_mode() {
-        let vertex = vec!
-            [
-                Vertex { position: [ 0.0, -1.3] },
-            ];
-
-        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertex, &vec![0.01]));
-
-        assert_eq!(result.is_err(), DEBUG)
-    }
-
-    #[test]
-    fn first_position_in_first_vertex_bigger_than_one_panics_in_debug_mode() {
-        let vertex = vec!
-            [
-                Vertex { position: [ 1.3,  0.0] },
-            ];
-
-        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertex, &vec![0.01]));
-
-        assert_eq!(result.is_err(), DEBUG)
-    }
-
-    #[test]
-    fn second_position_in_first_vertex_bigger_than_one_panics_in_debug_mode() {
-        let vertex = vec!
-            [
-                Vertex { position: [ 0.0,  1.3] },
-            ];
-
-        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertex, &vec![0.01]));
-
-        assert_eq!(result.is_err(), DEBUG)
-    }
-
-    #[test]
-    fn second_vertex_out_of_bounds_panics_in_debug_mode() {
-        let vertex = vec!
-            [
-                Vertex { position: [ 0.0,  0.0] },
-                Vertex { position: [-1.3,  0.0] },
-            ];
-
-        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertex, &vec![0.01]));
-
-        assert_eq!(result.is_err(), DEBUG)
-    }
-
-    #[test]
     fn square_out_of_bounds_to_the_north_panics_in_debug_mode() {
         let vertex = vec!
             [
-                Vertex { position: [ 0.0, -0.5] },
+            Vertex { position: [ 0.0, -0.5] },
             ];
 
         let size = vec![0.75];
@@ -191,7 +114,7 @@ mod tests {
     fn square_out_of_bounds_to_the_south_panics_in_debug_mode() {
         let vertex = vec!
             [
-                Vertex { position: [ 0.0,  0.5] },
+            Vertex { position: [ 0.0,  0.5] },
             ];
 
         let size = vec![0.75];
@@ -205,7 +128,7 @@ mod tests {
     fn square_out_of_bounds_to_the_east_panics_in_debug_mode() {
         let vertex = vec!
             [
-                Vertex { position: [ 0.5,  0.0] },
+            Vertex { position: [ 0.5,  0.0] },
             ];
 
         let size = vec![0.75];
@@ -219,7 +142,7 @@ mod tests {
     fn square_out_of_bounds_to_the_west_panics_in_debug_mode() {
         let vertex = vec!
             [
-                Vertex { position: [-0.5,  0.0] },
+            Vertex { position: [-0.5,  0.0] },
             ];
 
         let size = vec![0.75];
@@ -233,8 +156,8 @@ mod tests {
     fn second_square_out_of_bounds_panics_in_debug_mode() {
         let vertices = vec!
             [
-                Vertex { position: [ 0.0,  0.0] },
-                Vertex { position: [-0.5,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [-0.5,  0.0] },
             ];
 
         let sizes = vec![0.1, 0.75];
@@ -244,25 +167,70 @@ mod tests {
         assert_eq!(result.is_err(), DEBUG)
     }
 
+
+
+
+    #[test]
+    fn size_out_of_range_panics_in_debug_mode() {
+        let vertices = vec!
+            [
+            Vertex { position: [ 0.0,  0.0] },
+            ];
+
+        let sizes = vec![1.1];
+
+        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertices, &sizes));
+
+        assert_eq!(result.is_err(), DEBUG)
+    }
+
+    #[test]
+    fn second_size_out_of_range_panics_in_debug_mode() {
+        let vertices = vec!
+            [
+            Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
+            ];
+
+        let sizes = vec![0.1, 1.1];
+
+        let result = std::panic::catch_unwind(|| VglObject::check_square_parameters(&vertices, &sizes));
+
+        assert_eq!(result.is_err(), DEBUG)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #[test]
     fn vertices_generated_correctly() {
         let original_vertices = vec!
             [
-                Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
             ];
 
         let sizes = vec![0.1];
 
-        
+
         let expected_vertices = vec!
             [
-                Vertex { position: [-0.1, -0.1] },
-                Vertex { position: [ 0.1, -0.1] },
-                Vertex { position: [ 0.1,  0.1] },
-                Vertex { position: [-0.1,  0.1] },
+            Vertex { position: [-0.1, -0.1] },
+            Vertex { position: [ 0.1, -0.1] },
+            Vertex { position: [ 0.1,  0.1] },
+            Vertex { position: [-0.1,  0.1] },
             ];
 
-        let (square_vertices, square_indices) = VglObject::generate_square(&original_vertices, &sizes);
+        let (square_vertices, _square_indices) = VglObject::generate_square(&original_vertices, &sizes);
 
         assert_eq!(square_vertices, expected_vertices);
     }
@@ -271,9 +239,9 @@ mod tests {
     fn vertices_generated_correctly_with_two_squares() {
         let original_vertices = vec!
             [
-                Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
 
-                Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
             ];
 
         let sizes = vec![0.1, 0.3];
@@ -281,27 +249,30 @@ mod tests {
 
         let expected_vertices = vec!
             [
-                Vertex { position: [-0.1, -0.1] },
-                Vertex { position: [ 0.1, -0.1] },
-                Vertex { position: [ 0.1,  0.1] },
-                Vertex { position: [-0.1,  0.1] },
+            Vertex { position: [-0.1, -0.1] },
+            Vertex { position: [ 0.1, -0.1] },
+            Vertex { position: [ 0.1,  0.1] },
+            Vertex { position: [-0.1,  0.1] },
 
-                Vertex { position: [-0.3, -0.3] },
-                Vertex { position: [ 0.3, -0.3] },
-                Vertex { position: [ 0.3,  0.3] },
-                Vertex { position: [-0.3,  0.3] },
+            Vertex { position: [-0.3, -0.3] },
+            Vertex { position: [ 0.3, -0.3] },
+            Vertex { position: [ 0.3,  0.3] },
+            Vertex { position: [-0.3,  0.3] },
             ];
 
-        let (square_vertices, square_indices) = VglObject::generate_square(&original_vertices, &sizes);
+        let (square_vertices, _square_indices) = VglObject::generate_square(&original_vertices, &sizes);
 
         assert_eq!(square_vertices, expected_vertices);
     }
+
+
+
 
     #[test]
     fn indices_correctly_generated() {
         let original_vertices = vec!
             [
-                Vertex{ position: [ 0.0,  0.0] },
+            Vertex{ position: [ 0.0,  0.0] },
             ];
 
         let sizes = vec![0.1];
@@ -318,9 +289,9 @@ mod tests {
     fn indices_correctly_generated_with_two_squares() {
         let original_vertices = vec!
             [
-                Vertex { position: [ 0.0,  0.0] },
+            Vertex { position: [ 0.0,  0.0] },
 
-                Vertex { position: [ 0.2,  0.0] },
+            Vertex { position: [ 0.2,  0.0] },
             ];
 
         let sizes = vec![0.1, 0.3];
