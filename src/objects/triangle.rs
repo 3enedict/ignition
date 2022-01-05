@@ -1,8 +1,7 @@
-use crate::renderer::core::logical_device::VglLogicalDevice;
+use crate::core::logical_device::VglLogicalDevice;
 
-
-use crate::object::vertex::Vertex;
-use crate::object::VglObject;
+use crate::objects::vertex::Vertex;
+use crate::objects::VglObject;
 
 impl VglObject {
     pub fn triangle(

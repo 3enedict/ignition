@@ -2,12 +2,12 @@ use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, Subp
 use vulkano::pipeline::graphics::viewport::Viewport;
 
 
-use crate::renderer::core::VglLogicalDevice;
-use crate::renderer::core::VglPipeline;
-use crate::renderer::core::VglFramebuffers;
-use crate::renderer::core::VglSwapchainImage;
+use crate::core::VglLogicalDevice;
+use crate::core::VglPipeline;
+use crate::core::VglFramebuffers;
+use crate::core::VglSwapchainImage;
 
-use crate::object::VglObject;
+use crate::objects::VglObject;
 
 pub struct VglCommandBuffer {
     command_buffer: PrimaryAutoCommandBuffer,

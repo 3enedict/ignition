@@ -3,7 +3,7 @@ use vulkano::pipeline::graphics::viewport::Viewport;
 use winit::event_loop::{EventLoop, ControlFlow};
 use winit::event::{Event, WindowEvent};
 
-use crate::renderer::VglRenderer;
+use crate::VglRenderer;
 
 pub mod parameters;
 use parameters::VglRendererParameters;

@@ -3,10 +3,10 @@ use std::{thread, time::Duration};
 
 extern crate vgl;
 
-use vgl::renderer::VglRenderer;
-use vgl::renderer::core::parameters::VglRendererParameters;
+use vgl::VglRenderer;
+use vgl::core::parameters::VglRendererParameters;
 
-use vgl::object::vertex::Vertex;
+use vgl::objects::vertex::Vertex;
 
 const WAIT_TIME: u64 = 500;
 

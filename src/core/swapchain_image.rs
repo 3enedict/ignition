@@ -3,7 +3,7 @@ use vulkano::swapchain::{AcquireError, SwapchainAcquireFuture};
 
 use winit::window::Window;
 
-use crate::renderer::core::VglSwapchain;
+use crate::core::VglSwapchain;
 
 pub struct VglSwapchainImage {
     image_num: usize,

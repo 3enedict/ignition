@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use vulkano::render_pass::RenderPass;
 
-use crate::renderer::core::VglLogicalDevice;
-use crate::renderer::core::VglSwapchain;
+use crate::core::VglLogicalDevice;
+use crate::core::VglSwapchain;
 
 pub struct VglRenderPass {
     render_pass: Arc<RenderPass>,

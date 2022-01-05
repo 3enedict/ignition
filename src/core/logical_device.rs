@@ -3,7 +3,7 @@ use std::sync::Arc;
 use vulkano::device::{Device, DeviceExtensions, Queue, Features};
 
 
-use crate::renderer::core::VglPhysicalDevice;
+use crate::core::VglPhysicalDevice;
 
 // Note: The physical device is stored as an index to avoid lifetime problems within classes
 //       The same is true for the instance.

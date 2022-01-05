@@ -7,10 +7,10 @@ use vulkano::pipeline::graphics::vertex_input::BuffersDefinition;
 use vulkano::shader::ShaderModule;
 use vulkano::render_pass::Subpass;
 
-use crate::object::vertex::Vertex;
+use crate::objects::vertex::Vertex;
 
-use crate::renderer::core::VglLogicalDevice;
-use crate::renderer::core::VglRenderPass;
+use crate::core::VglLogicalDevice;
+use crate::core::VglRenderPass;
 
 pub struct VglPipeline {
     pipeline: Arc<GraphicsPipeline>,
