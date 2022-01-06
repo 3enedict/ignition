@@ -1,6 +1,7 @@
 pub mod core;
 pub mod objects;
 pub mod systems;
+pub mod shaders;
 
 use vulkano::pipeline::graphics::viewport::Viewport;
 
