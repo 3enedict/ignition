@@ -157,7 +157,7 @@ impl VglRenderer {
 
             render_pass,
 
-            pipeline,
+            pipelines: vec![pipeline],
 
             viewport,
             framebuffers,
@@ -193,7 +193,7 @@ impl VglRenderer {
 
         let command_buffer = VglCommandBuffer::new(
             &self.logical_device,
-            &self.pipeline,
+            &self.pipelines,
             &self.viewport,
             &self.framebuffers,
             &swapchain_image,

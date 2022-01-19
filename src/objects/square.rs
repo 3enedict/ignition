@@ -1,5 +1,3 @@
-use crate::core::logical_device::VglLogicalDevice;
-
 use crate::objects::vertex::Vertex;
 use crate::objects::VglObject;
 
@@ -7,15 +5,16 @@ use crate::DEBUG;
 
 impl VglObject {
     pub fn square(
-        logical_device: &VglLogicalDevice,
         vertices: &Vec<Vertex>,
         sizes: &Vec<f32>,
     ) -> Self {
         let (square_vertices, square_indices) = Self::generate_square(vertices, sizes);
 
         Self {
-            vertex_buffer: Self::generate_vertex_buffer(logical_device, &square_vertices),
-            index_buffer: Self::generate_index_buffer(logical_device, &square_indices),
+            vertices: Some(square_vertices),
+            indices: Some(square_indices),
+
+            pipeline_id: 0
         }
     }
 

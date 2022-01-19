@@ -1,18 +1,17 @@
-use crate::core::logical_device::VglLogicalDevice;
-
 use crate::objects::vertex::Vertex;
 use crate::objects::VglObject;
 
 impl VglObject {
     pub fn rectangle(
-        logical_device: &VglLogicalDevice,
         vertices: &Vec<Vertex>,
     ) -> Self {
         let (rectangle_vertices, rectangle_indices) = Self::generate_rectangle(vertices);
 
         Self {
-            vertex_buffer: Self::generate_vertex_buffer(logical_device, &rectangle_vertices),
-            index_buffer: Self::generate_index_buffer(logical_device, &rectangle_indices),
+            vertices: Some(rectangle_vertices),
+            indices: Some(rectangle_indices),
+
+            pipeline_id: 0,
         }
     }
 

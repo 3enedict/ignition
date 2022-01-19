@@ -7,6 +7,7 @@ use vgl::VglRenderer;
 use vgl::core::parameters::VglRendererParameters;
 
 use vgl::objects::vertex::Vertex;
+use vgl::objects::VglObject;
 
 const WAIT_TIME: u64 = 500;
 
@@ -19,14 +20,14 @@ const WAIT_TIME: u64 = 500;
 
 
 fn one_triangle(renderer: &mut VglRenderer) {
-    let mut triangle = vec!
+    let triangle = VglObject::triangle(&vec!
         [
         Vertex { position: [ 0.0, -0.5] },
         Vertex { position: [ 0.5,  0.5] },
         Vertex { position: [-0.5,  0.5] },
-        ];
+        ]);
 
-    renderer.add_triangles(&mut triangle);
+    renderer.add_objects(&triangle);
 }
 
 #[ignore]
@@ -42,7 +43,7 @@ fn render_one_triangle() {
 
 
 fn two_triangles(renderer: &mut VglRenderer) {
-    let mut triangles = vec!
+    let triangles = VglObject::triangle(&vec!
         [
         Vertex { position: [ 0.55, -0.5 ] },
         Vertex { position: [ 0.55,  0.55] },
@@ -51,9 +52,9 @@ fn two_triangles(renderer: &mut VglRenderer) {
         Vertex { position: [-0.55,  0.5 ] },
         Vertex { position: [-0.55, -0.55] },
         Vertex { position: [ 0.5 , -0.55] },
-        ];
+        ]);
 
-    renderer.add_triangles(&mut triangles);
+    renderer.add_objects(&triangles);
 }
 
 #[ignore]
@@ -75,13 +76,13 @@ fn render_two_triangles() {
 
 
 fn one_rectangle(renderer: &mut VglRenderer) {
-    let mut rectangle = vec!
+    let rectangle = VglObject::rectangle(&vec!
         [
         Vertex{ position: [-0.5,  0.5] },
         Vertex{ position: [ 0.5, -0.5] },
-        ];
+        ]);
 
-    renderer.add_rectangles(&mut rectangle);
+    renderer.add_objects(&rectangle);
 }
 
 #[ignore]
@@ -97,16 +98,16 @@ fn render_one_rectangle() {
 
 
 fn two_rectangles(renderer: &mut VglRenderer) {
-    let mut rectangle = vec!
+    let rectangle = VglObject::rectangle(&vec!
         [
         Vertex{ position: [-0.25,  0.75] },
         Vertex{ position: [-0.75, -0.75] },
 
         Vertex{ position: [ 0.75,  0.75] },
         Vertex{ position: [ 0.25, -0.75] },
-        ];
+        ]);
 
-    renderer.add_rectangles(&mut rectangle);
+    renderer.add_objects(&rectangle);
 }
 
 #[ignore]
@@ -128,14 +129,15 @@ fn render_two_rectangles() {
 
 
 fn one_square(renderer: &mut VglRenderer) {
-    let mut square = vec!
+    let square = VglObject::square(&vec!
         [
         Vertex { position: [ 0.0,  0.0] },
-        ];
+        ],
 
-    let mut sizes = vec![0.1];
+        &vec![0.1],
+    );
 
-    renderer.add_squares(&mut square, &mut sizes);
+    renderer.add_objects(&square);
 }
 
 #[ignore]
@@ -151,17 +153,23 @@ fn render_one_square() {
 
 
 fn two_squares(renderer: &mut VglRenderer) {
-    let mut squares = vec!
+    let squares = VglObject::square(&vec!
         [
         Vertex { position: [ 0.0,  0.0] },
 
         Vertex { position: [ 0.5,  0.1] },
-        ];
+        ],
 
-    let mut sizes = vec![0.1, 0.3];
+        &vec!
+        [
+        0.1, 
+
+        0.3,
+        ],
+    );
 
 
-    renderer.add_squares(&mut squares, &mut sizes);
+    renderer.add_objects(&squares);
 }
 
 #[ignore]
@@ -182,11 +190,11 @@ fn render_two_squares() {
 
 
 
-
-mod vs {
-    vulkano_shaders::shader! {
-        ty: "vertex",
-        src: "
+mod color_gradient_shader {
+    pub mod vs {
+        vulkano_shaders::shader! {
+            ty: "vertex",
+            src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
@@ -205,13 +213,13 @@ vec3(0.0, 0.0, 1.0)
    fragColor = colors[gl_VertexIndex % 3];
    }
    "
+        }
     }
-}
 
-mod fs {
-    vulkano_shaders::shader! {
-        ty: "fragment",
-        src: "
+    pub mod fs {
+        vulkano_shaders::shader! {
+            ty: "fragment",
+            src: "
    #version 450
    #extension GL_ARB_separate_shader_objects : enable
 
@@ -223,15 +231,69 @@ mod fs {
    outColor = vec4(fragColor, 1.0);
    }
    "
+        }
     }
 }
+
+
+fn one_triangle_with_new_shader(renderer: &mut VglRenderer) {
+    let pipeline_id = renderer.create_graphics_pipeline(color_gradient_shader::vs::load, color_gradient_shader::fs::load);
+
+    let triangle = VglObject::triangle(&vec!
+        [
+        Vertex { position: [ 0.0, -0.5] },
+        Vertex { position: [ 0.5,  0.5] },
+        Vertex { position: [-0.5,  0.5] },
+        ])
+        .with_pipeline(pipeline_id);
+
+    renderer.add_objects(&triangle);
+}
+
 
 #[ignore]
 #[test]
 fn render_triangle_with_shaders() {
     VglRenderer::new(VglRendererParameters::default())
-        .load_shaders(vs::load, fs::load)
-        .add_system_setup(one_triangle)
+        .add_system_setup(one_triangle_with_new_shader)
+        .draw();
+
+    thread::sleep(Duration::from_millis(WAIT_TIME));
+}
+
+
+
+
+
+fn two_different_shaders(renderer: &mut VglRenderer) {
+    let white_rectangle = VglObject::rectangle(&vec!
+        [ 
+        Vertex{ position: [-0.25,  0.75] }, 
+        Vertex{ position: [-0.75, -0.75] },
+        ]);
+
+    renderer.add_objects(&white_rectangle);
+
+
+
+
+    let pipeline_id = renderer.create_graphics_pipeline(color_gradient_shader::vs::load, color_gradient_shader::fs::load);
+
+    let shadered_rectangle = VglObject::rectangle(&vec!
+        [
+        Vertex{ position: [ 0.75,  0.75] },
+        Vertex{ position: [ 0.25, -0.75] },
+        ])
+        .with_pipeline(pipeline_id);
+
+    renderer.add_objects(&shadered_rectangle);
+}
+
+#[ignore]
+#[test]
+fn render_with_different_shaders() {
+    VglRenderer::new(VglRendererParameters::default())
+        .add_system_setup(two_different_shaders)
         .draw();
 
     thread::sleep(Duration::from_millis(WAIT_TIME));

@@ -1,18 +1,17 @@
-use crate::core::logical_device::VglLogicalDevice;
-
 use crate::objects::vertex::Vertex;
 use crate::objects::VglObject;
 
 impl VglObject {
     pub fn triangle(
-        logical_device: &VglLogicalDevice,
         vertices: &Vec<Vertex>,
     ) -> Self {
         Self::check_triangle_parameters(vertices);
 
         Self {
-            vertex_buffer: Self::generate_vertex_buffer(logical_device, vertices),
-            index_buffer: None,
+            vertices: Some(vertices.clone()),
+            indices: None,
+
+            pipeline_id: 0,
         }
     }
 

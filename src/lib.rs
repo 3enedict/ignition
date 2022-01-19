@@ -16,7 +16,7 @@ use crate::core::pipeline::VglPipeline;
 use crate::core::framebuffers::VglFramebuffers;
 use crate::core::future::VglFuture;
 
-use crate::objects::VglObject;
+use crate::objects::VulkanObject;
 
 
 
@@ -37,11 +37,11 @@ pub struct VglRenderer {
 
     swapchain: VglSwapchain,
 
-    objects: Vec<VglObject>,
+    objects: Vec<VulkanObject>,
 
     render_pass: VglRenderPass,
 
-    pipeline: VglPipeline,
+    pipelines: Vec<VglPipeline>,
 
     viewport: Viewport,
     framebuffers: VglFramebuffers,
