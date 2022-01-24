@@ -5,7 +5,7 @@ use vulkano::instance::debug::DebugCallback;
 use vulkano::instance::layers_list;
 use vulkano::instance::debug::{MessageType, MessageSeverity};
 
-use crate::core::VglInstance;
+use crate::core::rendering::instance::VglInstance;
 
 use crate::DEBUG;
 
@@ -83,7 +83,7 @@ impl VglValidationLayers<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::validation_layers::VglValidationLayers;
+    use crate::core::rendering::validation_layers::VglValidationLayers;
     use crate::DEBUG;
 
     #[test]

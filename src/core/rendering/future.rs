@@ -2,10 +2,10 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 
 
-use crate::core::VglLogicalDevice;
-use crate::core::VglSwapchain;
-use crate::core::VglSwapchainImage;
-use crate::core::VglCommandBuffer;
+use crate::core::rendering::logical_device::VglLogicalDevice;
+use crate::core::rendering::swapchain::VglSwapchain;
+use crate::core::rendering::swapchain_image::VglSwapchainImage;
+use crate::core::rendering::command_buffer::VglCommandBuffer;
 
 pub struct VglFuture {
     future: Option<Box<dyn GpuFuture>>,

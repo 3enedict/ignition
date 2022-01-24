@@ -7,8 +7,8 @@ use vulkano::pipeline::graphics::viewport::Viewport;
 
 use winit::window::Window;
 
-use crate::core::VglSwapchain;
-use crate::core::VglRenderPass;
+use crate::core::rendering::swapchain::VglSwapchain;
+use crate::core::rendering::render_pass::VglRenderPass;
 
 pub struct VglFramebuffers {
     framebuffers: Vec<Arc<Framebuffer>>,

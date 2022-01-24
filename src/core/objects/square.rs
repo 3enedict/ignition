@@ -1,5 +1,5 @@
-use crate::objects::vertex::Vertex;
-use crate::objects::VglObject;
+use crate::core::objects::vertex::Vertex;
+use crate::core::objects::VglObject;
 
 use crate::DEBUG;
 
@@ -90,8 +90,8 @@ impl VglObject {
 
 #[cfg(test)]
 mod tests {
-    use crate::objects::vertex::Vertex;
-    use crate::objects::VglObject;
+    use crate::core::objects::vertex::Vertex;
+    use crate::core::objects::VglObject;
 
     use crate::DEBUG;
 

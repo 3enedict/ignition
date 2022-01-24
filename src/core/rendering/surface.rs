@@ -7,7 +7,7 @@ use vulkano_win::VkSurfaceBuild;
 use winit::event_loop::EventLoop;
 use winit::window::{Window, WindowBuilder};
 
-use crate::core::VglInstance;
+use crate::core::rendering::instance::VglInstance;
 
 pub struct VglSurface {
     surface: Arc<Surface<Window>>,

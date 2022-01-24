@@ -1,5 +1,5 @@
-use crate::objects::vertex::Vertex;
-use crate::objects::VglObject;
+use crate::core::objects::vertex::Vertex;
+use crate::core::objects::VglObject;
 
 impl VglObject {
     pub fn rectangle(
@@ -72,8 +72,8 @@ impl VglObject {
 
 #[cfg(test)]
 mod tests {
-    use crate::objects::vertex::Vertex;
-    use crate::objects::VglObject;
+    use crate::core::objects::vertex::Vertex;
+    use crate::core::objects::VglObject;
 
     #[test]
     fn vertices_correctly_generated() {

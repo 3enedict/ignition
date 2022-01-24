@@ -3,7 +3,7 @@ use std::sync::Arc;
 use vulkano::instance::Instance;
 use vulkano::Version;
 
-use crate::core::validation_layers::VglValidationLayers;
+use crate::core::rendering::validation_layers::VglValidationLayers;
 
 pub struct VglInstance {
     instance: Arc<Instance>,

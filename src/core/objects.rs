@@ -4,14 +4,14 @@ use vulkano::buffer::{BufferUsage, TypedBufferAccess, CpuAccessibleBuffer};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, PrimaryAutoCommandBuffer};
 use vulkano::command_buffer::pool::standard::StandardCommandPoolBuilder;
 
-use crate::VglRenderer;
+use crate::core::VglRenderer;
 use crate::DEBUG;
 
-use crate::core::logical_device::VglLogicalDevice;
-use crate::core::pipeline::VglPipeline;
+use crate::core::rendering::logical_device::VglLogicalDevice;
+use crate::core::rendering::pipeline::VglPipeline;
 
 pub mod vertex;
-use crate::objects::vertex::Vertex;
+use crate::core::objects::vertex::Vertex;
 
 pub mod triangle;
 pub mod rectangle;
@@ -25,6 +25,17 @@ pub struct VglObject {
 }
 
 impl VglObject {
+    pub fn empty() -> Self {
+        Self {
+            vertices: None,
+            indices: None,
+
+            pipeline_id: 0,
+        }
+    }
+
+
+
     pub fn with_pipeline(
         mut self,
         pipeline_id: usize,
@@ -122,6 +133,14 @@ impl VulkanObject {
             index_buffer,
 
             pipeline_id: object.pipeline_id,
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            vertex_buffer: None,
+            index_buffer: None,
+            pipeline_id: 0,
         }
     }
 
@@ -237,8 +256,8 @@ impl VglRenderer {
 
 #[cfg(test)]
 mod tests {
-    use crate::objects::vertex::Vertex;
-    use crate::objects::VglObject;
+    use crate::core::objects::vertex::Vertex;
+    use crate::core::objects::VglObject;
 
     use crate::DEBUG;
 

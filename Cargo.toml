@@ -9,5 +9,7 @@ vulkano-win = "0.27.1"
 vulkano-shaders = "0.27.1"
 winit = "0.25.0"
 
-
 derivative = "2.2.0"
+
+
+base_derive = { path = "src/base_derive" }

@@ -4,8 +4,8 @@ use vulkano::instance::Instance;
 use vulkano::device::physical::{PhysicalDevice, PhysicalDeviceType, QueueFamily};
 use vulkano::device::DeviceExtensions;
 
-use crate::core::VglInstance;
-use crate::core::VglSurface;
+use crate::core::rendering::instance::VglInstance;
+use crate::core::rendering::surface::VglSurface;
 
 // Note: The physical device is stored as an index to avoid lifetime problems within classes
 //       The same is true for the instance.
