@@ -1,2 +1,5 @@
 /target
+Cargo.lock
 /src/base_derive/target
+/src/base_derive/Cargo.lock
+
