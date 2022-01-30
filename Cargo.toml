@@ -12,4 +12,4 @@ winit = "0.25.0"
 derivative = "2.2.0"
 
 
-base_derive = { path = "src/base_derive" }
+game_loop = { path = "src/game_loop" }

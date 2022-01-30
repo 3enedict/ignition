@@ -1,5 +1,5 @@
 [package]
-name = "base_derive"
+name = "game_loop"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,6 +9,5 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-syn = "1.0"
 quote = "1.0"
 proc-macro2 = "1.0"

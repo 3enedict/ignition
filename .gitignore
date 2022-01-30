@@ -1,5 +1,5 @@
 /target
 Cargo.lock
-/src/base_derive/target
-/src/base_derive/Cargo.lock
+/src/game_loop/target
+/src/game_loop/Cargo.lock
 

@@ -16,12 +16,6 @@ use crate::core::rendering::future::VglFuture;
 
 use crate::core::objects::VulkanObject;
 
-pub trait Base {
-    fn run(self);
-
-    fn get_renderer(&mut self) -> &mut VglRenderer;
-}
-
 pub struct VglRenderer {
     parameters: VglRendererParameters,
 
