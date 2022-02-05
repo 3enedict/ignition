@@ -3,37 +3,36 @@ use std::sync::Arc;
 use vulkano::instance::Instance;
 use vulkano::Version;
 
-use crate::core::rendering::validation_layers::VglValidationLayers;
+use crate::core::rendering::validation_layers::create_validation_layers;
+use crate::core::rendering::validation_layers::setup_debug_callback;
 
-pub struct VglInstance {
-    instance: Arc<Instance>,
+/* IF DEBUG IS ENABLED */
+
+#[cfg(debug_assertions)]
+pub fn create_instance() -> Arc<Instance> {
+    let mut validation_layers = create_validation_layers();
+
+    let mut required_extensions = vulkano_win::required_extensions();
+    required_extensions.ext_debug_utils = true;
+
+    let instance = Instance::new(None, Version::V1_3, &required_extensions, validation_layers).unwrap();
+
+    setup_debug_callback(&instance);
+
+    instance
 }
 
-impl VglInstance {
-    pub fn new(
-        validation_layers: &VglValidationLayers,
-    ) -> Self {
-        let instance;
-        let mut required_extensions = vulkano_win::required_extensions();
-
-        if validation_layers.is_enabled() {
-            required_extensions.ext_debug_utils = true;
-            instance = Instance::new(None, Version::V1_1, &required_extensions, validation_layers.get_validation_layers()).unwrap();
-        } else {
-            instance = Instance::new(None, Version::V1_1, &required_extensions, None).unwrap();
-        }
 
 
-        Self {
-            instance,
-        }
-    }
 
-    pub fn get_instance(&self) -> &Arc<Instance> {
-        &self.instance
-    }
 
-    pub fn clone_instance(&self) -> Arc<Instance> {
-        self.instance.clone()
-    }
+
+/* IF DEBUG IS DISABLED */
+
+#[cfg(not(debug_assertions))]
+pub fn create_instance() -> Arc<Instance> {
+    let mut required_extensions = vulkano_win::required_extensions();
+
+    Instance::new(None, Version::V1_3, &required_extensions, None).unwrap()
 }
+

@@ -1,79 +1,51 @@
 use std::sync::Arc;
 
-use vulkano::swapchain::{Swapchain, SwapchainCreationError};
+use vulkano::swapchain::{Swapchain, SwapchainCreationError, Surface};
 use vulkano::image::{SwapchainImage, ImageUsage};
+use vulkano::device::physical::PhysicalDevice;
+use vulkano::device::{Device, Queue};
 
 use winit::window::Window;
 
-use crate::core::rendering::surface::VglSurface;
-use crate::core::rendering::physical_device::VglPhysicalDevice;
-use crate::core::rendering::logical_device::VglLogicalDevice;
+pub fn create_swapchain(
+    surface: &Arc<Surface<Window>>,
+    physical_device: &PhysicalDevice,
+    logical_device: &Arc<Device>,
+    queue: &Arc<Queue>,
+) -> (Arc<Swapchain<Window>>, Vec<Arc<SwapchainImage<Window>>>) {
+    let (swapchain, images) = {
+        let caps = surface.capabilities(physical_device.clone()).unwrap();
+        let composite_alpha = caps.supported_composite_alpha.iter().next().unwrap();
+        let format = caps.supported_formats[0].0;
+        let dimensions: [u32; 2] = surface.window().inner_size().into();
+        Swapchain::start(logical_device.clone(), surface.clone())
+            .num_images(caps.min_image_count)
+            .format(format)
+            .dimensions(dimensions)
+            .usage(ImageUsage::color_attachment())
+            .sharing_mode(queue)
+            .composite_alpha(composite_alpha)
+            .build()
+            .unwrap()
+    };
 
-pub struct VglSwapchain {
-    swapchain: Arc<Swapchain<Window>>,
-    images: Vec<Arc<SwapchainImage<Window>>>,
+
+    (swapchain, images)
 }
 
-impl VglSwapchain {
-    pub fn new(
-        surface: &VglSurface,
-        physical_device: &VglPhysicalDevice,
-        logical_device: &VglLogicalDevice,
-    ) -> Self {
-        let (swapchain, images) = {
-            let caps = surface.get_surface().capabilities(physical_device.get_physical_device()).unwrap();
-            let composite_alpha = caps.supported_composite_alpha.iter().next().unwrap();
-            let format = caps.supported_formats[0].0;
-            let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
-            Swapchain::start(logical_device.clone_logical_device(), surface.clone_surface())
-                .num_images(caps.min_image_count)
-                .format(format)
-                .dimensions(dimensions)
-                .usage(ImageUsage::color_attachment())
-                .sharing_mode(logical_device.get_queue())
-                .composite_alpha(composite_alpha)
-                .build()
-                .unwrap()
+pub fn recreate_swapchain(
+    surface: &Arc<Surface<Window>>,
+    swapchain: &Arc<Swapchain<Window>>,
+) -> (bool, Option<(Arc<Swapchain<Window>>, Vec<Arc<SwapchainImage<Window>>>)>) {
+    let recreate_swapchain = false;
+
+    let dimensions: [u32; 2] = surface.window().inner_size().into();
+    let (new_swapchain, new_images) =
+        match swapchain.recreate().dimensions(dimensions).build() {
+            Ok(r) => r,
+            Err(SwapchainCreationError::UnsupportedDimensions) => return (true, None),
+            Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
         };
 
-
-        Self {
-            swapchain,
-            images,
-        }
-    }
-
-    pub fn recreate_swapchain(
-        &mut self,
-        surface: &VglSurface,
-    ) -> bool {
-        let dimensions: [u32; 2] = surface.get_surface().window().inner_size().into();
-        let (new_swapchain, new_images) =
-            match self.swapchain.recreate().dimensions(dimensions).build() {
-                Ok(r) => r,
-                Err(SwapchainCreationError::UnsupportedDimensions) => return true,
-                Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
-            };
-
-        self.swapchain = new_swapchain;
-        self.images = new_images;
-
-        return false;
-    }
-
-    pub fn get_swapchain(&self) -> &Arc<Swapchain<Window>> {
-        &self.swapchain
-    }
-
-    pub fn clone_swapchain(&self) -> Arc<Swapchain<Window>> {
-        self.swapchain.clone()
-    }
-
-    pub fn get_images(&self) -> &Vec<Arc<SwapchainImage<Window>>> {
-        &self.images
-    }
-
-    pub fn clone_images(&self) -> Vec<Arc<SwapchainImage<Window>>> {
-        self.images.clone()
-    }
+    (false, Some((new_swapchain, new_images)))
 }

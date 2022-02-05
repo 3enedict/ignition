@@ -11,7 +11,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
         use winit::event_loop::ControlFlow;
         use winit::event::{Event, WindowEvent};
 
-        renderer.take_event_loop().run(move |event, _, control_flow| {
+        renderer.event_loop.take().unwrap().run(move |event, _, control_flow| {
             match event {
                 Event::WindowEvent {
                     event: WindowEvent::CloseRequested,
@@ -23,7 +23,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
                     event: WindowEvent::Resized(_),
                     ..
                 } => {
-                    renderer.recreate_swapchain();
+                    renderer.recreate_swapchain = true;
                 }
                 Event::RedrawEventsCleared => {
                     #input

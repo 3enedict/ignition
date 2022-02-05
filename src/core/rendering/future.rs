@@ -1,71 +1,59 @@
+use std::sync::Arc;
+
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
+use vulkano::device::Device;
+use vulkano::swapchain::SwapchainAcquireFuture;
+use vulkano::command_buffer::PrimaryAutoCommandBuffer;
 
+use winit::window::Window;
 
-use crate::core::rendering::logical_device::VglLogicalDevice;
-use crate::core::rendering::swapchain::VglSwapchain;
-use crate::core::rendering::swapchain_image::VglSwapchainImage;
-use crate::core::rendering::command_buffer::VglCommandBuffer;
+use crate::core::VglRenderer;
 
-pub struct VglFuture {
-    future: Option<Box<dyn GpuFuture>>,
+pub fn create_future(
+    logical_device: &Arc<Device>,
+) -> Option<Box<dyn GpuFuture>> {
+    Some(sync::now(logical_device.clone()).boxed())
 }
 
-impl VglFuture {
-    pub fn new(
-        logical_device: &VglLogicalDevice,
-    ) -> Self {
-        let future = Self::create_brand_new_future(logical_device);
+pub fn update_future(
+    renderer: &mut VglRenderer,
+    acquire_future: Option<SwapchainAcquireFuture<Window>>,
+    swapchain_image: usize,
+    command_buffer: PrimaryAutoCommandBuffer,
+) -> bool {
+    let future = renderer.future
+        .take()
+        .unwrap()
+        .join(acquire_future.unwrap())
+        .then_execute(renderer.queue.clone(), command_buffer)
+        .unwrap()
+        .then_swapchain_present(renderer.queue.clone(), renderer.swapchain.clone(), swapchain_image)
+        .then_signal_fence_and_flush();
 
-        Self {
-            future,
+    let mut recreate_swapchain = false;
+    let updated_future;
+
+    match future {
+        Ok(future) => {
+            updated_future = Some(future.boxed());
+        }
+        Err(FlushError::OutOfDate) => {
+            recreate_swapchain = true;
+            updated_future = create_future(&renderer.logical_device);
+        }
+        Err(e) => {
+            println!("Failed to flush future: {:?}", e);
+            updated_future = create_future(&renderer.logical_device);
         }
     }
 
-    pub fn update_future(
-        &mut self,
-        logical_device: &VglLogicalDevice,
-        swapchain: &VglSwapchain,
-        mut swapchain_image: VglSwapchainImage,
-        command_buffer: VglCommandBuffer,
-    ) -> bool {
-        let future = self.future.take().unwrap()
-            .join(swapchain_image.get_acquire_future())
-            .then_execute(logical_device.clone_queue(), command_buffer.get_command_buffer())
-            .unwrap()
-            .then_swapchain_present(logical_device.clone_queue(), swapchain.clone_swapchain(), swapchain_image.get_image_num())
-            .then_signal_fence_and_flush();
+    renderer.future = updated_future;
 
-        let mut recreate_swapchain = false;
+    recreate_swapchain
+}
 
-        match future {
-            Ok(future) => {
-                self.future = Some(future.boxed());
-            }
-            Err(FlushError::OutOfDate) => {
-                recreate_swapchain = true;
-                self.future = Self::create_brand_new_future(logical_device);
-            }
-            Err(e) => {
-                println!("Failed to flush future: {:?}", e);
-                self.future = Self::create_brand_new_future(logical_device);
-            }
-        }
 
-        recreate_swapchain
-    }
-
-    fn create_brand_new_future(
-        logical_device: &VglLogicalDevice,
-    ) -> Option<Box<dyn GpuFuture>> {
-        Some(sync::now(logical_device.clone_logical_device()).boxed())
-    }
-
-    pub fn cleanup(&mut self) {
-        self.future.as_mut().unwrap().cleanup_finished();
-    }
-
-    pub fn get_future(&self) -> &Option<Box<dyn GpuFuture>> {
-        &self.future
-    }
+pub fn cleanup_future(future: &mut Option<Box<dyn GpuFuture>>) {
+    future.as_mut().unwrap().cleanup_finished();
 }

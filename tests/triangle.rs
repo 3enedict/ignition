@@ -1,7 +1,7 @@
 extern crate vgl;
 
-use vgl::core::VglRenderer;
-use vgl::core::rendering::parameters::VglRendererParameters;
+use vgl::core::rendering::create_renderer;
+use vgl::core::rendering::draw;
 use vgl::core::objects::VglObject;
 use vgl::core::objects::vertex::Vertex;
 
@@ -10,7 +10,7 @@ use game_loop::game_loop;
 #[ignore]
 #[test]
 fn one_triangle() {
-    let mut renderer = VglRenderer::new(VglRendererParameters::default());
+    let mut renderer = create_renderer();
 
     let triangle = VglObject::triangle(&vec!
         [
@@ -22,6 +22,6 @@ fn one_triangle() {
     renderer.add_objects(&triangle);
 
     game_loop! (
-        renderer.draw();
+        draw(&mut renderer);
     );
 }

@@ -1,53 +1,25 @@
 use std::sync::Arc;
 
 use vulkano::device::{Device, DeviceExtensions, Queue, Features};
+use vulkano::device::physical::{PhysicalDevice, QueueFamily};
 
 
-use crate::core::rendering::physical_device::VglPhysicalDevice;
+pub fn create_logical_device(
+    device_extensions: &DeviceExtensions,
+    physical_device: &PhysicalDevice,
+    queue_family: &QueueFamily,
+) -> (Arc<Device>, Arc<Queue>) {
+    let (logical_device, mut queues) = Device::new(
+        physical_device.clone(),
+        &Features::none(),
+        &physical_device
+        .required_extensions()
+        .union(&device_extensions),
+        [(queue_family.clone(), 0.5)].iter().cloned(),
+    )
+        .unwrap();
 
-// Note: The physical device is stored as an index to avoid lifetime problems within classes
-//       The same is true for the instance.
-pub struct VglLogicalDevice {
-  logical_device: Arc<Device>,
-  queue: Arc<Queue>,
-}
+    let queue = queues.next().unwrap();
 
-impl VglLogicalDevice {
-    pub fn new(
-        device_extensions: &DeviceExtensions,
-        physical_device: &VglPhysicalDevice,
-    ) -> Self {
-        let (logical_device, mut queues) = Device::new(
-            physical_device.get_physical_device(),
-            &Features::none(),
-            &physical_device.get_physical_device()
-            .required_extensions()
-            .union(&device_extensions),
-            [(physical_device.get_queue_family(), 0.5)].iter().cloned(),
-        )
-            .unwrap();
-
-        let queue = queues.next().unwrap();
-
-        Self {
-            logical_device,
-            queue,
-        }
-    }
-
-    pub fn get_logical_device(&self) -> &Arc<Device> {
-        &self.logical_device
-    }
-
-    pub fn clone_logical_device(&self) -> Arc<Device> {
-        self.logical_device.clone()
-    }
-
-    pub fn get_queue(&self) -> &Arc<Queue> {
-        &self.queue
-    }
-
-    pub fn clone_queue(&self) -> Arc<Queue> {
-        self.queue.clone()
-    }
+    (logical_device, queue)
 }

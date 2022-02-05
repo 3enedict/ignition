@@ -3,12 +3,11 @@ use std::sync::Arc;
 use vulkano::buffer::{BufferUsage, TypedBufferAccess, CpuAccessibleBuffer};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, PrimaryAutoCommandBuffer};
 use vulkano::command_buffer::pool::standard::StandardCommandPoolBuilder;
+use vulkano::pipeline::GraphicsPipeline;
+use vulkano::device::Device;
 
 use crate::core::VglRenderer;
 use crate::DEBUG;
-
-use crate::core::rendering::logical_device::VglLogicalDevice;
-use crate::core::rendering::pipeline::VglPipeline;
 
 pub mod vertex;
 use crate::core::objects::vertex::Vertex;
@@ -120,7 +119,7 @@ pub struct VulkanObject {
 
 impl VulkanObject {
     pub fn new(
-        logical_device: &VglLogicalDevice,
+        logical_device: &Arc<Device>,
         object: &VglObject,
     ) -> Self {
         let (vertex_buffer, index_buffer) = Self::generate_buffers(
@@ -147,7 +146,7 @@ impl VulkanObject {
 
 
     fn generate_buffers(
-        logical_device: &VglLogicalDevice,
+        logical_device: &Arc<Device>,
         object: &VglObject,
     ) -> (Option<Arc<CpuAccessibleBuffer<[Vertex]>>>, Option<Arc<CpuAccessibleBuffer<[u16]>>>) {
         let vertex_buffer = Self::generate_vertex_buffer(logical_device, object.get_vertices());
@@ -162,11 +161,11 @@ impl VulkanObject {
 
 
     fn generate_vertex_buffer(
-        logical_device: &VglLogicalDevice,
+        logical_device: &Arc<Device>,
         vertices: &Vec<Vertex>,
     ) -> Option<Arc<CpuAccessibleBuffer<[Vertex]>>> {
         Some(CpuAccessibleBuffer::from_iter(
-                logical_device.clone_logical_device(),
+                logical_device.clone(),
                 BufferUsage::all(),
                 false,
                 vertices.iter().cloned(),
@@ -174,11 +173,11 @@ impl VulkanObject {
     }
 
     fn generate_index_buffer(
-        logical_device: &VglLogicalDevice,
+        logical_device: &Arc<Device>,
         indices: &Vec<u16>,
     ) -> Option<Arc<CpuAccessibleBuffer<[u16]>>> {
         Some(CpuAccessibleBuffer::from_iter(
-                logical_device.clone_logical_device(),
+                logical_device.clone(),
                 BufferUsage::index_buffer(),
                 false,
                 indices.iter().cloned(),
@@ -192,10 +191,10 @@ impl VulkanObject {
     pub fn draw(
         &mut self,
         command_buffer_builder: &mut AutoCommandBufferBuilder<PrimaryAutoCommandBuffer, StandardCommandPoolBuilder>,
-        pipelines: &Vec<VglPipeline>,
+        pipelines: &Vec<Arc<GraphicsPipeline>>,
     ) {
         command_buffer_builder
-            .bind_pipeline_graphics(pipelines[self.pipeline_id].clone_pipeline())
+            .bind_pipeline_graphics(pipelines[self.pipeline_id].clone())
             .bind_vertex_buffers(0, self.get_vertex_buffer());
 
         if self.index_buffer.is_some() {
