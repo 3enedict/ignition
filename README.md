@@ -12,7 +12,7 @@ If ever you want to run a few tests, here's the command for the "integration tes
 cargo test -- --ignored --test-threads=1
 ```
 
-And here are the ones for the unit tests : 
+And here's the one for the unit tests : 
 
 ```bash
 cargo test
