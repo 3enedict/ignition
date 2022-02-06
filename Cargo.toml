@@ -13,4 +13,4 @@ wgpu = "0.12"
 pollster = "0.2"
 
 
-game_loop = { path = "src/game_loop" }
+game_loop = { path = "macros/game_loop" }
