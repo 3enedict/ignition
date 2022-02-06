@@ -8,8 +8,10 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(raw_input);
 
     let gen = quote! {
-        use winit::event_loop::ControlFlow;
-        use winit::event::{Event, WindowEvent};
+        use winit::{
+            event::{Event, WindowEvent},
+            event_loop::ControlFlow,
+        };
 
         renderer.event_loop.take().unwrap().run(move |event, _, control_flow| {
             match event {
@@ -18,7 +20,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
                     ..
                 } => {
                     *control_flow = ControlFlow::Exit;
-                }
+                }/*
                 Event::WindowEvent {
                     event: WindowEvent::Resized(_),
                     ..
@@ -27,7 +29,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
                 }
                 Event::RedrawEventsCleared => {
                     #input
-                }
+                }*/
                 _ => (),
             }
         });
