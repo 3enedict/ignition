@@ -1,4 +1,4 @@
-As of now, VGL has only one goal : create perfect triangles.
+Ignition is a trying to be (one day), a beautifully simple graphics engine. Hopefully....
 
 # IMPORTANT
 
