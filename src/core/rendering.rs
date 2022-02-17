@@ -1,16 +1,9 @@
-use std::iter::once;
-
 use wgpu::{
     Instance,
     Backends,
 
     SurfaceError,
     TextureViewDescriptor,
-    CommandEncoderDescriptor,
-    RenderPassDescriptor,
-    LoadOp,
-    Operations,
-    Color,
 };
 
 
@@ -21,6 +14,9 @@ use window::IgnitionWindow;
 
 pub mod gpu;
 use gpu::IgnitionGPU;
+
+pub mod commands;
+use commands::create_command_buffer;
 
 impl Engine {
     pub async fn setup_engine() -> Self {
@@ -33,8 +29,7 @@ impl Engine {
 
         window.config.format = window.surface.get_preferred_format(&gpu.adapter).unwrap();
 
-        window.surface
-            .configure(&gpu.device, &window.config);
+        window.surface.configure(&gpu.device, &window.config);
 
         Self {
             window,
@@ -46,31 +41,9 @@ impl Engine {
         let output = self.window.surface.get_current_texture()?;
         let view = output.texture.create_view(&TextureViewDescriptor::default());
 
-        let mut encoder = self.gpu.device.create_command_encoder(&CommandEncoderDescriptor {
-            label: Some("Render Encoder"),
-        });
+        let command_buffer = create_command_buffer(self, &view);
 
-        {
-            let _render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: Operations {
-                        load: LoadOp::Clear(Color {
-                            r: 0.0,
-                            g: 0.0,
-                            b: 0.0,
-                            a: 1.0,
-                        }),
-                        store: true,
-                    },
-                }],
-                depth_stencil_attachment: None,
-            });
-        }
-
-        self.gpu.queue.submit(once(encoder.finish()));
+        self.gpu.queue.submit(command_buffer);
         output.present();
 
         Ok(())
