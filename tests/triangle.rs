@@ -1,13 +1,13 @@
-extern crate vgl;
+extern crate ignition;
 
-use vgl::core::rendering::create_renderer;
+use ignition::core::Engine;
 
 use game_loop::game_loop;
 
 #[ignore]
 #[test]
 fn one_triangle() {
-    let mut renderer = create_renderer();
+    let mut engine = Engine::ignite();
 
     game_loop! (
 

@@ -18,7 +18,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
             event_loop::ControlFlow,
         };
 
-        renderer.window.event_loop
+        engine.window.event_loop
             .take().unwrap()
             .run(move |event, _, control_flow| {
             match event {
@@ -26,15 +26,15 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
                     event: WindowEvent::Resized(size),
                     ..
                 } => {
-                    renderer.resize(renderer.window.size);
+                    engine.resize(engine.window.size);
                 }
 
                 Event::RedrawRequested(_) => {
                     #input
 
-                    match renderer.render() {
+                    match engine.render() {
                         Ok(_) => {}
-                        Err(SurfaceError::Lost) => renderer.resize(renderer.window.size),
+                        Err(SurfaceError::Lost) => engine.resize(engine.window.size),
                         Err(SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                         Err(e) => eprintln!("{:?}", e),
                     }
