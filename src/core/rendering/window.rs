@@ -1,10 +1,10 @@
 use wgpu::{
     Instance,
     Surface,
+    Adapter,
 
     SurfaceConfiguration,
     TextureUsages,
-    TextureFormat,
     PresentMode,
 };
 
@@ -26,46 +26,28 @@ pub struct IgnitionWindow {
     pub config: SurfaceConfiguration,
 }
 
-impl IgnitionWindow {
-    pub fn new(instance: &Instance) -> Self {
-        let (event_loop, window, size) = Self::create_window();
-        let surface = Self::create_surface(&instance, &window);
-        let config = Self::generate_default_configuration(&size);
+pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
+    let event_loop = EventLoop::new();
+    let window = WindowBuilder::new()
+        .build(&event_loop)
+        .unwrap();
 
-        Self { 
-            event_loop: Some(event_loop), 
+    let size = window.inner_size();
 
-            window, 
-            size,
+    (event_loop, window, size)
+}
 
-            surface,
-            config,
-        }
-    }
+pub fn create_surface(instance: &Instance, window: &Window) -> Surface {
+    unsafe { instance.create_surface(&window) }
+}
 
-    fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
-        let event_loop = EventLoop::new();
-        let window = WindowBuilder::new()
-            .build(&event_loop)
-            .unwrap();
-
-        let size = window.inner_size();
-
-        (event_loop, window, size)
-    }
-
-    fn create_surface(instance: &Instance, window: &Window) -> Surface {
-        unsafe { instance.create_surface(&window) }
-    }
-
-    fn generate_default_configuration(size: &PhysicalSize<u32>) -> SurfaceConfiguration {
-        SurfaceConfiguration {
-            usage: TextureUsages::RENDER_ATTACHMENT,
-            format: TextureFormat::Bgra8UnormSrgb,
-            width: size.width,
-            height: size.height,
-            present_mode: PresentMode::Fifo,
-        }
+pub fn generate_default_configuration(size: &PhysicalSize<u32>, surface: &Surface, adapter: &Adapter) -> SurfaceConfiguration {
+    SurfaceConfiguration {
+        usage: TextureUsages::RENDER_ATTACHMENT,
+        format: surface.get_preferred_format(adapter).unwrap(),
+        width: size.width,
+        height: size.height,
+        present_mode: PresentMode::Fifo,
     }
 }
 

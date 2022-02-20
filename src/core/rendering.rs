@@ -10,10 +10,10 @@ use wgpu::{
 use crate::core::Engine;
 
 pub mod window;
-use window::IgnitionWindow;
+use window::{IgnitionWindow, create_window, create_surface, generate_default_configuration};
 
 pub mod gpu;
-use gpu::IgnitionGPU;
+use gpu::{IgnitionGPU, get_adapter, get_device};
 
 pub mod commands;
 use commands::create_command_buffer;
@@ -22,18 +22,36 @@ impl Engine {
     pub async fn setup_engine() -> Self {
         env_logger::init();
 
+
+        let (event_loop, window, size) = create_window();
+
         let instance = Instance::new(Backends::all());
+        let surface = create_surface(&instance, &window);
 
-        let mut window = IgnitionWindow::new(&instance);
-        let gpu = pollster::block_on(IgnitionGPU::new(&instance, &window));
+        let adapter = pollster::block_on(get_adapter(&instance, &surface));
+        println!("Device name : {}", adapter.get_info().name);
+        let (device, queue) = pollster::block_on(get_device(&adapter));
 
-        window.config.format = window.surface.get_preferred_format(&gpu.adapter).unwrap();
+        let config = generate_default_configuration(&size, &surface, &adapter);
 
-        window.surface.configure(&gpu.device, &window.config);
+        surface.configure(&device, &config);
 
         Self {
-            window,
-            gpu,
+            window: IgnitionWindow {
+                event_loop: Some(event_loop),
+                window,
+                size,
+
+                surface,
+                config,
+            },
+
+            gpu: IgnitionGPU {
+                adapter,
+
+                device,
+                queue,
+            },
         }
     }
 

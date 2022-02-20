@@ -21,32 +21,34 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
         engine.window.event_loop
             .take().unwrap()
             .run(move |event, _, control_flow| {
-            match event {
-                Event::WindowEvent {
-                    event: WindowEvent::Resized(size),
-                    ..
-                } => {
-                    engine.resize(engine.window.size);
-                }
+                let _ = &engine;
 
-                Event::RedrawRequested(_) => {
-                    #input
-
-                    match engine.render() {
-                        Ok(_) => {}
-                        Err(SurfaceError::Lost) => engine.resize(engine.window.size),
-                        Err(SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-                        Err(e) => eprintln!("{:?}", e),
+                match event {
+                    Event::WindowEvent {
+                        event: WindowEvent::Resized(size),
+                        ..
+                    } => {
+                        engine.resize(engine.window.size);
                     }
-                }
 
-                Event::WindowEvent {
-                    event: WindowEvent::CloseRequested,
-                    ..
-                } => *control_flow = ControlFlow::Exit,
-                _ => {}
-            }
-        });
+                    Event::RedrawRequested(_) => {
+                        #input
+
+                        match engine.render() {
+                            Ok(_) => {}
+                            Err(SurfaceError::Lost) => engine.resize(engine.window.size),
+                            Err(SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
+                            Err(e) => eprintln!("{:?}", e),
+                        }
+                    }
+
+                    Event::WindowEvent {
+                        event: WindowEvent::CloseRequested,
+                        ..
+                    } => *control_flow = ControlFlow::Exit,
+                    _ => {}
+                }
+            });
     };
 
     gen.into()
