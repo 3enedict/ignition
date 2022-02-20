@@ -27,7 +27,7 @@ pub async fn get_adapter(instance: &Instance, surface: &Surface) -> Adapter {
             compatible_surface: Some(&surface),
             force_fallback_adapter: false,
         },
-    ).await.unwrap()
+    ).await.expect("Error: Failed to find an appropriate adapter - Ignition")
 }
 
 pub async fn get_device(adapter: &Adapter) -> (Device, Queue) {
@@ -38,5 +38,5 @@ pub async fn get_device(adapter: &Adapter) -> (Device, Queue) {
             label: None,
         },
         None,
-    ).await.unwrap()
+    ).await.expect("Error: Failed to create device - Ignition")
 }

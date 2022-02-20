@@ -1,5 +1,3 @@
-use std::iter::{Once, once};
-
 use wgpu::{
     CommandBuffer,
     CommandEncoder,
@@ -15,23 +13,23 @@ use wgpu::{
 
 use crate::core::Engine;
 
-pub fn create_command_buffer(engine: &Engine, view: &TextureView) -> Once<CommandBuffer> {
+pub fn create_command_buffer(engine: &Engine, view: &TextureView) -> Option<CommandBuffer> {
     let mut encoder = create_command_encoder(engine);
 
     begin_render_pass(&mut encoder, view);
 
-    once(encoder.finish())
+    Some(encoder.finish())
 }
 
 fn create_command_encoder(engine: &Engine) -> CommandEncoder {
     engine.gpu.device.create_command_encoder(&CommandEncoderDescriptor {
-        label: Some("Render Encoder"),
+        label: None,
     })
 }
 
 fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView) {
     encoder.begin_render_pass(&RenderPassDescriptor {
-        label: Some("Render Pass"),
+        label: None,
         color_attachments: &[wgpu::RenderPassColorAttachment {
             view,
             resolve_target: None,

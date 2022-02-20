@@ -22,6 +22,7 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
             .take().unwrap()
             .run(move |event, _, control_flow| {
                 let _ = &engine;
+                *control_flow = ControlFlow::Wait;
 
                 match event {
                     Event::WindowEvent {
