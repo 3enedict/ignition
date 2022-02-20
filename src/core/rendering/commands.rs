@@ -16,7 +16,7 @@ use crate::core::Engine;
 pub fn create_command_buffer(engine: &Engine, view: &TextureView) -> Option<CommandBuffer> {
     let mut encoder = create_command_encoder(engine);
 
-    begin_render_pass(&mut encoder, view);
+    begin_render_pass(&mut encoder, view, engine);
 
     Some(encoder.finish())
 }
@@ -27,8 +27,8 @@ fn create_command_encoder(engine: &Engine) -> CommandEncoder {
     })
 }
 
-fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView) {
-    encoder.begin_render_pass(&RenderPassDescriptor {
+fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView, engine: &Engine) {
+    let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachment {
             view,
@@ -45,4 +45,7 @@ fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView) {
         }],
         depth_stencil_attachment: None,
     });
+
+    render_pass.set_pipeline(&engine.render_pipeline);
+    render_pass.draw(0..3, 0..1);
 }

@@ -59,7 +59,11 @@ impl Engine {
             self.window.config.width = new_size.width;
             self.window.config.height = new_size.height;
 
-            self.window.surface.configure(&self.gpu.device, &self.window.config);
+            self.configure_surface();
         }
+    }
+
+    pub fn configure_surface(&mut self) {
+        self.window.surface.configure(&self.gpu.device, &self.window.config);
     }
 }
