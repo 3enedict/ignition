@@ -46,6 +46,6 @@ fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView, engine: &
         depth_stencil_attachment: None,
     });
 
-    render_pass.set_pipeline(&engine.render_pipeline);
+    render_pass.set_pipeline(&engine.pipelines[0]);
     render_pass.draw(0..3, 0..1);
 }

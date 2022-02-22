@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use wgpu::{
     Instance,
     Backends,
@@ -19,6 +18,8 @@ use gpu::{IgnitionGPU, get_adapter, get_device};
 pub mod commands;
 use commands::create_command_buffer;
 
+pub mod pipeline;
+
 impl Engine {
     pub async fn setup_engine() -> Self {
         env_logger::init();
@@ -35,53 +36,6 @@ impl Engine {
 
         let config = generate_default_configuration(&size, &surface, &adapter);
         surface.configure(&device, &config);
-
-        // Load the shaders from disk
-        let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
-            label: None,
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
-        });
-
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: None,
-            bind_group_layouts: &[],
-            push_constant_ranges: &[],
-        });
-
-        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: None,
-            layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState { 
-                    format: config.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                }],
-            }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
-                polygon_mode: wgpu::PolygonMode::Fill,
-                unclipped_depth: false,
-                conservative: false,
-            },
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
-            multiview: None,
-        });
 
         Self {
             window: IgnitionWindow {
@@ -100,7 +54,7 @@ impl Engine {
                 queue,
             },
 
-            render_pipeline,
+            pipelines: Vec::new(),
         }
     }
 
