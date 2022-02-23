@@ -7,7 +7,10 @@ use wgpu::{
 };
 
 
-use crate::core::Engine;
+use crate::core::{
+    Engine,
+    shapes::IgnitionShapes,
+};
 
 pub mod window;
 use window::{IgnitionWindow, create_window, create_surface, generate_default_configuration};
@@ -15,10 +18,12 @@ use window::{IgnitionWindow, create_window, create_surface, generate_default_con
 pub mod gpu;
 use gpu::{IgnitionGPU, get_adapter, get_device};
 
-pub mod commands;
-use commands::create_command_buffer;
+pub mod command_buffer;
+use command_buffer::create_command_buffer;
 
 pub mod pipeline;
+
+pub mod vertex_buffer;
 
 impl Engine {
     pub async fn setup_engine() -> Self {
@@ -54,7 +59,8 @@ impl Engine {
                 queue,
             },
 
-            pipelines: Vec::new(),
+
+            shapes: IgnitionShapes::new(),
         }
     }
 

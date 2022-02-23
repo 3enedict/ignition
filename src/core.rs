@@ -1,16 +1,18 @@
-use wgpu::RenderPipeline;
-
 pub mod rendering;
 use rendering::{
     window::IgnitionWindow,
     gpu::IgnitionGPU,
 };
 
+pub mod shapes;
+use shapes::IgnitionShapes;
+
 
 pub struct Engine {
     pub window: IgnitionWindow,
     pub gpu: IgnitionGPU,
-    pub pipelines: Vec<RenderPipeline>,
+
+    pub shapes: IgnitionShapes,
 }
 
 impl Engine {

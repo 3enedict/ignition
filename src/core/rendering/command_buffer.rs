@@ -1,6 +1,7 @@
 use wgpu::{
     CommandBuffer,
     CommandEncoder,
+    RenderPass,
     TextureView,
 
     CommandEncoderDescriptor,
@@ -13,10 +14,9 @@ use wgpu::{
 
 use crate::core::Engine;
 
-pub fn create_command_buffer(engine: &Engine, view: &TextureView) -> Option<CommandBuffer> {
+pub fn create_command_buffer(engine: &mut Engine, view: &TextureView) -> Option<CommandBuffer> {
     let mut encoder = create_command_encoder(engine);
-
-    begin_render_pass(&mut encoder, view, engine);
+    setup_render_pass(engine, &mut encoder, view);
 
     Some(encoder.finish())
 }
@@ -27,8 +27,16 @@ fn create_command_encoder(engine: &Engine) -> CommandEncoder {
     })
 }
 
-fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView, engine: &Engine) {
-    let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+fn setup_render_pass(engine: &mut Engine, encoder: &mut CommandEncoder, view: &TextureView) {
+    let mut render_pass = begin_render_pass(encoder, view);
+
+    render_pass.set_pipeline(&engine.shapes.pipelines[0]);
+    render_pass.set_vertex_buffer(0, engine.shapes.vertex_buffers[0].slice(..));
+    render_pass.draw(0..3, 0..1);
+}
+
+fn begin_render_pass<'a>(encoder: &'a mut CommandEncoder, view: &'a TextureView) -> RenderPass<'a> {
+    encoder.begin_render_pass(&RenderPassDescriptor {
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachment {
             view,
@@ -44,8 +52,5 @@ fn begin_render_pass(encoder: &mut CommandEncoder, view: &TextureView, engine: &
             },
         }],
         depth_stencil_attachment: None,
-    });
-
-    render_pass.set_pipeline(&engine.pipelines[0]);
-    render_pass.draw(0..3, 0..1);
+    })
 }
