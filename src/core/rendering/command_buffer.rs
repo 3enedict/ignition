@@ -32,7 +32,8 @@ fn setup_render_pass(engine: &mut Engine, encoder: &mut CommandEncoder, view: &T
 
     render_pass.set_pipeline(&engine.shapes.pipelines[0]);
     render_pass.set_vertex_buffer(0, engine.shapes.vertex_buffers[0].slice(..));
-    render_pass.draw(0..3, 0..1);
+
+    render_pass.draw(0..engine.shapes.vertex_len[0], 0..1);
 }
 
 fn begin_render_pass<'a>(encoder: &'a mut CommandEncoder, view: &'a TextureView) -> RenderPass<'a> {

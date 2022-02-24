@@ -1,5 +1,10 @@
 /target
 Cargo.lock
+
+
 /macros/game_loop/target
 /macros/game_loop/Cargo.lock
+
+/macros/game_loop_that_does_not_hijack_main_thread/target
+/macros/game_loop_that_does_not_hijack_main_thread/Cargo.lock
 

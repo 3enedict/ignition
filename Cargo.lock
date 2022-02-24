@@ -507,6 +507,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "game_loop_that_does_not_hijack_main_thread"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -622,6 +630,7 @@ dependencies = [
  "cgmath",
  "env_logger",
  "game_loop",
+ "game_loop_that_does_not_hijack_main_thread",
  "image",
  "log",
  "pollster",

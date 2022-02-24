@@ -22,7 +22,9 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
             .take().unwrap()
             .run(move |event, _, control_flow| {
                 let _ = &engine;
-                *control_flow = ControlFlow::Wait;
+                *control_flow = engine.options.control_flow;
+
+                #input
 
                 match event {
                     Event::WindowEvent {
@@ -33,8 +35,6 @@ pub fn game_loop(raw_input: TokenStream) -> TokenStream {
                     }
 
                     Event::RedrawRequested(_) => {
-                        #input
-
                         match engine.render() {
                             Ok(_) => {}
                             Err(SurfaceError::Lost) => engine.configure_surface(),

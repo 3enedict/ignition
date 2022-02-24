@@ -7,8 +7,13 @@ use rendering::{
 pub mod shapes;
 use shapes::IgnitionShapes;
 
+pub mod options;
+use options::IgnitionOptions;
+
 
 pub struct Engine {
+    pub options: IgnitionOptions,
+
     pub window: IgnitionWindow,
     pub gpu: IgnitionGPU,
 
@@ -16,8 +21,10 @@ pub struct Engine {
 }
 
 impl Engine {
-    pub fn ignite() -> Self {
-        pollster::block_on(Engine::setup_engine())
+    pub fn ignite(options: IgnitionOptions) -> Self {
+        env_logger::init();
+
+        pollster::block_on(Engine::setup_engine(options))
     }
 }
 

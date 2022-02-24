@@ -10,6 +10,7 @@ use wgpu::{
 use crate::core::{
     Engine,
     shapes::IgnitionShapes,
+    options::IgnitionOptions,
 };
 
 pub mod window;
@@ -26,10 +27,7 @@ pub mod pipeline;
 pub mod vertex_buffer;
 
 impl Engine {
-    pub async fn setup_engine() -> Self {
-        env_logger::init();
-
-
+    pub async fn setup_engine(options: IgnitionOptions) -> Self {
         let (event_loop, window, size) = create_window();
 
         let instance = Instance::new(Backends::all());
@@ -43,6 +41,8 @@ impl Engine {
         surface.configure(&device, &config);
 
         Self {
+            options,
+
             window: IgnitionWindow {
                 event_loop: Some(event_loop),
                 window,

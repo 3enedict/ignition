@@ -14,6 +14,8 @@ use crate::core::rendering::{
 pub struct IgnitionShapes { 
     pub pipelines: Vec<RenderPipeline>,
     pub vertex_buffers: Vec<Buffer>,
+
+    pub vertex_len: Vec<u32>
 }
 
 impl IgnitionShapes {
@@ -21,6 +23,8 @@ impl IgnitionShapes {
         Self {
             pipelines: Vec::new(),
             vertex_buffers: Vec::new(),
+
+            vertex_len: Vec::new(),
         }
     }
 }
@@ -33,4 +37,6 @@ pub fn ignite_shape(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: Shader
 
     engine.shapes.pipelines.push(pipeline);
     engine.shapes.vertex_buffers.push(vertex_buffer);
+
+    engine.shapes.vertex_len.push(vertices.len() as u32);
 }
