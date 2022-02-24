@@ -507,14 +507,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "game_loop_that_does_not_hijack_main_thread"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
-]
-
-[[package]]
 name = "getrandom"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -587,6 +579,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "handle_events"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -630,10 +630,13 @@ dependencies = [
  "cgmath",
  "env_logger",
  "game_loop",
- "game_loop_that_does_not_hijack_main_thread",
+ "handle_events",
  "image",
  "log",
  "pollster",
+ "redraw_requested",
+ "render",
+ "run_return",
  "wgpu",
  "winit",
 ]
@@ -1193,6 +1196,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "redraw_requested"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "regex"
 version = "1.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1210,10 +1221,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 
 [[package]]
+name = "render"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "renderdoc-sys"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
+
+[[package]]
+name = "run_return"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
 
 [[package]]
 name = "rustc-hash"

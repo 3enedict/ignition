@@ -21,10 +21,10 @@ pub struct Engine {
 }
 
 impl Engine {
-    pub fn ignite(options: IgnitionOptions) -> Self {
+    pub fn ignite() -> Self {
         env_logger::init();
 
-        pollster::block_on(Engine::setup_engine(options))
+        pollster::block_on(Engine::setup_engine())
     }
 }
 

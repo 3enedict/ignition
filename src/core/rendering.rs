@@ -27,7 +27,7 @@ pub mod pipeline;
 pub mod vertex_buffer;
 
 impl Engine {
-    pub async fn setup_engine(options: IgnitionOptions) -> Self {
+    pub async fn setup_engine() -> Self {
         let (event_loop, window, size) = create_window();
 
         let instance = Instance::new(Backends::all());
@@ -41,7 +41,7 @@ impl Engine {
         surface.configure(&device, &config);
 
         Self {
-            options,
+            options: IgnitionOptions { ..Default::default() },
 
             window: IgnitionWindow {
                 event_loop: Some(event_loop),

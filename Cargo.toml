@@ -16,5 +16,10 @@ cgmath = "0.18"
 bytemuck = { version = "1.4", features = [ "derive" ] }
 
 
-game_loop = { path = "macros/game_loop" }
-game_loop_that_does_not_hijack_main_thread = { path = "macros/game_loop_that_does_not_hijack_main_thread" }
+game_loop = { path = "macros/event_loop/game_loop" }
+run_return = { path = "macros/event_loop/run_return" }
+
+handle_events = { path = "macros/events/handle_events" }
+redraw_requested = { path = "macros/events/redraw_requested" }
+
+render = { path = "macros/render" }

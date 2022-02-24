@@ -6,11 +6,12 @@ use ignition::core::{
     Engine,
     rendering::vertex_buffer::Vertex,
     shapes::ignite_shape,
-    options::IgnitionOptions,
 };
 
-mod utils;
-use crate::utils::run_game_loop;
+use run_return::run_return;
+use redraw_requested::redraw_requested;
+use handle_events::handle_events;
+use render::render;
 
 
 const ONE_TRIANGLE: &[Vertex] = &[
@@ -24,15 +25,12 @@ const ONE_TRIANGLE: &[Vertex] = &[
 fn one_triangle() {
     env_logger::init();
 
-    let mut engine = pollster::block_on(Engine::setup_engine(
-            IgnitionOptions {
-                ..Default::default()
-            }
-    ));
-
+    let mut engine = pollster::block_on(Engine::setup_engine());
     ignite_shape(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_game_loop(&mut engine);
+    run_return! (
+        redraw_requested!( render!() );
+    );
 }
 
 const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
@@ -48,13 +46,10 @@ const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
 #[ignore]
 #[test]
 fn two_triangles_in_one_buffer() {
-    let mut engine = pollster::block_on(Engine::setup_engine(
-            IgnitionOptions {
-                ..Default::default()
-            }
-    ));
-
+    let mut engine = pollster::block_on(Engine::setup_engine());
     ignite_shape(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_game_loop(&mut engine);
+    run_return! (
+        redraw_requested!( render!() );
+    );
 }
