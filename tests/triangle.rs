@@ -1,18 +1,5 @@
-use wgpu::include_wgsl;
-
 extern crate ignition;
-
-use ignition::core::{
-    Engine,
-    rendering::vertex_buffer::Vertex,
-    shapes::ignite_shape,
-};
-
-use run_return::run_return;
-use redraw_requested::redraw_requested;
-use handle_events::handle_events;
-use render::render;
-
+use ignition::prelude::*;
 
 const ONE_TRIANGLE: &[Vertex] = &[
     Vertex { position: [ 0.0,  0.5, 0.0], color: [1.0, 0.0, 0.0] },
