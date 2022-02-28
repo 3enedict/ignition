@@ -1,6 +1,3 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-
 use wgpu::{
     ShaderModuleDescriptor,
 
@@ -22,20 +19,12 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    pub fn ignite(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Rc<RefCell<Self>> {
-        let triangle = Rc::new(
-            RefCell::new(
-                Self {
-                    pipeline: ignite_pipeline(engine, shaders),
-                    vertex_buffer: ignite_vertex_buffer(engine, vertices),
+    pub fn ignite(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Self {
+        Self {
+            pipeline: ignite_pipeline(engine, shaders),
+            vertex_buffer: ignite_vertex_buffer(engine, vertices),
 
-                    vertex_len: vertices.len() as u32,
-                }
-            )
-        );
-
-        engine.shapes.push(Rc::downgrade(&triangle));
-
-        triangle
+            vertex_len: vertices.len() as u32,
+        }
     }
 }

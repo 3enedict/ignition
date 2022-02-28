@@ -13,11 +13,16 @@ fn one_triangle() {
     env_logger::init();
 
     let mut engine = pollster::block_on(Engine::setup_engine());
-    let _triangle = Triangle::ignite(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
+    let triangle = Triangle::ignite(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
 
     run_return! (
         redraw_requested!( 
-            render!();
+            render!(
+                render_pass.set_pipeline(&triangle.pipeline);
+                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
+
+                render_pass.draw(0..triangle.vertex_len, 0..1);
+            );
         );
     );
 }
@@ -36,11 +41,16 @@ const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
 #[test]
 fn two_triangles_in_one_buffer() {
     let mut engine = pollster::block_on(Engine::setup_engine());
-    let _triangle = Triangle::ignite(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
+    let triangle = Triangle::ignite(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
 
     run_return! (
         redraw_requested!( 
-            render!();
+            render!(
+                render_pass.set_pipeline(&triangle.pipeline);
+                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
+
+                render_pass.draw(0..triangle.vertex_len, 0..1);
+            );
         );
     );
 }
