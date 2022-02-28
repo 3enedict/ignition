@@ -3,7 +3,7 @@ pub use wgpu::include_wgsl;
 pub use crate::core::{
     Engine,
     rendering::vertex_buffer::Vertex,
-    shapes::ignite_shape,
+    shapes::triangle::Triangle,
 };
 
 pub use run_return::run_return;

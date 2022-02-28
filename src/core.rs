@@ -1,3 +1,6 @@
+use std::rc::Weak;
+use std::cell::RefCell;
+
 pub mod rendering;
 use rendering::{
     window::IgnitionWindow,
@@ -5,7 +8,7 @@ use rendering::{
 };
 
 pub mod shapes;
-use shapes::IgnitionShapes;
+use shapes::triangle::Triangle;
 
 pub mod options;
 use options::IgnitionOptions;
@@ -17,7 +20,7 @@ pub struct Engine {
     pub window: IgnitionWindow,
     pub gpu: IgnitionGPU,
 
-    pub shapes: IgnitionShapes,
+    pub shapes: Vec<Weak<RefCell<Triangle>>>,
 }
 
 impl Engine {

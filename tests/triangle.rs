@@ -13,10 +13,12 @@ fn one_triangle() {
     env_logger::init();
 
     let mut engine = pollster::block_on(Engine::setup_engine());
-    ignite_shape(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
+    let _triangle = Triangle::ignite(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
 
     run_return! (
-        redraw_requested!( render!() );
+        redraw_requested!( 
+            render!();
+        );
     );
 }
 
@@ -34,9 +36,11 @@ const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
 #[test]
 fn two_triangles_in_one_buffer() {
     let mut engine = pollster::block_on(Engine::setup_engine());
-    ignite_shape(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
+    let _triangle = Triangle::ignite(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
 
     run_return! (
-        redraw_requested!( render!() );
+        redraw_requested!( 
+            render!();
+        );
     );
 }

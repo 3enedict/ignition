@@ -1,11 +1,12 @@
 use wgpu::{
-    CommandBuffer,
     CommandEncoder,
     RenderPass,
     TextureView,
+    SurfaceTexture,
 
     CommandEncoderDescriptor,
     RenderPassDescriptor,
+    TextureViewDescriptor,
 
     LoadOp,
     Operations,
@@ -14,29 +15,33 @@ use wgpu::{
 
 use crate::core::Engine;
 
-pub fn create_command_buffer(engine: &mut Engine, view: &TextureView) -> Option<CommandBuffer> {
-    let mut encoder = create_command_encoder(engine);
-    setup_render_pass(engine, &mut encoder, view);
-
-    Some(encoder.finish())
+#[macro_export]
+macro_rules! draw {
+    ( $( $x:expr ),* ) => {
+        $(
+            engine.queue_draw($x);
+        )*
+    };
 }
 
-fn create_command_encoder(engine: &Engine) -> CommandEncoder {
+
+pub fn create_frame(engine: &Engine) -> (SurfaceTexture, TextureView) {
+    let frame = engine.window.surface
+        .get_current_texture()
+        .expect("Failed to acquire next swap chain texture");
+
+    let view = frame.texture.create_view(&TextureViewDescriptor::default());
+
+    (frame, view)
+}
+
+pub fn create_command_encoder(engine: &Engine) -> CommandEncoder {
     engine.gpu.device.create_command_encoder(&CommandEncoderDescriptor {
         label: None,
     })
 }
 
-fn setup_render_pass(engine: &mut Engine, encoder: &mut CommandEncoder, view: &TextureView) {
-    let mut render_pass = begin_render_pass(encoder, view);
-
-    render_pass.set_pipeline(&engine.shapes.pipelines[0]);
-    render_pass.set_vertex_buffer(0, engine.shapes.vertex_buffers[0].slice(..));
-
-    render_pass.draw(0..engine.shapes.vertex_len[0], 0..1);
-}
-
-fn begin_render_pass<'a>(encoder: &'a mut CommandEncoder, view: &'a TextureView) -> RenderPass<'a> {
+pub fn create_render_pass<'a>(encoder: &'a mut CommandEncoder, view: &'a TextureView) -> RenderPass<'a> {
     encoder.begin_render_pass(&RenderPassDescriptor {
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachment {

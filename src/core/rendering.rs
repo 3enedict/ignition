@@ -1,15 +1,12 @@
 use wgpu::{
     Instance,
     Backends,
-
     SurfaceError,
-    TextureViewDescriptor,
 };
 
 
 use crate::core::{
     Engine,
-    shapes::IgnitionShapes,
     options::IgnitionOptions,
 };
 
@@ -20,14 +17,13 @@ pub mod gpu;
 use gpu::{IgnitionGPU, get_adapter, get_device};
 
 pub mod command_buffer;
-use command_buffer::create_command_buffer;
+use command_buffer::{create_frame, create_command_encoder, create_render_pass};
 
 pub mod pipeline;
-
 pub mod vertex_buffer;
 
 impl Engine {
-    pub async fn setup_engine() -> Self {
+    pub async fn setup_engine() -> Engine {
         let (event_loop, window, size) = create_window();
 
         let instance = Instance::new(Backends::all());
@@ -59,21 +55,31 @@ impl Engine {
                 queue,
             },
 
-
-            shapes: IgnitionShapes::new(),
+            shapes: Vec::new(),
         }
     }
 
     pub fn render(&mut self) -> Result<(), SurfaceError> {
-        let frame = self.window.surface
-            .get_current_texture()
-            .expect("Failed to acquire next swap chain texture");
+        let (frame, view) = create_frame(self);
 
-        let view = frame.texture.create_view(&TextureViewDescriptor::default());
+        let mut encoder = create_command_encoder(self);
+        let mut render_pass = create_render_pass(&mut encoder, &view);
 
-        let command_buffer = create_command_buffer(self, &view);
+        self.shapes.retain(|shape| { 
+            if shape.upgrade().is_none() { return false; }
+            true
+        });
 
+        for shape in self.shapes.iter() {
+            render_pass.set_pipeline(&shape.upgrade().unwrap().borrow().pipeline);
+            render_pass.set_vertex_buffer(0, shape.upgrade().unwrap().borrow().vertex_buffer.slice(..));
+
+            render_pass.draw(0..shape.upgrade().unwrap().borrow().vertex_len, 0..1);
+        }
+
+        let command_buffer = Some(encoder.finish());
         self.gpu.queue.submit(command_buffer);
+
         frame.present();
 
         Ok(())
