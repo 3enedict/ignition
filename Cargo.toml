@@ -22,4 +22,5 @@ run_return = { path = "macros/event_loop/run_return" }
 handle_events = { path = "macros/events/handle_events" }
 redraw_requested = { path = "macros/events/redraw_requested" }
 
-render = { path = "macros/render" }
+render = { path = "macros/rendering/render" }
+draw = { path = "macros/rendering/draw" }

@@ -1,3 +1,5 @@
+use std::time::{Instant, Duration};
+
 extern crate ignition;
 use ignition::prelude::*;
 
@@ -15,15 +17,12 @@ fn one_triangle() {
     let mut engine = pollster::block_on(Engine::setup_engine());
     let triangle = Triangle::ignite(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_return! (
+    run_return! ( 
         redraw_requested!( 
             render!(
-                render_pass.set_pipeline(&triangle.pipeline);
-                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
-
-                render_pass.draw(0..triangle.vertex_len, 0..1);
-            );
-        );
+                draw!(triangle);
+            ); 
+        ); 
     );
 }
 
@@ -46,11 +45,62 @@ fn two_triangles_in_one_buffer() {
     run_return! (
         redraw_requested!( 
             render!(
-                render_pass.set_pipeline(&triangle.pipeline);
-                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
-
-                render_pass.draw(0..triangle.vertex_len, 0..1);
+                draw!(triangle);
             );
+        );
+    );
+}
+
+const TRIANGLE_BUFFER_ONE: &[Vertex] = &[
+    Vertex { position: [ 0.55, -0.5 , 0.0], color: [1.0, 0.0, 0.0] },
+    Vertex { position: [ 0.55,  0.55, 0.0], color: [0.0, 1.0, 0.0] },
+    Vertex { position: [-0.5 ,  0.55, 0.0], color: [0.0, 0.0, 1.0] },
+];
+
+const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
+    Vertex { position: [-0.55,  0.5 , 0.0], color: [1.0, 0.0, 0.0] },
+    Vertex { position: [-0.55, -0.55, 0.0], color: [0.0, 1.0, 0.0] },
+    Vertex { position: [ 0.5 , -0.55, 0.0], color: [0.0, 0.0, 1.0] },
+];
+
+#[ignore]
+#[test]
+fn two_triangles_in_different_buffers() {
+    let mut engine = pollster::block_on(Engine::setup_engine());
+    let triangle_one = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_ONE), include_wgsl!("shaders/gradient.wgsl"));
+    let triangle_two = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_TWO), include_wgsl!("shaders/gradient.wgsl"));
+
+    run_return! (
+        redraw_requested!( 
+            render!(
+                draw!(triangle_one triangle_two);
+            );
+        );
+    );
+}
+
+#[ignore]
+#[test]
+fn alternating_triangles() {
+    let mut engine = pollster::block_on(Engine::setup_engine());
+    let triangle_one = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_ONE), include_wgsl!("shaders/gradient.wgsl"));
+    let triangle_two = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_TWO), include_wgsl!("shaders/gradient.wgsl"));
+
+    let mut instant = Instant::now();
+    let mut swap = true;
+
+    run_return! (
+        render!(
+            if instant.elapsed() > Duration::from_millis(200) { 
+                instant = Instant::now();
+                swap = !swap;
+            }
+
+            if swap {
+                draw!(triangle_one);
+            } else {
+                draw!(triangle_two);
+            }
         );
     );
 }

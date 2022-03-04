@@ -450,6 +450,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
+name = "draw"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -628,6 +637,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "cgmath",
+ "draw",
  "env_logger",
  "game_loop",
  "handle_events",

@@ -3,6 +3,7 @@ use wgpu::{
     RenderPass,
     TextureView,
     SurfaceTexture,
+    SurfaceError,
 
     CommandEncoderDescriptor,
     RenderPassDescriptor,
@@ -15,24 +16,50 @@ use wgpu::{
 
 use crate::core::Engine;
 
-#[macro_export]
-macro_rules! draw {
-    ( $( $x:expr ),* ) => {
-        $(
-            engine.queue_draw($x);
-        )*
-    };
+pub struct Commands {
+    frame: SurfaceTexture,
+    view: TextureView,
+
+    encoder: CommandEncoder,
 }
 
+impl Commands {
+    pub fn ignite(engine: &Engine) -> Result<Self, SurfaceError> {
+        let frame = create_frame(engine)?;
+        let view = create_view(&frame);
 
-pub fn create_frame(engine: &Engine) -> (SurfaceTexture, TextureView) {
+        let encoder = create_command_encoder(engine);
+
+        Ok( Self {
+            frame,
+            view,
+
+            encoder,
+        } )
+    }
+
+    pub fn ignite_render_pass(&mut self) -> RenderPass {
+        create_render_pass(&mut self.encoder, &self.view)
+    }
+
+    pub fn execute(self, engine: &Engine) {
+        let command_buffer = Some(self.encoder.finish());
+        engine.gpu.queue.submit(command_buffer);
+
+        self.frame.present();
+    }
+}
+
+pub fn create_frame(engine: &Engine) -> Result<SurfaceTexture, SurfaceError> {
     let frame = engine.window.surface
         .get_current_texture()
         .expect("Failed to acquire next swap chain texture");
 
-    let view = frame.texture.create_view(&TextureViewDescriptor::default());
+    Ok(frame)
+}
 
-    (frame, view)
+pub fn create_view(frame: &SurfaceTexture) -> TextureView {
+    frame.texture.create_view(&TextureViewDescriptor::default())
 }
 
 pub fn create_command_encoder(engine: &Engine) -> CommandEncoder {
