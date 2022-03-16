@@ -1,9 +1,6 @@
 use wgpu::{
     Instance,
     Backends,
-    RenderPass,
-
-    SurfaceError,
 };
 
 
@@ -19,8 +16,6 @@ pub mod gpu;
 use gpu::{IgnitionGPU, get_adapter, get_device};
 
 pub mod command_buffer;
-use command_buffer::{create_frame, create_view, create_command_encoder, create_render_pass};
-
 pub mod pipeline;
 pub mod vertex_buffer;
 

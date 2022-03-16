@@ -9,6 +9,7 @@ const ONE_TRIANGLE: &[Vertex] = &[
     Vertex { position: [ 0.5, -0.5, 0.0], color: [0.0, 0.0, 1.0] },
 ];
 
+#[any_thread]
 #[ignore]
 #[test]
 fn one_triangle() {
@@ -17,14 +18,11 @@ fn one_triangle() {
     let mut engine = pollster::block_on(Engine::setup_engine());
     let triangle = Triangle::ignite(&mut engine, &Vec::from(ONE_TRIANGLE), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_return! ( 
-        redraw_requested!( 
-            render!(
-                draw!(triangle);
-            ); 
-        ); 
+    game_loop! (
+        draw!(triangle);
     );
 }
+
 
 const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
     Vertex { position: [ 0.55, -0.5 , 0.0], color: [1.0, 0.0, 0.0] },
@@ -36,18 +34,15 @@ const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
     Vertex { position: [ 0.5 , -0.55, 0.0], color: [0.0, 0.0, 1.0] },
 ];
 
+#[any_thread]
 #[ignore]
 #[test]
 fn two_triangles_in_one_buffer() {
     let mut engine = pollster::block_on(Engine::setup_engine());
     let triangle = Triangle::ignite(&mut engine, &Vec::from(TWO_TRIANGLES_ONE_BUFFER), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_return! (
-        redraw_requested!( 
-            render!(
-                draw!(triangle);
-            );
-        );
+    game_loop! (
+        draw!(triangle);
     );
 }
 
@@ -63,6 +58,7 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
     Vertex { position: [ 0.5 , -0.55, 0.0], color: [0.0, 0.0, 1.0] },
 ];
 
+#[any_thread]
 #[ignore]
 #[test]
 fn two_triangles_in_different_buffers() {
@@ -70,15 +66,12 @@ fn two_triangles_in_different_buffers() {
     let triangle_one = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_ONE), include_wgsl!("shaders/gradient.wgsl"));
     let triangle_two = Triangle::ignite(&mut engine, &Vec::from(TRIANGLE_BUFFER_TWO), include_wgsl!("shaders/gradient.wgsl"));
 
-    run_return! (
-        redraw_requested!( 
-            render!(
-                draw!(triangle_one triangle_two);
-            );
-        );
+    game_loop! (
+        draw!(triangle_one triangle_two);
     );
 }
 
+#[any_thread]
 #[ignore]
 #[test]
 fn alternating_triangles() {
@@ -89,18 +82,16 @@ fn alternating_triangles() {
     let mut instant = Instant::now();
     let mut swap = true;
 
-    run_return! (
-        render!(
-            if instant.elapsed() > Duration::from_millis(200) { 
-                instant = Instant::now();
-                swap = !swap;
-            }
+    game_loop! (
+        if instant.elapsed() > Duration::from_millis(200) { 
+            instant = Instant::now();
+            swap = !swap;
+        }
 
-            if swap {
-                draw!(triangle_one);
-            } else {
-                draw!(triangle_two);
-            }
-        );
+        if swap {
+            draw!(triangle_one);
+        } else {
+            draw!(triangle_two);
+        }
     );
 }

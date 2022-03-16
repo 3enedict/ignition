@@ -16,11 +16,19 @@ cgmath = "0.18"
 bytemuck = { version = "1.4", features = [ "derive" ] }
 
 
-game_loop = { path = "macros/event_loop/game_loop" }
-run_return = { path = "macros/event_loop/run_return" }
+game_loop = { path = "macros/game_loop/game_loop" }
 
-handle_events = { path = "macros/events/handle_events" }
-redraw_requested = { path = "macros/events/redraw_requested" }
+any_thread = { path = "macros/game_loop/attributes/any_thread" }
+
 
 render = { path = "macros/rendering/render" }
 draw = { path = "macros/rendering/draw" }
+
+
+run = { path = "macros/winit/event_loop/run" }
+run_return = { path = "macros/winit/event_loop/run_return" }
+
+handle_default_events = { path = "macros/winit/events/handle_default_events" }
+main_events_cleared = { path = "macros/winit/events/main_events_cleared" }
+redraw = { path = "macros/winit/events/redraw" }
+redraw_requested = { path = "macros/winit/events/redraw_requested" }

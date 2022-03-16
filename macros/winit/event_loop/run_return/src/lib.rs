@@ -8,13 +8,7 @@ pub fn run_return(raw_input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(raw_input);
 
     let gen = quote! {
-        use wgpu::SurfaceError;
-
-        use winit::{
-            event::{Event, WindowEvent},
-            event_loop::ControlFlow,
-            platform::run_return::EventLoopExtRunReturn
-        };
+        use winit::platform::run_return::EventLoopExtRunReturn;
 
         println!("WARNING: This macro should not be used as it is platform dependent !");
 
@@ -25,7 +19,7 @@ pub fn run_return(raw_input: TokenStream) -> TokenStream {
                     let _ = &engine;
                     *control_flow = engine.options.control_flow;
 
-                    handle_events!();
+                    handle_default_events!();
 
                     #input
                 });

@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 
 #[proc_macro]
-pub fn handle_events(_raw_input: TokenStream) -> TokenStream {
+pub fn handle_default_events(_raw_input: TokenStream) -> TokenStream {
     let gen = quote! {
         use winit::{
             event::{Event, WindowEvent},

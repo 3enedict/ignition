@@ -35,6 +35,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "any_thread"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "regex",
+]
+
+[[package]]
 name = "approx"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -588,7 +597,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "handle_events"
+name = "handle_default_events"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -635,17 +644,21 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 name = "ignition"
 version = "0.1.0"
 dependencies = [
+ "any_thread",
  "bytemuck",
  "cgmath",
  "draw",
  "env_logger",
  "game_loop",
- "handle_events",
+ "handle_default_events",
  "image",
  "log",
+ "main_events_cleared",
  "pollster",
+ "redraw",
  "redraw_requested",
  "render",
+ "run",
  "run_return",
  "wgpu",
  "winit",
@@ -770,6 +783,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
 dependencies = [
  "cfg-if 1.0.0",
+]
+
+[[package]]
+name = "main_events_cleared"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
 ]
 
 [[package]]
@@ -1206,6 +1227,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "redraw"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "redraw_requested"
 version = "0.1.0"
 dependencies = [
@@ -1243,6 +1272,14 @@ name = "renderdoc-sys"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
+
+[[package]]
+name = "run"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
 
 [[package]]
 name = "run_return"
