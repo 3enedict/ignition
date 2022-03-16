@@ -487,6 +487,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "event_driven"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "regex",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -649,6 +658,7 @@ dependencies = [
  "cgmath",
  "draw",
  "env_logger",
+ "event_driven",
  "game_loop",
  "handle_default_events",
  "image",

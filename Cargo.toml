@@ -19,6 +19,7 @@ bytemuck = { version = "1.4", features = [ "derive" ] }
 game_loop = { path = "macros/game_loop/game_loop" }
 
 any_thread = { path = "macros/game_loop/attributes/any_thread" }
+event_driven = { path = "macros/game_loop/attributes/event_driven" }
 
 
 render = { path = "macros/rendering/render" }

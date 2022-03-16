@@ -10,6 +10,7 @@ const ONE_TRIANGLE: &[Vertex] = &[
 ];
 
 #[any_thread]
+#[event_driven]
 #[ignore]
 #[test]
 fn one_triangle() {
@@ -35,6 +36,7 @@ const TWO_TRIANGLES_ONE_BUFFER: &[Vertex] = &[
 ];
 
 #[any_thread]
+#[event_driven]
 #[ignore]
 #[test]
 fn two_triangles_in_one_buffer() {
@@ -59,6 +61,7 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
 ];
 
 #[any_thread]
+#[event_driven]
 #[ignore]
 #[test]
 fn two_triangles_in_different_buffers() {

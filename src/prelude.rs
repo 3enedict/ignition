@@ -16,6 +16,7 @@ pub use crate::core::{
 pub use game_loop::game_loop;
 
 pub use any_thread::any_thread;
+pub use event_driven::event_driven;
 
 
 pub use render::render;
