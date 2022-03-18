@@ -1,40 +1,11 @@
-use wgpu::{
-    ShaderModuleDescriptor,
-
-    RenderPass,
-    RenderPipeline,
-    Buffer,
-};
+use wgpu::ShaderModuleDescriptor;
 
 use crate::core::{
     Engine,
-    rendering::{
-        vertex_buffer::{Vertex, ignite_vertex_buffer},
-        pipeline::ignite_pipeline,
-    },
+    rendering::vertex_buffer::Vertex,
+    shapes::{shape, Shape},
 };
 
-pub struct Triangle { 
-    pub pipeline: RenderPipeline,
-    pub vertex_buffer: Buffer,
-
-    pub vertex_len: u32
-}
-
-impl Triangle {
-    pub fn ignite(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Self {
-        Self {
-            pipeline: ignite_pipeline(engine, shaders),
-            vertex_buffer: ignite_vertex_buffer(engine, vertices),
-
-            vertex_len: vertices.len() as u32,
-        }
-    }
-
-    pub fn render<'a: 'b, 'b>(&'a self, render_pass: &mut RenderPass<'a>) {
-        render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-
-        render_pass.draw(0..self.vertex_len, 0..1);
-    }
+pub fn triangle(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Shape {
+    shape(engine, vertices, shaders)
 }

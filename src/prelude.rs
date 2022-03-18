@@ -9,7 +9,8 @@ pub use crate::core::{
     },
 
     shapes::{
-        triangle::Triangle,
+        shape,
+        triangle::triangle,
     },
 };
 
