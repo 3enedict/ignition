@@ -10,6 +10,7 @@ pub use crate::core::{
 
     shapes::{
         shape,
+        indexed_shape,
         triangle::triangle,
     },
 };

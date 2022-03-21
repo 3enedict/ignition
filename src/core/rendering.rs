@@ -18,6 +18,7 @@ use gpu::{IgnitionGPU, get_adapter, get_device};
 pub mod command_buffer;
 pub mod pipeline;
 pub mod vertex_buffer;
+pub mod index_buffer;
 
 impl Engine {
     pub async fn setup_engine() -> Engine {
