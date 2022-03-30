@@ -6,6 +6,6 @@ use crate::core::{
     shapes::{shape, Shape},
 };
 
-pub fn triangle(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Shape {
+pub fn doritos(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Shape {
     shape(engine, vertices, shaders)
 }

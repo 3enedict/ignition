@@ -17,7 +17,8 @@ use crate::core::{
     },
 };
 
-pub mod triangle;
+pub mod doritos;
+pub mod crackers;
 
 pub struct Shape {
     pub pipeline: RenderPipeline,
@@ -43,6 +44,16 @@ impl Shape {
         render_pass.draw(0..self.num_vertices, 0..1);
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 pub struct IndexedShape {
     pub pipeline: RenderPipeline,
