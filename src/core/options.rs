@@ -1,17 +1,10 @@
 use winit::event_loop::ControlFlow;
 
+#[derive(Builder, Debug, PartialEq)]
 pub struct Options {
+    #[builder(default = "ControlFlow::Poll")]
     pub control_flow: ControlFlow,
 
+    #[builder(default = "false")]
     pub any_thread: bool,
-}
-
-impl Default for Options {
-    fn default() -> Options {
-        Options {
-            control_flow: ControlFlow::Poll,
-
-            any_thread: false,
-        }
-    }
 }

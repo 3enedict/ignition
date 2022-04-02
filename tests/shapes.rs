@@ -36,12 +36,8 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
 #[ignore]
 #[test]
 fn alternating_triangles() {
-    let options = Options {
-        any_thread: true,
-        ..Default::default()
-    };
-
-    let mut engine = Engine::ignite(Some(options));
+    let options = OptionsBuilder::default().any_thread(true).build();
+    let mut engine = Engine::ignite(options);
 
     let triangle_one = doritos(
         &mut engine,
@@ -100,12 +96,8 @@ const POLYGON_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
 #[ignore]
 #[test]
 fn polygon() {
-    let options = Options {
-        any_thread: true,
-        ..Default::default()
-    };
-
-    let mut engine = Engine::ignite(Some(options));
+    let options = OptionsBuilder::default().any_thread(true).build();
+    let mut engine = Engine::ignite(options);
 
     let polygon = indexed_shape(
         &mut engine,

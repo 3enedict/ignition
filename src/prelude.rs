@@ -1,7 +1,7 @@
 pub use wgpu::include_wgsl;
 
 pub use crate::core::{
-    options::Options,
+    options::{Options, OptionsBuilder},
     rendering::{command_buffer::Commands, vertex_buffer::Vertex},
     shapes::{crackers::crackers, doritos::doritos, indexed_shape, shape},
     Engine,
