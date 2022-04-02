@@ -1,14 +1,10 @@
 pub mod rendering;
-use rendering::{
-    window::IgnitionWindow,
-    gpu::IgnitionGPU,
-};
+use rendering::{gpu::IgnitionGPU, window::IgnitionWindow};
 
 pub mod shapes;
 
 pub mod options;
 use options::IgnitionOptions;
-
 
 pub struct Engine {
     pub options: IgnitionOptions,
@@ -19,9 +15,10 @@ pub struct Engine {
 
 impl Engine {
     pub fn ignite() -> Self {
-        env_logger::init();
+        if env_logger::try_init().is_err() {
+            println!("Warning: Unable to start env_logger");
+        }
 
         pollster::block_on(Engine::setup_engine())
     }
 }
-
