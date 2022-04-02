@@ -1,19 +1,10 @@
 pub use wgpu::include_wgsl;
 
 pub use crate::core::{
+    options::Options,
+    rendering::{command_buffer::Commands, vertex_buffer::Vertex},
+    shapes::{crackers::crackers, doritos::doritos, indexed_shape, shape},
     Engine,
-
-    rendering::{
-        command_buffer::Commands,
-        vertex_buffer::Vertex,
-    },
-
-    shapes::{
-        shape,
-        indexed_shape,
-        doritos::doritos,
-        crackers::crackers,
-    },
 };
 
 pub use game_loop::game_loop;
@@ -21,10 +12,8 @@ pub use game_loop::game_loop;
 pub use any_thread::any_thread;
 pub use event_driven::event_driven;
 
-
-pub use render::render;
 pub use draw::draw;
-
+pub use render::render;
 
 pub use run::run;
 pub use run_return::run_return;

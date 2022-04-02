@@ -1,27 +1,20 @@
-use wgpu::{
-    Instance,
-    Backends,
-};
+use wgpu::{Backends, Instance};
 
-
-use crate::core::{
-    Engine,
-    options::IgnitionOptions,
-};
+use crate::core::{options::Options, Engine};
 
 pub mod window;
-use window::{IgnitionWindow, create_window, create_surface, generate_default_configuration};
+use window::{create_surface, create_window, generate_default_configuration, IgnitionWindow};
 
 pub mod gpu;
-use gpu::{IgnitionGPU, get_adapter, get_device};
+use gpu::{get_adapter, get_device, IgnitionGPU};
 
 pub mod command_buffer;
+pub mod index_buffer;
 pub mod pipeline;
 pub mod vertex_buffer;
-pub mod index_buffer;
 
 impl Engine {
-    pub async fn setup_engine() -> Engine {
+    pub async fn setup_engine(options: Options) -> Engine {
         let (event_loop, window, size) = create_window();
 
         let instance = Instance::new(Backends::all());
@@ -35,7 +28,7 @@ impl Engine {
         surface.configure(&device, &config);
 
         Self {
-            options: IgnitionOptions { ..Default::default() },
+            options,
 
             window: IgnitionWindow {
                 event_loop: Some(event_loop),
