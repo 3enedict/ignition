@@ -17,10 +17,13 @@ pub mod pipeline;
 pub mod vertex_buffer;
 
 impl Engine {
-    pub fn render<'a: 'b, 'b>(&'a self, render_pass: &mut RenderPass<'a>) {
-        for shape in self.shapes.iter() {
-            if shape.render == true {
-                shape.shape.render(render_pass);
+    pub fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
+        for i in 0..self.scene.shape_component.len() {
+            if self.scene.render_component[i].unwrap() == true {
+                self.scene.shape_component[i]
+                    .as_ref()
+                    .unwrap()
+                    .render(render_pass);
             }
         }
     }

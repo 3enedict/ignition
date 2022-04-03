@@ -1,14 +1,10 @@
 pub mod core;
+pub mod ecs;
 pub mod prelude;
 
 use crate::core::options::Options;
 use crate::core::rendering::{gpu::IgnitionGPU, window::IgnitionWindow};
-use crate::core::shapes::Shape;
-
-pub struct Intermediate {
-    pub shape: Shape,
-    pub render: bool,
-}
+use crate::ecs::IgnitionScene;
 
 pub struct Engine {
     pub options: Options,
@@ -16,7 +12,7 @@ pub struct Engine {
     pub window: IgnitionWindow,
     pub gpu: IgnitionGPU,
 
-    pub shapes: Vec<Intermediate>,
+    pub scene: IgnitionScene,
 }
 
 impl Engine {

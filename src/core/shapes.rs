@@ -1,11 +1,13 @@
 use wgpu::{Buffer, IndexFormat::Uint16, RenderPass, RenderPipeline, ShaderModuleDescriptor};
 
-use crate::core::rendering::{
-    index_buffer::ignite_index_buffer,
-    pipeline::ignite_pipeline,
-    vertex_buffer::{ignite_vertex_buffer, Vertex},
+use crate::core::{
+    rendering::{
+        index_buffer::ignite_index_buffer,
+        pipeline::ignite_pipeline,
+        vertex_buffer::{ignite_vertex_buffer, Vertex},
+    },
+    Engine,
 };
-use crate::Engine;
 
 pub mod crackers;
 pub mod doritos;
@@ -31,7 +33,7 @@ pub fn shape(
 }
 
 impl Shape {
-    pub fn render<'a: 'b, 'b>(&'a self, render_pass: &mut RenderPass<'a>) {
+    pub fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
@@ -63,7 +65,7 @@ pub fn indexed_shape(
 }
 
 impl IndexedShape {
-    pub fn render<'a: 'b, 'b>(&'a self, render_pass: &mut RenderPass<'a>) {
+    pub fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_index_buffer(self.index_buffer.slice(..), Uint16);

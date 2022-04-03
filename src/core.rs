@@ -5,6 +5,7 @@ use crate::core::rendering::gpu::{get_adapter, get_device, IgnitionGPU};
 use crate::core::rendering::window::{
     create_surface, create_window, generate_default_configuration, IgnitionWindow,
 };
+use crate::ecs::IgnitionScene;
 use crate::Engine;
 
 pub mod options;
@@ -44,7 +45,7 @@ impl Engine {
                 queue,
             },
 
-            shapes: Vec::new(),
+            scene: IgnitionScene::new(),
         }
     }
 }
