@@ -1,24 +1,16 @@
-use wgpu::{
-    ShaderModuleDescriptor,
-
-    RenderPass,
-    RenderPipeline,
-    Buffer,
-
-    IndexFormat::Uint16, 
-};
+use wgpu::{Buffer, IndexFormat::Uint16, RenderPass, RenderPipeline, ShaderModuleDescriptor};
 
 use crate::core::{
-    Engine,
     rendering::{
-        vertex_buffer::{Vertex, ignite_vertex_buffer},
         index_buffer::ignite_index_buffer,
         pipeline::ignite_pipeline,
+        vertex_buffer::{ignite_vertex_buffer, Vertex},
     },
+    Engine,
 };
 
-pub mod doritos;
 pub mod crackers;
+pub mod doritos;
 
 pub struct Shape {
     pub pipeline: RenderPipeline,
@@ -27,7 +19,11 @@ pub struct Shape {
     pub num_vertices: u32,
 }
 
-pub fn shape(engine: &mut Engine, vertices: &Vec<Vertex>, shaders: ShaderModuleDescriptor) -> Shape {
+pub fn shape(
+    engine: &mut Engine,
+    vertices: &Vec<Vertex>,
+    shaders: ShaderModuleDescriptor,
+) -> Shape {
     Shape {
         pipeline: ignite_pipeline(engine, shaders),
         vertex_buffer: ignite_vertex_buffer(engine, vertices),
@@ -45,16 +41,6 @@ impl Shape {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 pub struct IndexedShape {
     pub pipeline: RenderPipeline,
     pub vertex_buffer: Buffer,
@@ -63,7 +49,12 @@ pub struct IndexedShape {
     pub num_indices: u32,
 }
 
-pub fn indexed_shape(engine: &mut Engine, vertices: &Vec<Vertex>, indices: &Vec<u16>, shaders: ShaderModuleDescriptor) -> IndexedShape {
+pub fn indexed_shape(
+    engine: &mut Engine,
+    vertices: &Vec<Vertex>,
+    indices: &Vec<u16>,
+    shaders: ShaderModuleDescriptor,
+) -> IndexedShape {
     IndexedShape {
         pipeline: ignite_pipeline(engine, shaders),
         vertex_buffer: ignite_vertex_buffer(engine, vertices),

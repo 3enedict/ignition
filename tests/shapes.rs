@@ -36,8 +36,7 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
 #[ignore]
 #[test]
 fn alternating_triangles() {
-    let options = OptionsBuilder::default().any_thread(true).build();
-    let mut engine = Engine::ignite(options);
+    let mut engine = Engine::ignite();
 
     let triangle_one = doritos(
         &mut engine,
@@ -51,23 +50,36 @@ fn alternating_triangles() {
         include_wgsl!("shaders/gradient.wgsl"),
     );
 
+    engine.shapes.push(Intermediate {
+        shape: triangle_one,
+        render: true,
+    });
+
+    engine.shapes.push(Intermediate {
+        shape: triangle_two,
+        render: true,
+    });
+
     let mut instant = Instant::now();
     let mut swap = true;
 
-    game_loop! (
+    engine.game_loop(move |engine: &mut Engine| {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
             swap = !swap;
         }
 
         if swap {
-            draw!(triangle_one);
+            engine.shapes[0].render = true;
+            engine.shapes[1].render = false;
         } else {
-            draw!(triangle_two);
+            engine.shapes[0].render = false;
+            engine.shapes[1].render = true;
         }
-    );
+    });
 }
 
+/*
 const POLYGON_VERTICES: &[Vertex] = &[
     Vertex {
         position: [-0.0868241, 0.49240386, 0.0],
@@ -110,3 +122,4 @@ fn polygon() {
         draw!(polygon);
     );
 }
+*/

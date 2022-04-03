@@ -2,27 +2,31 @@ pub mod rendering;
 use rendering::{gpu::IgnitionGPU, window::IgnitionWindow};
 
 pub mod shapes;
+use shapes::Shape;
 
 pub mod options;
-use options::{Options, OptionsBuilder, OptionsBuilderError};
+use options::Options;
+
+pub struct Intermediate {
+    pub shape: Shape,
+    pub render: bool,
+}
 
 pub struct Engine {
     pub options: Options,
 
     pub window: IgnitionWindow,
     pub gpu: IgnitionGPU,
+
+    pub shapes: Vec<Intermediate>,
 }
+
 impl Engine {
-    pub fn ignite(options: Result<Options, OptionsBuilderError>) -> Self {
+    pub fn ignite() -> Self {
         if env_logger::try_init().is_err() {
             println!("Warning: Unable to start env_logger");
         }
 
-        if options.is_err() {
-            println!("Warning: Supplied options are incorrect. Reverting to default configuration.")
-        }
-
-        let default_options = OptionsBuilder::default().build().unwrap();
-        pollster::block_on(Engine::setup_engine(options.unwrap_or(default_options)))
+        pollster::block_on(Engine::setup_engine())
     }
 }
