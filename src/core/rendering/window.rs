@@ -1,36 +1,26 @@
-use wgpu::{
-    Instance,
-    Surface,
-    Adapter,
-
-    SurfaceConfiguration,
-    TextureUsages,
-    PresentMode,
-};
+use wgpu::{Adapter, Instance, PresentMode, Surface, SurfaceConfiguration, TextureUsages};
 
 use winit::{
+    dpi::PhysicalSize,
     event_loop::EventLoop,
     window::{Window, WindowBuilder},
-    dpi::PhysicalSize,
 };
 
-use crate::core::Engine;
+use crate::Engine;
 
 pub struct IgnitionWindow {
-    pub event_loop: Option<EventLoop<()>>, 
+    pub event_loop: Option<EventLoop<()>>,
 
-    pub window: Window, 
+    pub window: Window,
     pub size: PhysicalSize<u32>,
 
-    pub surface: Surface, 
+    pub surface: Surface,
     pub config: SurfaceConfiguration,
 }
 
 pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new()
-        .build(&event_loop)
-        .unwrap();
+    let window = WindowBuilder::new().build(&event_loop).unwrap();
 
     let size = window.inner_size();
 
@@ -41,7 +31,11 @@ pub fn create_surface(instance: &Instance, window: &Window) -> Surface {
     unsafe { instance.create_surface(&window) }
 }
 
-pub fn generate_default_configuration(size: &PhysicalSize<u32>, surface: &Surface, adapter: &Adapter) -> SurfaceConfiguration {
+pub fn generate_default_configuration(
+    size: &PhysicalSize<u32>,
+    surface: &Surface,
+    adapter: &Adapter,
+) -> SurfaceConfiguration {
     SurfaceConfiguration {
         usage: TextureUsages::RENDER_ATTACHMENT,
         format: surface.get_preferred_format(adapter).unwrap(),
@@ -64,6 +58,8 @@ impl Engine {
     }
 
     pub fn configure_surface(&mut self) {
-        self.window.surface.configure(&self.gpu.device, &self.window.config);
+        self.window
+            .surface
+            .configure(&self.gpu.device, &self.window.config);
     }
 }

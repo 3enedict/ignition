@@ -1,17 +1,6 @@
 use wgpu::{
-    CommandEncoder,
-    RenderPass,
-    TextureView,
-    SurfaceTexture,
-    SurfaceError,
-
-    CommandEncoderDescriptor,
-    RenderPassDescriptor,
-    TextureViewDescriptor,
-
-    LoadOp,
-    Operations,
-    Color,
+    Color, CommandEncoder, CommandEncoderDescriptor, LoadOp, Operations, RenderPass,
+    RenderPassDescriptor, SurfaceError, SurfaceTexture, TextureView, TextureViewDescriptor,
 };
 
 use crate::core::Engine;
@@ -30,12 +19,12 @@ impl Commands {
 
         let encoder = create_command_encoder(engine);
 
-        Ok( Self {
+        Ok(Self {
             frame,
             view,
 
             encoder,
-        } )
+        })
     }
 
     pub fn ignite_render_pass(&mut self) -> RenderPass {
@@ -51,7 +40,9 @@ impl Commands {
 }
 
 pub fn create_frame(engine: &Engine) -> Result<SurfaceTexture, SurfaceError> {
-    let frame = engine.window.surface
+    let frame = engine
+        .window
+        .surface
         .get_current_texture()
         .expect("Failed to acquire next swap chain texture");
 
@@ -63,12 +54,16 @@ pub fn create_view(frame: &SurfaceTexture) -> TextureView {
 }
 
 pub fn create_command_encoder(engine: &Engine) -> CommandEncoder {
-    engine.gpu.device.create_command_encoder(&CommandEncoderDescriptor {
-        label: None,
-    })
+    engine
+        .gpu
+        .device
+        .create_command_encoder(&CommandEncoderDescriptor { label: None })
 }
 
-pub fn create_render_pass<'a>(encoder: &'a mut CommandEncoder, view: &'a TextureView) -> RenderPass<'a> {
+pub fn create_render_pass<'a>(
+    encoder: &'a mut CommandEncoder,
+    view: &'a TextureView,
+) -> RenderPass<'a> {
     encoder.begin_render_pass(&RenderPassDescriptor {
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachment {

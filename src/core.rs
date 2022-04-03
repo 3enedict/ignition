@@ -1,32 +1,50 @@
-pub mod rendering;
-use rendering::{gpu::IgnitionGPU, window::IgnitionWindow};
+use wgpu::{Backends, Instance};
 
-pub mod shapes;
-use shapes::Shape;
+use crate::core::options::Options;
+use crate::core::rendering::gpu::{get_adapter, get_device, IgnitionGPU};
+use crate::core::rendering::window::{
+    create_surface, create_window, generate_default_configuration, IgnitionWindow,
+};
+use crate::Engine;
 
 pub mod options;
-use options::Options;
-
-pub struct Intermediate {
-    pub shape: Shape,
-    pub render: bool,
-}
-
-pub struct Engine {
-    pub options: Options,
-
-    pub window: IgnitionWindow,
-    pub gpu: IgnitionGPU,
-
-    pub shapes: Vec<Intermediate>,
-}
+pub mod rendering;
+pub mod shapes;
 
 impl Engine {
-    pub fn ignite() -> Self {
-        if env_logger::try_init().is_err() {
-            println!("Warning: Unable to start env_logger");
-        }
+    pub async fn setup_engine() -> Engine {
+        let (event_loop, window, size) = create_window();
 
-        pollster::block_on(Engine::setup_engine())
+        let instance = Instance::new(Backends::all());
+        let surface = create_surface(&instance, &window);
+
+        let adapter = pollster::block_on(get_adapter(&instance, &surface));
+        println!("Device name : {}", adapter.get_info().name);
+        let (device, queue) = pollster::block_on(get_device(&adapter));
+
+        let config = generate_default_configuration(&size, &surface, &adapter);
+        surface.configure(&device, &config);
+
+        Self {
+            options: Options::default(),
+
+            window: IgnitionWindow {
+                event_loop: Some(event_loop),
+                window,
+                size,
+
+                surface,
+                config,
+            },
+
+            gpu: IgnitionGPU {
+                adapter,
+
+                device,
+                queue,
+            },
+
+            shapes: Vec::new(),
+        }
     }
 }

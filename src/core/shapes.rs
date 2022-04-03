@@ -1,13 +1,11 @@
 use wgpu::{Buffer, IndexFormat::Uint16, RenderPass, RenderPipeline, ShaderModuleDescriptor};
 
-use crate::core::{
-    rendering::{
-        index_buffer::ignite_index_buffer,
-        pipeline::ignite_pipeline,
-        vertex_buffer::{ignite_vertex_buffer, Vertex},
-    },
-    Engine,
+use crate::core::rendering::{
+    index_buffer::ignite_index_buffer,
+    pipeline::ignite_pipeline,
+    vertex_buffer::{ignite_vertex_buffer, Vertex},
 };
+use crate::Engine;
 
 pub mod crackers;
 pub mod doritos;

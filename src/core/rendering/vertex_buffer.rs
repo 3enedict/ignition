@@ -1,13 +1,6 @@
 use wgpu::{
-    Buffer,
-    BufferUsages,
-
-    VertexBufferLayout,
-    VertexAttribute,
-    VertexFormat,
-    VertexStepMode,
-
     util::{BufferInitDescriptor, DeviceExt},
+    Buffer, BufferUsages, VertexAttribute, VertexBufferLayout, VertexFormat, VertexStepMode,
 };
 
 use crate::core::Engine;
@@ -34,22 +27,18 @@ impl Vertex {
                     offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
                     format: VertexFormat::Float32x3,
-                }
-            ]
+                },
+            ],
         }
     }
 }
 
-
-
 pub fn ignite_vertex_buffer(engine: &mut Engine, vertices: &Vec<Vertex>) -> Buffer {
-    let vertex_buffer = engine.gpu.device.create_buffer_init(
-        &BufferInitDescriptor {
-            label: None,
-            contents: bytemuck::cast_slice(vertices),
-            usage: BufferUsages::VERTEX,
-        }
-    );
+    let vertex_buffer = engine.gpu.device.create_buffer_init(&BufferInitDescriptor {
+        label: None,
+        contents: bytemuck::cast_slice(vertices),
+        usage: BufferUsages::VERTEX,
+    });
 
     vertex_buffer
 }
