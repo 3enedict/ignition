@@ -31,3 +31,18 @@ impl IgnitionScene {
         self.render_component.push(render);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_new_entity() {
+        let mut scene = IgnitionScene::new();
+        scene.new_entity(None, None, Some(true));
+
+        assert!(scene.vertices_component[0].is_none());
+        assert!(scene.shape_component[0].is_none());
+        assert_eq!(scene.render_component[0].unwrap(), true);
+    }
+}
