@@ -17,16 +17,7 @@ pub mod pipeline;
 pub mod vertex_buffer;
 
 impl Engine {
-    pub fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
-        for i in 0..self.scene.shape_component.len() {
-            if self.scene.render_component[i].unwrap() == true {
-                self.scene.shape_component[i]
-                    .as_ref()
-                    .unwrap()
-                    .render(render_pass);
-            }
-        }
-    }
+    pub fn render<'a>(&'a self, _render_pass: &mut RenderPass<'a>) {}
 
     pub fn game_loop<F>(mut self, mut closure: F)
     where
