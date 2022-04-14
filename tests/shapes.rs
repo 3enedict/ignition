@@ -50,21 +50,25 @@ fn alternating_triangles() {
         include_wgsl!("shaders/gradient.wgsl"),
     );
 
-    engine.scene.new_entity(
-        Some(Vertices {
+    let entity_one = engine.scene.entity();
+    engine.scene.component(
+        entity_one,
+        Vertices {
             vertices: Vec::from(TRIANGLE_BUFFER_ONE),
-        }),
-        Some(triangle_one),
-        Some(true),
+        },
     );
+    engine.scene.component(entity_one, triangle_one);
+    engine.scene.component(entity_one, true);
 
-    engine.scene.new_entity(
-        Some(Vertices {
+    let entity_two = engine.scene.entity();
+    engine.scene.component(
+        entity_two,
+        Vertices {
             vertices: Vec::from(TRIANGLE_BUFFER_TWO),
-        }),
-        Some(triangle_two),
-        Some(true),
+        },
     );
+    engine.scene.component(entity_two, triangle_two);
+    engine.scene.component(entity_two, true);
 
     let mut instant = Instant::now();
     let mut swap = true;
@@ -76,11 +80,11 @@ fn alternating_triangles() {
         }
 
         if swap {
-            engine.scene.render_component[0] = Some(true);
-            engine.scene.render_component[1] = Some(false);
+            engine.scene.get_components(2)[0] = true;
+            engine.scene.get_components(2)[1] = false;
         } else {
-            engine.scene.render_component[1] = Some(true);
-            engine.scene.render_component[0] = Some(false);
+            engine.scene.get_components(2)[1] = true;
+            engine.scene.get_components(2)[0] = false;
         }
     });
 }

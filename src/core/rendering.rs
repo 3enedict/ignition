@@ -5,6 +5,8 @@ use winit::{
     event_loop::ControlFlow,
 };
 
+use crate::core::shapes::Shape;
+use crate::ecs::ComponentPool;
 use crate::Engine;
 
 pub mod command_buffer;
@@ -17,7 +19,20 @@ pub mod pipeline;
 pub mod vertex_buffer;
 
 impl Engine {
-    pub fn render<'a>(&'a self, _render_pass: &mut RenderPass<'a>) {}
+    pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
+        for component_pool in self.scene.component_pools.iter_mut() {
+            if let Some(shapes) = component_pool
+                .as_any_mut()
+                .downcast_mut::<ComponentPool<Shape>>()
+            {
+                for shape in shapes.components.iter() {
+                    shape.render(render_pass);
+                }
+
+                return;
+            }
+        }
+    }
 
     pub fn game_loop<F>(mut self, mut closure: F)
     where
