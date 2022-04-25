@@ -3,6 +3,7 @@ use wgpu::{Adapter, Instance, PresentMode, Surface, SurfaceConfiguration, Textur
 use winit::{
     dpi::PhysicalSize,
     event_loop::EventLoop,
+    platform::unix::EventLoopExtUnix,
     window::{Window, WindowBuilder},
 };
 
@@ -19,7 +20,7 @@ pub struct IgnitionWindow {
 }
 
 pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoop::new_any_thread();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
     let size = window.inner_size();
