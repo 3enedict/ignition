@@ -1,4 +1,10 @@
 use crate::core::rendering::vertex_buffer::Vertex;
+use bit_set::BitSet;
+
+pub struct Entity {
+    pub id: usize,
+    pub bitmask: BitSet,
+}
 
 pub struct Vertices {
     pub vertices: Vec<Vertex>,
@@ -41,30 +47,33 @@ impl IgnitionScene {
         }
     }
 
-    pub fn entity(&mut self) -> i32 {
+    pub fn entity(&mut self) -> Entity {
         self.entity_count += 1;
 
         for component_pool in self.component_pools.iter_mut() {
             component_pool.push_none();
         }
 
-        self.entity_count
+        Entity {
+            id: self.entity_count as usize,
+            bitmask: BitSet::new(),
+        }
     }
 
-    pub fn component<G: 'static>(&mut self, entity: i32, component: G) {
+    pub fn component<G: 'static>(&mut self, entity: &Entity, component: G) {
         for component_pool in self.component_pools.iter_mut() {
             if let Some(component_pool) = component_pool
                 .as_any_mut()
                 .downcast_mut::<ComponentPool<G>>()
             {
-                component_pool.components.insert(entity as usize, component);
+                component_pool.components.insert(entity.id, component);
 
                 return;
             }
         }
 
-        let mut new_component_pool_vec = Vec::with_capacity(entity as usize);
-        new_component_pool_vec.insert(entity as usize, component);
+        let mut new_component_pool_vec = Vec::with_capacity(entity.id);
+        new_component_pool_vec.insert(entity.id, component);
 
         self.component_pools.push(Box::new(ComponentPool {
             components: new_component_pool_vec,
@@ -103,12 +112,12 @@ mod tests {
         let mut scene = IgnitionScene::new();
 
         let entity1 = scene.entity();
-        scene.component(entity1, Pos { x: 1, y: -3 });
-        scene.component(entity1, Vel { speed: 30 });
+        scene.component(&entity1, Pos { x: 1, y: -3 });
+        scene.component(&entity1, Vel { speed: 30 });
 
         let entity2 = scene.entity();
-        scene.component(entity2, Pos { x: 5, y: 2 });
-        scene.component(entity2, Vel { speed: 3 });
+        scene.component(&entity2, Pos { x: 5, y: 2 });
+        scene.component(&entity2, Vel { speed: 3 });
 
         assert_eq!(
             &mut vec! { Pos { x: 1, y: -3 }, Pos { x: 5, y: 2 } },
