@@ -12,8 +12,12 @@ pub struct Vertices {
 
 pub trait ComponentPoolTrait {
     fn push_none(&mut self);
+
     fn as_any(&self) -> &dyn std::any::Any;
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
+
+    fn component_as_any(&self, index: usize) -> &dyn std::any::Any;
+    fn component_as_any_mut(&mut self, index: usize) -> &mut dyn std::any::Any;
 }
 
 pub struct ComponentPool<G> {
@@ -31,6 +35,14 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self as &mut dyn std::any::Any
+    }
+
+    fn component_as_any(&self, index: usize) -> &dyn std::any::Any {
+        self.components.get(index).unwrap() as &dyn std::any::Any
+    }
+
+    fn component_as_any_mut(&mut self, index: usize) -> &mut dyn std::any::Any {
+        self.components.get_mut(index).unwrap() as &mut dyn std::any::Any
     }
 }
 
@@ -60,17 +72,23 @@ impl IgnitionScene {
         }
     }
 
-    pub fn component<G: 'static>(&mut self, entity: &Entity, component: G) {
-        for component_pool in self.component_pools.iter_mut() {
-            if let Some(component_pool) = component_pool
+    pub fn component<G: 'static>(&mut self, entity: &mut Entity, component: G) {
+        for i in 0..self.component_pools.len() {
+            if let Some(component_pool) = self
+                .component_pools
+                .get_mut(i)
+                .unwrap()
                 .as_any_mut()
                 .downcast_mut::<ComponentPool<G>>()
             {
                 component_pool.components.insert(entity.id, component);
+                entity.bitmask.insert(i);
 
                 return;
             }
         }
+
+        entity.bitmask.insert(self.component_pools.len());
 
         let mut new_component_pool_vec = Vec::with_capacity(entity.id);
         new_component_pool_vec.insert(entity.id, component);
@@ -108,16 +126,16 @@ mod tests {
     }
 
     #[test]
-    fn test_add_new_entity() {
+    fn test_adding_components() {
         let mut scene = IgnitionScene::new();
 
-        let entity1 = scene.entity();
-        scene.component(&entity1, Pos { x: 1, y: -3 });
-        scene.component(&entity1, Vel { speed: 30 });
+        let mut entity1 = scene.entity();
+        scene.component(&mut entity1, Pos { x: 1, y: -3 });
+        scene.component(&mut entity1, Vel { speed: 30 });
 
-        let entity2 = scene.entity();
-        scene.component(&entity2, Pos { x: 5, y: 2 });
-        scene.component(&entity2, Vel { speed: 3 });
+        let mut entity2 = scene.entity();
+        scene.component(&mut entity2, Pos { x: 5, y: 2 });
+        scene.component(&mut entity2, Vel { speed: 3 });
 
         assert_eq!(
             &mut vec! { Pos { x: 1, y: -3 }, Pos { x: 5, y: 2 } },
@@ -128,5 +146,26 @@ mod tests {
             &mut vec! { Vel { speed: 30 }, Vel { speed: 3 } },
             scene.get_components(1)
         );
+    }
+
+    #[test]
+    fn test_entity_bitmasks() {
+        let mut scene = IgnitionScene::new();
+
+        let mut entity1 = scene.entity();
+        scene.component(&mut entity1, Pos { x: 1, y: -3 });
+        scene.component(&mut entity1, Vel { speed: 30 });
+
+        let mut entity2 = scene.entity();
+        scene.component(&mut entity2, Vel { speed: 3 });
+
+        let mut expected_result1 = BitSet::new();
+        expected_result1.insert(0);
+        expected_result1.insert(1);
+        assert_eq!(entity1.bitmask, expected_result1);
+
+        let mut expected_result2 = BitSet::new();
+        expected_result2.insert(1);
+        assert_eq!(entity2.bitmask, expected_result2);
     }
 }
