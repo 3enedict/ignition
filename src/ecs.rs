@@ -48,6 +48,8 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 pub struct IgnitionScene {
     pub entity_count: usize,
+    pub available_entities: Vec<usize>,
+
     pub component_pools: Vec<Box<dyn ComponentPoolTrait>>,
 }
 
@@ -55,21 +57,26 @@ impl IgnitionScene {
     pub fn new() -> Self {
         Self {
             entity_count: 0,
+            available_entities: vec![0],
+
             component_pools: Vec::new(),
         }
     }
 
     pub fn entity(&mut self) -> Entity {
-        for component_pool in self.component_pools.iter_mut() {
-            component_pool.push_none();
-        }
-
         let new_entity = Entity {
-            id: self.entity_count,
+            id: self.available_entities.pop().unwrap(),
             bitmask: BitSet::new(),
         };
 
         self.entity_count += 1;
+        if self.available_entities.is_empty() {
+            for component_pool in self.component_pools.iter_mut() {
+                component_pool.push_none();
+            }
+
+            self.available_entities.push(self.entity_count);
+        }
 
         new_entity
     }
@@ -110,6 +117,10 @@ impl IgnitionScene {
             .downcast_mut::<ComponentPool<G>>()
             .unwrap()
             .components
+    }
+
+    pub fn delete_entity(&mut self, entity: Entity) {
+        self.available_entities.push(entity.id);
     }
 }
 
@@ -190,5 +201,21 @@ mod tests {
         expected_result3.insert(0);
         expected_result3.insert(1);
         assert_eq!(entity3.bitmask, expected_result3);
+    }
+
+    #[test]
+    fn test_deleting_then_adding_an_entity() {
+        let (mut scene, entity1, _entity2, _entity3) =
+            init_three_entities_with_different_components();
+
+        scene.delete_entity(entity1);
+
+        let mut entity4 = scene.entity();
+        scene.component(&mut entity4, Pos { x: 43, y: 96 });
+
+        assert_eq!(
+            &mut vec! { Some ( Pos { x: 43, y: 96 } ), None, Some ( Pos { x: 1, y: -3 } ) },
+            scene.get_components(1)
+        );
     }
 }
