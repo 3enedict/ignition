@@ -25,8 +25,8 @@ impl Engine {
                 .as_any_mut()
                 .downcast_mut::<ComponentPool<Shape>>()
             {
-                for shape in shapes.components.iter() {
-                    shape.as_ref().unwrap().render(render_pass);
+                for shape in shapes.component_array.iter() {
+                    shape.render(render_pass);
                 }
 
                 return;

@@ -25,7 +25,6 @@ impl IgnitionScene {
 mod tests {
     use crate::ecs::entity::Entity;
     use crate::ecs::IgnitionScene;
-    use bit_set::BitSet;
 
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct Pos {
@@ -54,67 +53,56 @@ mod tests {
     }
 
     #[test]
-    fn test_adding_components_pos() {
+    fn add_components_pos_sparse_array() {
+        let (mut scene, _entity1, _entity2, _entity3) =
+            init_three_entities_with_different_components();
+
+        assert_eq!(&mut vec! { -1, -1, 0 }, scene.get_sparse_array::<Pos>(1));
+    }
+
+    #[test]
+    fn add_components_pos_packed_array() {
+        let (mut scene, _entity1, _entity2, _entity3) =
+            init_three_entities_with_different_components();
+
+        assert_eq!(&mut vec! { 2 }, scene.get_packed_array::<Pos>(1));
+    }
+
+    #[test]
+    fn add_components_pos_component_array() {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
         assert_eq!(
-            &mut vec! { None, None, Some ( Pos { x: 1, y: -3 } ) },
-            scene.get_components(1)
+            &mut vec! { Pos { x: 1, y: -3 } },
+            scene.get_component_array::<Pos>(1)
         );
     }
 
     #[test]
-    fn test_adding_components_vel() {
+    fn add_components_vel_sparse_array() {
+        let (mut scene, _entity1, _entity2, _entity3) =
+            init_three_entities_with_different_components();
+
+        assert_eq!(&mut vec! { 0, -1, 1 }, scene.get_sparse_array::<Vel>(0));
+    }
+
+    #[test]
+    fn add_components_vel_packed_array() {
+        let (mut scene, _entity1, _entity2, _entity3) =
+            init_three_entities_with_different_components();
+
+        assert_eq!(&mut vec! { 0, 2 }, scene.get_packed_array::<Vel>(0));
+    }
+
+    #[test]
+    fn add_components_vel_component_array() {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
         assert_eq!(
-            &mut vec! { Some ( Vel { speed: 286 } ), None, Some ( Vel { speed: 30 } ) },
-            scene.get_components(0)
-        );
-    }
-
-    #[test]
-    fn test_entity_bitmasks_entity1() {
-        let (_scene, entity1, _entity2, _entity3) = init_three_entities_with_different_components();
-
-        let mut expected_result1 = BitSet::new();
-        expected_result1.insert(0);
-        assert_eq!(entity1.bitmask, expected_result1);
-    }
-
-    #[test]
-    fn test_entity_bitmasks_entity2() {
-        let (_scene, _entity1, entity2, _entity3) = init_three_entities_with_different_components();
-
-        let expected_result2 = BitSet::new();
-        assert_eq!(entity2.bitmask, expected_result2);
-    }
-
-    #[test]
-    fn test_entity_bitmasks_entity3() {
-        let (_scene, _entity1, _entity2, entity3) = init_three_entities_with_different_components();
-
-        let mut expected_result3 = BitSet::new();
-        expected_result3.insert(0);
-        expected_result3.insert(1);
-        assert_eq!(entity3.bitmask, expected_result3);
-    }
-
-    #[test]
-    fn test_deleting_then_adding_an_entity() {
-        let (mut scene, entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
-
-        scene.delete_entity(entity1);
-
-        let mut entity4 = scene.entity();
-        scene.component(&mut entity4, Pos { x: 43, y: 96 });
-
-        assert_eq!(
-            &mut vec! { Some ( Pos { x: 43, y: 96 } ), None, Some ( Pos { x: 1, y: -3 } ) },
-            scene.get_components(1)
+            &mut vec! { Vel { speed: 286 }, Vel { speed: 30 } },
+            scene.get_component_array::<Vel>(0)
         );
     }
 }

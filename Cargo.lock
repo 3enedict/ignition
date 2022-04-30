@@ -654,7 +654,6 @@ name = "ignition"
 version = "0.1.0"
 dependencies = [
  "any_thread",
- "bit-set",
  "bytemuck",
  "cgmath",
  "draw",
