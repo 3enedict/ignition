@@ -6,7 +6,7 @@ use winit::{
 };
 
 use crate::core::shapes::Shape;
-use crate::ecs::ComponentPool;
+use crate::ecs::component::ComponentPool;
 use crate::Engine;
 
 pub mod command_buffer;

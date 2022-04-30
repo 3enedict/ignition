@@ -3,6 +3,10 @@ use std::time::{Duration, Instant};
 extern crate ignition;
 use ignition::prelude::*;
 
+pub struct Vertices {
+    pub vertices: Vec<Vertex>,
+}
+
 const TRIANGLE_BUFFER_ONE: &[Vertex] = &[
     Vertex {
         position: [0.55, -0.5, 0.0],
