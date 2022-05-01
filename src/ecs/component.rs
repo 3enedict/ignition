@@ -1,3 +1,5 @@
+use std::any::TypeId;
+
 use crate::ecs::entity::Entity;
 use crate::ecs::IgnitionScene;
 
@@ -43,24 +45,21 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 impl IgnitionScene {
     pub fn component<G: 'static>(&mut self, entity: &mut Entity, component: G) {
-        for i in 0..self.component_pools.len() {
-            if let Some(component_pool) = self
-                .component_pools
-                .get_mut(i)
-                .unwrap()
-                .as_any_mut()
-                .downcast_mut::<ComponentPool<G>>()
-            {
-                component_pool.sparse_array[entity.id] = component_pool.num_components;
+        if self.component_indices.contains_key(&TypeId::of::<G>()) {
+            let component_pool = self.get_component_pool::<G>();
 
-                component_pool.packed_array.push(entity.id as i32);
-                component_pool.component_array.push(component);
+            component_pool.sparse_array[entity.id] = component_pool.num_components;
 
-                component_pool.num_components += 1;
+            component_pool.packed_array.push(entity.id as i32);
+            component_pool.component_array.push(component);
 
-                return;
-            }
+            component_pool.num_components += 1;
+
+            return;
         }
+
+        self.component_indices
+            .insert(TypeId::of::<G>(), self.component_pools.len());
 
         let mut sparse_array = Vec::with_capacity(entity.id);
         sparse_array.resize_with(entity.id, || -1);
@@ -78,36 +77,12 @@ impl IgnitionScene {
         }));
     }
 
-    pub fn get_component_array<G: 'static>(&mut self, index: usize) -> &mut Vec<G> {
-        &mut self
-            .component_pools
-            .get_mut(index)
+    pub fn get_component_pool<G: 'static>(&mut self) -> &mut ComponentPool<G> {
+        self.component_pools
+            .get_mut(*self.component_indices.get(&TypeId::of::<G>()).unwrap())
             .unwrap()
             .as_any_mut()
             .downcast_mut::<ComponentPool<G>>()
             .unwrap()
-            .component_array
-    }
-
-    pub fn get_sparse_array<G: 'static>(&mut self, index: usize) -> &mut Vec<i32> {
-        &mut self
-            .component_pools
-            .get_mut(index)
-            .unwrap()
-            .as_any_mut()
-            .downcast_mut::<ComponentPool<G>>()
-            .unwrap()
-            .sparse_array
-    }
-
-    pub fn get_packed_array<G: 'static>(&mut self, index: usize) -> &mut Vec<i32> {
-        &mut self
-            .component_pools
-            .get_mut(index)
-            .unwrap()
-            .as_any_mut()
-            .downcast_mut::<ComponentPool<G>>()
-            .unwrap()
-            .packed_array
     }
 }

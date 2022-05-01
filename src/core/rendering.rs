@@ -1,3 +1,5 @@
+use std::any::TypeId;
+
 use wgpu::RenderPass;
 
 use winit::{
@@ -6,7 +8,6 @@ use winit::{
 };
 
 use crate::core::shapes::Shape;
-use crate::ecs::component::ComponentPool;
 use crate::Engine;
 
 pub mod command_buffer;
@@ -20,17 +21,18 @@ pub mod vertex_buffer;
 
 impl Engine {
     pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
-        for component_pool in self.scene.component_pools.iter_mut() {
-            if let Some(shapes) = component_pool
-                .as_any_mut()
-                .downcast_mut::<ComponentPool<Shape>>()
-            {
-                for shape in shapes.component_array.iter() {
-                    shape.render(render_pass);
-                }
+        if self
+            .scene
+            .component_indices
+            .contains_key(&TypeId::of::<Shape>())
+        {
+            let shapes = self.scene.get_component_pool::<Shape>();
 
-                return;
+            for shape in shapes.component_array.iter() {
+                shape.render(render_pass);
             }
+
+            return;
         }
     }
 

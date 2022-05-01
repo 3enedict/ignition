@@ -1,3 +1,6 @@
+use std::any::TypeId;
+use std::collections::HashMap;
+
 pub mod entity;
 
 pub mod component;
@@ -7,6 +10,7 @@ pub struct IgnitionScene {
     pub entity_count: usize,
     pub available_entities: Vec<usize>,
 
+    pub component_indices: HashMap<TypeId, usize>,
     pub component_pools: Vec<Box<dyn ComponentPoolTrait>>,
 }
 
@@ -16,6 +20,7 @@ impl IgnitionScene {
             entity_count: 0,
             available_entities: vec![0],
 
+            component_indices: HashMap::new(),
             component_pools: Vec::new(),
         }
     }
@@ -57,7 +62,10 @@ mod tests {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
-        assert_eq!(&mut vec! { -1, -1, 0 }, scene.get_sparse_array::<Pos>(1));
+        assert_eq!(
+            vec! { -1, -1, 0 },
+            scene.get_component_pool::<Pos>().sparse_array
+        );
     }
 
     #[test]
@@ -65,7 +73,7 @@ mod tests {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
-        assert_eq!(&mut vec! { 2 }, scene.get_packed_array::<Pos>(1));
+        assert_eq!(vec! { 2 }, scene.get_component_pool::<Pos>().packed_array);
     }
 
     #[test]
@@ -74,8 +82,8 @@ mod tests {
             init_three_entities_with_different_components();
 
         assert_eq!(
-            &mut vec! { Pos { x: 1, y: -3 } },
-            scene.get_component_array::<Pos>(1)
+            vec! { Pos { x: 1, y: -3 } },
+            scene.get_component_pool::<Pos>().component_array
         );
     }
 
@@ -84,7 +92,10 @@ mod tests {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
-        assert_eq!(&mut vec! { 0, -1, 1 }, scene.get_sparse_array::<Vel>(0));
+        assert_eq!(
+            vec! { 0, -1, 1 },
+            scene.get_component_pool::<Vel>().sparse_array
+        );
     }
 
     #[test]
@@ -92,7 +103,10 @@ mod tests {
         let (mut scene, _entity1, _entity2, _entity3) =
             init_three_entities_with_different_components();
 
-        assert_eq!(&mut vec! { 0, 2 }, scene.get_packed_array::<Vel>(0));
+        assert_eq!(
+            vec! { 0, 2 },
+            scene.get_component_pool::<Vel>().packed_array
+        );
     }
 
     #[test]
@@ -101,8 +115,8 @@ mod tests {
             init_three_entities_with_different_components();
 
         assert_eq!(
-            &mut vec! { Vel { speed: 286 }, Vel { speed: 30 } },
-            scene.get_component_array::<Vel>(0)
+            vec! { Vel { speed: 286 }, Vel { speed: 30 } },
+            scene.get_component_pool::<Vel>().component_array
         );
     }
 }

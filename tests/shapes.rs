@@ -84,11 +84,11 @@ fn alternating_triangles() {
         }
 
         if swap {
-            engine.scene.get_component_array(2)[0] = true;
-            engine.scene.get_component_array(2)[1] = false;
+            engine.scene.get_component_pool::<bool>().component_array[0] = true;
+            engine.scene.get_component_pool::<bool>().component_array[1] = false;
         } else {
-            engine.scene.get_component_array(2)[1] = true;
-            engine.scene.get_component_array(2)[0] = false;
+            engine.scene.get_component_pool::<bool>().component_array[1] = true;
+            engine.scene.get_component_pool::<bool>().component_array[0] = false;
         }
     });
 }
