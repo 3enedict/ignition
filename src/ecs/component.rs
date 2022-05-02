@@ -9,10 +9,10 @@ pub trait ComponentPoolTrait {
     fn as_any(&self) -> &dyn std::any::Any;
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
 
-    fn component_as_any(&self, index: usize) -> &dyn std::any::Any;
-    fn component_as_any_mut(&mut self, index: usize) -> &mut dyn std::any::Any;
+    fn delete_entity(&mut self, entity: usize);
 }
 
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct ComponentPool<G> {
     pub num_components: i32,
 
@@ -34,12 +34,21 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
         self as &mut dyn std::any::Any
     }
 
-    fn component_as_any(&self, index: usize) -> &dyn std::any::Any {
-        self.component_array.get(index).unwrap() as &dyn std::any::Any
-    }
+    fn delete_entity(&mut self, entity: usize) {
+        let index = self.sparse_array[entity];
 
-    fn component_as_any_mut(&mut self, index: usize) -> &mut dyn std::any::Any {
-        self.component_array.get_mut(index).unwrap() as &mut dyn std::any::Any
+        if index != -1 {
+            self.num_components -= 1;
+
+            self.packed_array.swap_remove(index as usize);
+            self.component_array.swap_remove(index as usize);
+
+            let last_index = self.sparse_array.len() - 1;
+            self.sparse_array[last_index] = self.sparse_array[entity];
+            self.sparse_array[entity] = -1;
+
+            self.packed_array[index as usize] = last_index as i32;
+        }
     }
 }
 

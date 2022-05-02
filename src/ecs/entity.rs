@@ -21,4 +21,13 @@ impl IgnitionScene {
 
         new_entity
     }
+
+    pub fn delete(&mut self, entity: Entity) {
+        self.entity_count -= 1;
+        self.available_entities.push(entity.id);
+
+        for component_pool in self.component_pools.iter_mut() {
+            component_pool.delete_entity(entity.id);
+        }
+    }
 }

@@ -28,6 +28,7 @@ impl IgnitionScene {
 
 #[cfg(test)]
 mod tests {
+    use crate::ecs::component::ComponentPool;
     use crate::ecs::entity::Entity;
     use crate::ecs::IgnitionScene;
 
@@ -42,7 +43,7 @@ mod tests {
         speed: u32,
     }
 
-    fn init_three_entities_with_different_components() -> (IgnitionScene, Entity, Entity, Entity) {
+    fn init_three_entities() -> (IgnitionScene, Entity, Entity, Entity) {
         let mut scene = IgnitionScene::new();
 
         let mut entity1 = scene.entity();
@@ -58,65 +59,61 @@ mod tests {
     }
 
     #[test]
-    fn add_components_pos_sparse_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
+    fn add_component() {
+        let (mut scene, _entity1, _entity2, _entity3) = init_three_entities();
 
         assert_eq!(
-            vec! { -1, -1, 0 },
-            scene.get_component_pool::<Pos>().sparse_array
+            &mut ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec! { -1, -1, 0 },
+                packed_array: vec! { 2 },
+                component_array: vec! { Pos { x: 1, y: -3 } },
+            },
+            scene.get_component_pool::<Pos>()
+        );
+
+        assert_eq!(
+            &mut ComponentPool {
+                num_components: 2,
+
+                sparse_array: vec! { 0, -1, 1 },
+                packed_array: vec! { 0, 2 },
+                component_array: vec! { Vel { speed: 286 }, Vel { speed: 30 } },
+            },
+            scene.get_component_pool::<Vel>()
         );
     }
 
     #[test]
-    fn add_components_pos_packed_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
+    fn recycle_entity() {
+        let (mut scene, entity1, _entity2, _entity3) = init_three_entities();
 
-        assert_eq!(vec! { 2 }, scene.get_component_pool::<Pos>().packed_array);
-    }
+        scene.delete(entity1);
 
-    #[test]
-    fn add_components_pos_component_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
+        let mut entity4 = scene.entity();
+        scene.component(&mut entity4, Pos { x: 26, y: 39 });
 
         assert_eq!(
-            vec! { Pos { x: 1, y: -3 } },
-            scene.get_component_pool::<Pos>().component_array
+            &mut ComponentPool {
+                num_components: 2,
+
+                sparse_array: vec! { 1, -1, 0 },
+                packed_array: vec! { 2, 0 },
+                component_array: vec! { Pos { x: 1, y: -3 }, Pos { x: 26, y: 39 } },
+            },
+            scene.get_component_pool::<Pos>()
         );
-    }
-
-    #[test]
-    fn add_components_vel_sparse_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
 
         assert_eq!(
-            vec! { 0, -1, 1 },
-            scene.get_component_pool::<Vel>().sparse_array
-        );
-    }
+            &mut ComponentPool {
+                num_components: 1,
 
-    #[test]
-    fn add_components_vel_packed_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
-
-        assert_eq!(
-            vec! { 0, 2 },
-            scene.get_component_pool::<Vel>().packed_array
-        );
-    }
-
-    #[test]
-    fn add_components_vel_component_array() {
-        let (mut scene, _entity1, _entity2, _entity3) =
-            init_three_entities_with_different_components();
-
-        assert_eq!(
-            vec! { Vel { speed: 286 }, Vel { speed: 30 } },
-            scene.get_component_pool::<Vel>().component_array
+                sparse_array: vec! { -1, -1, 0 },
+                packed_array: vec! { 2 },
+                component_array: vec! { Vel { speed: 30 } },
+            },
+            scene.get_component_pool::<Vel>()
         );
     }
 }
