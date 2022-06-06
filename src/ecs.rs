@@ -4,7 +4,7 @@ use std::collections::HashMap;
 pub mod entity;
 
 pub mod component;
-use component::ComponentPoolTrait;
+use component::component_pool_trait::ComponentPoolTrait;
 
 pub struct IgnitionScene {
     pub entity_count: usize,
@@ -18,7 +18,7 @@ impl IgnitionScene {
     pub fn new() -> Self {
         Self {
             entity_count: 0,
-            available_entities: vec![0],
+            available_entities: Vec::new(),
 
             component_indices: HashMap::new(),
             component_pools: Vec::new(),
@@ -26,10 +26,11 @@ impl IgnitionScene {
     }
 }
 
+/* TESTS */
+
 #[cfg(test)]
 mod tests {
-    use crate::ecs::component::ComponentPool;
-    use crate::ecs::entity::Entity;
+    use crate::ecs::component::component_pool::ComponentPool;
     use crate::ecs::IgnitionScene;
 
     #[derive(Debug, Eq, PartialEq, Clone)]
@@ -43,17 +44,17 @@ mod tests {
         speed: u32,
     }
 
-    fn init_three_entities() -> (IgnitionScene, Entity, Entity, Entity) {
+    fn init_three_entities() -> (IgnitionScene, usize, usize, usize) {
         let mut scene = IgnitionScene::new();
 
-        let mut entity1 = scene.entity();
-        scene.component(&mut entity1, Vel { speed: 286 });
+        let entity1 = scene.entity();
+        scene.component(entity1, Vel { speed: 286 });
 
         let entity2 = scene.entity();
 
-        let mut entity3 = scene.entity();
-        scene.component(&mut entity3, Pos { x: 1, y: -3 });
-        scene.component(&mut entity3, Vel { speed: 30 });
+        let entity3 = scene.entity();
+        scene.component(entity3, Pos { x: 1, y: -3 });
+        scene.component(entity3, Vel { speed: 30 });
 
         (scene, entity1, entity2, entity3)
     }
@@ -91,8 +92,8 @@ mod tests {
 
         scene.delete(entity1);
 
-        let mut entity4 = scene.entity();
-        scene.component(&mut entity4, Pos { x: 26, y: 39 });
+        let entity4 = scene.entity();
+        scene.component(entity4, Pos { x: 26, y: 39 });
 
         assert_eq!(
             &mut ComponentPool {

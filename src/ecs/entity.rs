@@ -1,33 +1,40 @@
 use crate::ecs::IgnitionScene;
 
-pub struct Entity {
-    pub id: usize,
-}
-
 impl IgnitionScene {
-    pub fn entity(&mut self) -> Entity {
-        let new_entity = Entity {
-            id: self.available_entities.pop().unwrap(),
-        };
-
-        self.entity_count += 1;
-        if self.available_entities.is_empty() {
-            for component_pool in self.component_pools.iter_mut() {
-                component_pool.push_none();
-            }
-
-            self.available_entities.push(self.entity_count);
-        }
+    pub fn entity(&mut self) -> usize {
+        let new_entity = self.generate_new_id();
 
         new_entity
     }
 
-    pub fn delete(&mut self, entity: Entity) {
+    pub fn delete(&mut self, entity: usize) {
         self.entity_count -= 1;
-        self.available_entities.push(entity.id);
+        self.available_entities.push(entity);
+        self.delete_entity_from_each_component_pool(entity);
+    }
 
+    /* Utility functions */
+
+    pub fn generate_new_id(&mut self) -> usize {
+        self.available_entities.pop().unwrap_or_else(|| {
+            let id = self.entity_count;
+            self.entity_count += 1;
+
+            self.push_empty_entity_to_each_component_pool();
+
+            id
+        })
+    }
+
+    pub fn push_empty_entity_to_each_component_pool(&mut self) {
         for component_pool in self.component_pools.iter_mut() {
-            component_pool.delete_entity(entity.id);
+            component_pool.create_empty_entity();
+        }
+    }
+
+    pub fn delete_entity_from_each_component_pool(&mut self, entity: usize) {
+        for component_pool in self.component_pools.iter_mut() {
+            component_pool.delete_entity(entity);
         }
     }
 }
