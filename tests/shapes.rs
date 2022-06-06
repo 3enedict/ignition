@@ -54,25 +54,25 @@ fn alternating_triangles() {
         include_wgsl!("shaders/gradient.wgsl"),
     );
 
-    let mut entity_one = engine.scene.entity();
+    let entity_one = engine.scene.entity();
     engine.scene.component(
-        &mut entity_one,
+        entity_one,
         Vertices {
             vertices: Vec::from(TRIANGLE_BUFFER_ONE),
         },
     );
-    engine.scene.component(&mut entity_one, triangle_one);
-    engine.scene.component(&mut entity_one, true);
+    engine.scene.component(entity_one, triangle_one);
+    engine.scene.component(entity_one, true);
 
-    let mut entity_two = engine.scene.entity();
+    let entity_two = engine.scene.entity();
     engine.scene.component(
-        &mut entity_two,
+        entity_two,
         Vertices {
             vertices: Vec::from(TRIANGLE_BUFFER_TWO),
         },
     );
-    engine.scene.component(&mut entity_two, triangle_two);
-    engine.scene.component(&mut entity_two, true);
+    engine.scene.component(entity_two, triangle_two);
+    engine.scene.component(entity_two, true);
 
     let mut instant = Instant::now();
     let mut swap = true;

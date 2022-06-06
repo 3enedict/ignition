@@ -47,14 +47,16 @@ mod tests {
     fn init_three_entities() -> (IgnitionScene, usize, usize, usize) {
         let mut scene = IgnitionScene::new();
 
+        // Use older format in the name of backwards compatibility...
         let entity1 = scene.entity();
         scene.component(entity1, Vel { speed: 286 });
 
         let entity2 = scene.entity();
 
-        let entity3 = scene.entity();
-        scene.component(entity3, Pos { x: 1, y: -3 });
-        scene.component(entity3, Vel { speed: 30 });
+        let entity3 = scene
+            .with_component(Pos { x: 1, y: -3 })
+            .with_component(Vel { speed: 30 })
+            .entity();
 
         (scene, entity1, entity2, entity3)
     }
@@ -91,9 +93,7 @@ mod tests {
         let (mut scene, entity1, _entity2, _entity3) = init_three_entities();
 
         scene.delete(entity1);
-
-        let entity4 = scene.entity();
-        scene.component(entity4, Pos { x: 26, y: 39 });
+        scene.with_component(Pos { x: 26, y: 39 }).entity();
 
         assert_eq!(
             &mut ComponentPool {

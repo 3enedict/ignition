@@ -14,22 +14,3 @@ pollster = "0.2"
 image = "0.23"
 cgmath = "0.18"
 bytemuck = { version = "1.4", features = [ "derive" ] }
-
-
-game_loop = { path = "macros/game_loop/game_loop" }
-
-any_thread = { path = "macros/game_loop/attributes/any_thread" }
-event_driven = { path = "macros/game_loop/attributes/event_driven" }
-
-
-render = { path = "macros/rendering/render" }
-draw = { path = "macros/rendering/draw" }
-
-
-run = { path = "macros/winit/event_loop/run" }
-run_return = { path = "macros/winit/event_loop/run_return" }
-
-handle_default_events = { path = "macros/winit/events/handle_default_events" }
-main_events_cleared = { path = "macros/winit/events/main_events_cleared" }
-redraw = { path = "macros/winit/events/redraw" }
-redraw_requested = { path = "macros/winit/events/redraw_requested" }

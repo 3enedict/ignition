@@ -7,7 +7,21 @@ use component_pool::ComponentPool;
 
 pub mod component_pool_trait;
 
+pub mod component_builder;
+use component_builder::ComponentBuilder;
+
 impl IgnitionScene {
+    // This is only really for aesthetics
+    pub fn with_component<G: 'static>(&mut self, component: G) -> ComponentBuilder {
+        let entity = self.entity();
+        self.component(entity, component);
+
+        ComponentBuilder {
+            scene: self,
+            entity,
+        }
+    }
+
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<G>() {
             self.assign_component_to_entity(entity, component)
