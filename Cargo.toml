@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 env_logger = "0.9"
-log = "0.4"
+log = { version = "0.4", features = ["release_max_level_off"] }
 
 winit = "0.26"
 wgpu = "0.12"

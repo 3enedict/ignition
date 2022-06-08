@@ -1,3 +1,4 @@
+use log::info;
 use std::any::TypeId;
 
 use crate::ecs::IgnitionScene;
@@ -7,22 +8,25 @@ use component_pool::ComponentPool;
 
 pub mod component_pool_trait;
 
-pub mod component_builder;
-use component_builder::ComponentBuilder;
-
 impl IgnitionScene {
-    // This is only really for aesthetics
-    pub fn with_component<G: 'static>(&mut self, component: G) -> ComponentBuilder {
-        let entity = self.entity();
-        self.component(entity, component);
+    pub fn with_component<G: 'static + std::fmt::Debug>(&mut self, component: G) -> &mut Self {
+        let current_entity = self.available_entities[self.available_entities.len() - 1];
+        info!(
+            "Adding component to current entity under construction ({})",
+            current_entity
+        );
 
-        ComponentBuilder {
-            scene: self,
-            entity,
-        }
+        self.component(current_entity, component);
+
+        self
     }
 
-    pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
+    pub fn component<G: 'static + std::fmt::Debug>(&mut self, entity: usize, component: G) {
+        info!(
+            "Assigning component ({:?}) to entity ({})",
+            component, entity
+        );
+
         if self.component_exists::<G>() {
             self.assign_component_to_entity(entity, component)
         } else {

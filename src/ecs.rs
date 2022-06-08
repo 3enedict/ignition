@@ -7,7 +7,6 @@ pub mod component;
 use component::component_pool_trait::ComponentPoolTrait;
 
 pub struct IgnitionScene {
-    pub entity_count: usize,
     pub available_entities: Vec<usize>,
 
     pub component_indices: HashMap<TypeId, usize>,
@@ -17,8 +16,7 @@ pub struct IgnitionScene {
 impl IgnitionScene {
     pub fn new() -> Self {
         Self {
-            entity_count: 0,
-            available_entities: Vec::new(),
+            available_entities: vec![0],
 
             component_indices: HashMap::new(),
             component_pools: Vec::new(),
@@ -32,6 +30,7 @@ impl IgnitionScene {
 mod tests {
     use crate::ecs::component::component_pool::ComponentPool;
     use crate::ecs::IgnitionScene;
+    use log::LevelFilter;
 
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct Pos {
@@ -44,7 +43,16 @@ mod tests {
         speed: u32,
     }
 
+    fn init_log() {
+        let _ = env_logger::builder()
+            .is_test(true)
+            .filter_level(LevelFilter::Info)
+            .try_init();
+    }
+
     fn init_three_entities() -> (IgnitionScene, usize, usize, usize) {
+        init_log();
+
         let mut scene = IgnitionScene::new();
 
         // Use older format in the name of backwards compatibility...

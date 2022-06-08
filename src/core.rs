@@ -8,6 +8,7 @@ use crate::core::rendering::window::{
 use crate::ecs::IgnitionScene;
 use crate::Engine;
 
+pub mod ecs;
 pub mod options;
 pub mod rendering;
 pub mod shapes;
