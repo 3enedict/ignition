@@ -9,22 +9,18 @@ use component_pool::ComponentPool;
 pub mod component_pool_trait;
 
 impl IgnitionScene {
-    pub fn with_component<G: 'static + std::fmt::Debug>(&mut self, component: G) -> &mut Self {
+    pub fn with_component<G: 'static>(&mut self, component: G) -> &mut Self {
         let current_entity = self.available_entities[self.available_entities.len() - 1];
-        info!(
-            "Adding component to current entity under construction ({})",
-            current_entity
-        );
-
         self.component(current_entity, component);
 
         self
     }
 
-    pub fn component<G: 'static + std::fmt::Debug>(&mut self, entity: usize, component: G) {
+    pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
         info!(
             "Assigning component ({:?}) to entity ({})",
-            component, entity
+            std::any::type_name::<G>(),
+            entity
         );
 
         if self.component_exists::<G>() {
