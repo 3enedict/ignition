@@ -30,7 +30,6 @@ impl IgnitionScene {
 mod tests {
     use crate::ecs::component::component_pool::ComponentPool;
     use crate::ecs::IgnitionScene;
-    use log::LevelFilter;
 
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct Pos {
@@ -43,16 +42,7 @@ mod tests {
         speed: u32,
     }
 
-    fn init_log() {
-        let _ = env_logger::builder()
-            .is_test(true)
-            .filter_level(LevelFilter::Info)
-            .try_init();
-    }
-
-    fn init_three_entities() -> (IgnitionScene, usize, usize, usize) {
-        init_log();
-
+    fn init_four_entities() -> (IgnitionScene, usize, usize, usize, usize) {
         let mut scene = IgnitionScene::new();
 
         // Use older format in the name of backwards compatibility...
@@ -66,12 +56,14 @@ mod tests {
             .with_component(Vel { speed: 30 })
             .entity();
 
-        (scene, entity1, entity2, entity3)
+        let entity4 = scene.entity();
+
+        (scene, entity1, entity2, entity3, entity4)
     }
 
     #[test]
     fn add_component() {
-        let (mut scene, _entity1, _entity2, _entity3) = init_three_entities();
+        let (mut scene, _entity1, _entity2, _entity3, _entity4) = init_four_entities();
 
         assert_eq!(
             &mut ComponentPool {
@@ -98,7 +90,7 @@ mod tests {
 
     #[test]
     fn recycle_entity() {
-        let (mut scene, entity1, _entity2, _entity3) = init_three_entities();
+        let (mut scene, entity1, _entity2, _entity3, _entity4) = init_four_entities();
 
         scene.delete(entity1);
         scene.with_component(Pos { x: 26, y: 39 }).entity();

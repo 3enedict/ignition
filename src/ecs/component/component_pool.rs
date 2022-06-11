@@ -1,5 +1,3 @@
-use log::info;
-
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct ComponentPool<G> {
     pub num_components: usize,
@@ -17,27 +15,21 @@ impl<G> ComponentPool<G> {
         let packed_array = vec![entity];
         let component_array = vec![component];
 
-        let component_pool = Self {
+        Self {
             num_components: 1,
 
             sparse_array,
             packed_array,
             component_array,
-        };
-
-        component_pool.log_vars_in_component_pool((Vec::new(), Vec::new(), 0));
-        component_pool
+        }
     }
 
     pub fn assign_component_to_entity(&mut self, entity: usize, component: G) {
-        let snapshot = self.snapshot_for_logs();
-
         Self::add_entity_to_sparse_array(entity, self.num_components, &mut self.sparse_array);
+
         self.packed_array.push(entity);
         self.component_array.push(component);
         self.num_components += 1;
-
-        self.log_vars_in_component_pool(snapshot);
     }
 
     /* Utility functions */
@@ -49,29 +41,25 @@ impl<G> ComponentPool<G> {
 
         sparse_array[entity] = value as i32;
     }
+}
 
-    fn snapshot_for_logs(&self) -> (Vec<i32>, Vec<usize>, usize) {
-        (
-            self.sparse_array.clone(),
-            self.packed_array.clone(),
-            self.num_components,
-        )
+#[cfg(test)]
+mod tests {
+    use crate::ecs::component::component_pool::ComponentPool;
+
+    #[test]
+    fn adding_an_entity_to_sparse_array_fills_the_gaps() {
+        let mut sparse_array = vec![-1, -1, 0];
+        ComponentPool::<i32>::add_entity_to_sparse_array(5, 1, &mut sparse_array);
+
+        assert_eq!(vec![-1, -1, 0, -1, -1, 1], sparse_array);
     }
 
-    fn log_vars_in_component_pool(&self, snapshot: (Vec<i32>, Vec<usize>, usize)) {
-        let (sparse_array, packed_array, num_components) = snapshot;
+    #[test]
+    fn recycling_an_entity_in_sparse_array_does_not_resize_it_incorrectly() {
+        let mut sparse_array = vec![-1, -1, 0];
+        ComponentPool::<i32>::add_entity_to_sparse_array(0, 1, &mut sparse_array);
 
-        info!(
-            "Sparse array: {:?} -> {:?}",
-            sparse_array, self.sparse_array
-        );
-        info!(
-            "Packed array: {:?} -> {:?}",
-            packed_array, self.packed_array
-        );
-        info!(
-            "Num components: {:?} -> {:?}",
-            num_components, self.num_components
-        );
+        assert_eq!(vec![1, -1, 0], sparse_array);
     }
 }

@@ -1,4 +1,3 @@
-use log::info;
 use std::any::TypeId;
 
 use crate::ecs::IgnitionScene;
@@ -17,20 +16,12 @@ impl IgnitionScene {
     }
 
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
-        info!(
-            "Assigning component ({:?}) to entity ({})",
-            std::any::type_name::<G>(),
-            entity
-        );
-
         if self.component_exists::<G>() {
             self.assign_component_to_entity(entity, component)
         } else {
             self.create_new_component_pool_with_entity(entity, component);
         }
     }
-
-    /* Utility functions */
 
     pub fn get_component_pool<G: 'static>(&mut self) -> &mut ComponentPool<G> {
         self.component_pools
@@ -41,9 +32,7 @@ impl IgnitionScene {
             .unwrap()
     }
 
-    pub fn component_exists<G: 'static>(&mut self) -> bool {
-        self.component_indices.contains_key(&TypeId::of::<G>())
-    }
+    /* Utility functions */
 
     pub fn assign_component_to_entity<G: 'static>(&mut self, entity: usize, component: G) {
         self.get_component_pool::<G>()
@@ -60,5 +49,9 @@ impl IgnitionScene {
 
         self.component_pools
             .push(Box::new(ComponentPool::new_with_entity(entity, component)));
+    }
+
+    pub fn component_exists<G: 'static>(&mut self) -> bool {
+        self.component_indices.contains_key(&TypeId::of::<G>())
     }
 }

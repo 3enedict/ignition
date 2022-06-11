@@ -37,12 +37,12 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
     },
 ];
 
-/*
 #[ignore]
 #[test]
 fn alternating_triangles() {
     let mut engine = Engine::ignite();
 
+    /*
     let triangle1 = engine
         .with_component(Vec::from(TRIANGLE_BUFFER_ONE))
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
@@ -52,6 +52,12 @@ fn alternating_triangles() {
         .with_component(Vec::from(TRIANGLE_BUFFER_TWO))
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .entity();
+    */
+    let triangle_one = doritos(
+        &mut engine,
+        &Vec::from(TRIANGLE_BUFFER_ONE),
+        include_wgsl!("shaders/gradient.wgsl"),
+    );
 
     let triangle_two = doritos(
         &mut engine,
@@ -98,6 +104,7 @@ fn alternating_triangles() {
     });
 }
 
+/*
 const POLYGON_VERTICES: &[Vertex] = &[
     Vertex {
         position: [-0.0868241, 0.49240386, 0.0],
