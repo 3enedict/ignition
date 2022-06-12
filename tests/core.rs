@@ -42,48 +42,15 @@ const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
 fn alternating_triangles() {
     let mut engine = Engine::ignite();
 
-    /*
     let triangle1 = engine
         .with_component(Vec::from(TRIANGLE_BUFFER_ONE))
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
-        .entity();
+        .doritos();
 
     let triangle2 = engine
         .with_component(Vec::from(TRIANGLE_BUFFER_TWO))
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
-        .entity();
-    */
-    let triangle_one = doritos(
-        &mut engine,
-        &Vec::from(TRIANGLE_BUFFER_ONE),
-        include_wgsl!("shaders/gradient.wgsl"),
-    );
-
-    let triangle_two = doritos(
-        &mut engine,
-        &Vec::from(TRIANGLE_BUFFER_TWO),
-        include_wgsl!("shaders/gradient.wgsl"),
-    );
-
-    let entity_one = engine.scene.entity();
-    engine.scene.component(
-        entity_one,
-        Vertices {
-            vertices: Vec::from(TRIANGLE_BUFFER_ONE),
-        },
-    );
-    engine.scene.component(entity_one, triangle_one);
-    engine.scene.component(entity_one, true);
-
-    let entity_two = engine.scene.entity();
-    engine.scene.component(
-        entity_two,
-        Vertices {
-            vertices: Vec::from(TRIANGLE_BUFFER_TWO),
-        },
-    );
-    engine.scene.component(entity_two, triangle_two);
-    engine.scene.component(entity_two, true);
+        .doritos();
 
     let mut instant = Instant::now();
     let mut swap = true;
@@ -94,6 +61,7 @@ fn alternating_triangles() {
             swap = !swap;
         }
 
+        /*
         if swap {
             engine.scene.get_component_pool::<bool>().component_array[0] = true;
             engine.scene.get_component_pool::<bool>().component_array[1] = false;
@@ -101,6 +69,7 @@ fn alternating_triangles() {
             engine.scene.get_component_pool::<bool>().component_array[1] = true;
             engine.scene.get_component_pool::<bool>().component_array[0] = false;
         }
+        */
     });
 }
 

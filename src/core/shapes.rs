@@ -1,13 +1,6 @@
-use wgpu::{Buffer, IndexFormat::Uint16, RenderPass, RenderPipeline, ShaderModuleDescriptor};
+use wgpu::{Buffer, RenderPass, RenderPipeline, ShaderModuleDescriptor, TextureFormat};
 
-use crate::core::{
-    rendering::{
-        index_buffer::ignite_index_buffer,
-        pipeline::ignite_pipeline,
-        vertex_buffer::{ignite_vertex_buffer, Vertex},
-    },
-    Engine,
-};
+use crate::core::rendering::{gpu::IgnitionGPU, vertex_buffer::Vertex};
 
 pub mod crackers;
 pub mod doritos;
@@ -19,16 +12,19 @@ pub struct Shape {
     pub num_vertices: u32,
 }
 
-pub fn shape(
-    engine: &mut Engine,
-    vertices: &Vec<Vertex>,
-    shaders: ShaderModuleDescriptor,
-) -> Shape {
-    Shape {
-        pipeline: ignite_pipeline(engine, shaders),
-        vertex_buffer: ignite_vertex_buffer(engine, vertices),
+impl IgnitionGPU {
+    pub fn shape(
+        &mut self,
+        vertices: &Vec<Vertex>,
+        shaders: &ShaderModuleDescriptor,
+        format: TextureFormat,
+    ) -> Shape {
+        Shape {
+            pipeline: self.ignite_pipeline(shaders, format),
+            vertex_buffer: self.ignite_vertex_buffer(vertices),
 
-        num_vertices: vertices.len() as u32,
+            num_vertices: vertices.len() as u32,
+        }
     }
 }
 
@@ -41,6 +37,7 @@ impl Shape {
     }
 }
 
+/*
 pub struct IndexedShape {
     pub pipeline: RenderPipeline,
     pub vertex_buffer: Buffer,
@@ -49,18 +46,20 @@ pub struct IndexedShape {
     pub num_indices: u32,
 }
 
-pub fn indexed_shape(
-    engine: &mut Engine,
-    vertices: &Vec<Vertex>,
-    indices: &Vec<u16>,
-    shaders: ShaderModuleDescriptor,
-) -> IndexedShape {
-    IndexedShape {
-        pipeline: ignite_pipeline(engine, shaders),
-        vertex_buffer: ignite_vertex_buffer(engine, vertices),
-        index_buffer: ignite_index_buffer(engine, indices),
+impl Engine {
+    pub fn indexed_shape(
+        &mut self,
+        vertices: &Vec<Vertex>,
+        indices: &Vec<u16>,
+        shaders: &ShaderModuleDescriptor,
+    ) -> IndexedShape {
+        IndexedShape {
+            pipeline: ignite_pipeline(self, shaders),
+            vertex_buffer: ignite_vertex_buffer(self, vertices),
+            index_buffer: ignite_index_buffer(self, indices),
 
-        num_indices: indices.len() as u32,
+            num_indices: indices.len() as u32,
+        }
     }
 }
 
@@ -73,3 +72,5 @@ impl IndexedShape {
         render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
     }
 }
+
+*/

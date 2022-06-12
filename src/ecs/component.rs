@@ -1,4 +1,4 @@
-use std::any::TypeId;
+use std::{any::TypeId, ops::Deref};
 
 use crate::ecs::IgnitionScene;
 
@@ -8,13 +8,6 @@ use component_pool::ComponentPool;
 pub mod component_pool_trait;
 
 impl IgnitionScene {
-    pub fn with_component<G: 'static>(&mut self, component: G) -> &mut Self {
-        let current_entity = self.available_entities[self.available_entities.len() - 1];
-        self.component(current_entity, component);
-
-        self
-    }
-
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<G>() {
             self.assign_component_to_entity(entity, component)
@@ -23,7 +16,16 @@ impl IgnitionScene {
         }
     }
 
-    pub fn get_component_pool<G: 'static>(&mut self) -> &mut ComponentPool<G> {
+    pub fn get_component_pool<G: 'static>(&self) -> &ComponentPool<G> {
+        self.component_pools
+            .get(*self.component_indices.get(&TypeId::of::<G>()).unwrap())
+            .unwrap()
+            .as_any()
+            .downcast_ref::<ComponentPool<G>>()
+            .unwrap()
+    }
+
+    pub fn get_component_pool_mut<G: 'static>(&mut self) -> &mut ComponentPool<G> {
         self.component_pools
             .get_mut(*self.component_indices.get(&TypeId::of::<G>()).unwrap())
             .unwrap()
@@ -35,7 +37,7 @@ impl IgnitionScene {
     /* Utility functions */
 
     pub fn assign_component_to_entity<G: 'static>(&mut self, entity: usize, component: G) {
-        self.get_component_pool::<G>()
+        self.get_component_pool_mut::<G>()
             .assign_component_to_entity(entity, component);
     }
 

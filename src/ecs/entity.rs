@@ -16,6 +16,10 @@ impl IgnitionScene {
 
     /* Utility functions */
 
+    pub fn get_current_entity(&self) -> usize {
+        self.available_entities[self.available_entities.len() - 1]
+    }
+
     pub fn generate_new_entity(&mut self) -> usize {
         let id = self.available_entities[0];
         self.available_entities[0] += 1;

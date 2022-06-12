@@ -5,6 +5,8 @@ use wgpu::{
 
 use crate::core::Engine;
 
+use super::gpu::IgnitionGPU;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
@@ -33,12 +35,14 @@ impl Vertex {
     }
 }
 
-pub fn ignite_vertex_buffer(engine: &mut Engine, vertices: &Vec<Vertex>) -> Buffer {
-    let vertex_buffer = engine.gpu.device.create_buffer_init(&BufferInitDescriptor {
-        label: None,
-        contents: bytemuck::cast_slice(vertices),
-        usage: BufferUsages::VERTEX,
-    });
+impl IgnitionGPU {
+    pub fn ignite_vertex_buffer(&mut self, vertices: &Vec<Vertex>) -> Buffer {
+        let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+            label: None,
+            contents: bytemuck::cast_slice(vertices),
+            usage: BufferUsages::VERTEX,
+        });
 
-    vertex_buffer
+        vertex_buffer
+    }
 }

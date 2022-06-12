@@ -51,10 +51,9 @@ mod tests {
 
         let entity2 = scene.entity();
 
-        let entity3 = scene
-            .with_component(Pos { x: 1, y: -3 })
-            .with_component(Vel { speed: 30 })
-            .entity();
+        let entity3 = scene.entity();
+        scene.component(entity3, Pos { x: 1, y: -3 });
+        scene.component(entity3, Vel { speed: 30 });
 
         let entity4 = scene.entity();
 
@@ -93,7 +92,9 @@ mod tests {
         let (mut scene, entity1, _entity2, _entity3, _entity4) = init_four_entities();
 
         scene.delete(entity1);
-        scene.with_component(Pos { x: 26, y: 39 }).entity();
+
+        let entity4 = scene.entity();
+        scene.component(entity4, Pos { x: 26, y: 39 });
 
         assert_eq!(
             &mut ComponentPool {

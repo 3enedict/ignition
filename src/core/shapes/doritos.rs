@@ -1,15 +1,17 @@
-use wgpu::ShaderModuleDescriptor;
+use wgpu::{ShaderModuleDescriptor, TextureFormat};
 
 use crate::core::{
-    rendering::vertex_buffer::Vertex,
-    shapes::{shape, Shape},
-    Engine,
+    rendering::{gpu::IgnitionGPU, vertex_buffer::Vertex},
+    shapes::Shape,
 };
 
-pub fn doritos(
-    engine: &mut Engine,
-    vertices: &Vec<Vertex>,
-    shaders: ShaderModuleDescriptor,
-) -> Shape {
-    shape(engine, vertices, shaders)
+impl IgnitionGPU {
+    pub fn doritos(
+        &mut self,
+        vertices: &Vec<Vertex>,
+        shaders: &ShaderModuleDescriptor,
+        format: TextureFormat,
+    ) -> Shape {
+        self.shape(vertices, shaders, format)
+    }
 }

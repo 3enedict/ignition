@@ -1,19 +1,16 @@
+/*
 use wgpu::ShaderModuleDescriptor;
 
-use crate::core::{
-    rendering::vertex_buffer::Vertex,
-    shapes::{indexed_shape, IndexedShape},
-    Engine,
-};
+use crate::core::{rendering::vertex_buffer::Vertex, shapes::IndexedShape, Engine};
 
 pub fn crackers(
     engine: &mut Engine,
     vertices: &Vec<Vertex>,
-    shaders: ShaderModuleDescriptor,
+    shaders: &ShaderModuleDescriptor,
 ) -> IndexedShape {
     let (generated_vertices, generated_indices) = generate_rectangle(vertices);
 
-    indexed_shape(engine, &generated_vertices, &generated_indices, shaders)
+    engine.indexed_shape(&generated_vertices, &generated_indices, shaders)
 }
 
 pub fn generate_rectangle(vertices: &Vec<Vertex>) -> (Vec<Vertex>, Vec<u16>) {
@@ -72,3 +69,4 @@ pub fn generate_rectangle_indices(index: usize) -> Vec<u16> {
 
     rectangle_layout
 }
+*/
