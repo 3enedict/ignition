@@ -1,6 +1,6 @@
 use wgpu::ShaderModuleDescriptor;
 
-use crate::{core::rendering::vertex_buffer::Vertex, core::Engine};
+use crate::{renderer::core::vertex_buffer::Vertex, Engine};
 
 impl Engine {
     pub fn with_component<G: 'static>(&mut self, component: G) -> &mut Self {
@@ -30,7 +30,10 @@ impl Engine {
             .get(entity)
             .unwrap();
 
-        let doritos = self.gpu.shape(vertices, shader, self.window.config.format);
+        let doritos = self
+            .renderer
+            .gpu
+            .shape(vertices, shader, self.renderer.window.config.format);
         self.scene.component(entity, doritos);
 
         self.scene.entity()

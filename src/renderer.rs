@@ -1,20 +1,21 @@
 use wgpu::{Backends, Instance};
 
-use crate::core::options::Options;
-use crate::core::rendering::gpu::{get_adapter, get_device, IgnitionGPU};
-use crate::core::rendering::window::{
-    create_surface, create_window, generate_default_configuration, IgnitionWindow,
+use crate::renderer::core::gpu::{get_adapter, get_device, GPU};
+use crate::renderer::core::window::{
+    create_surface, create_window, generate_default_configuration, Window,
 };
-use crate::ecs::IgnitionScene;
-use crate::Engine;
 
+pub mod core;
 pub mod ecs;
-pub mod options;
-pub mod rendering;
 pub mod shapes;
 
-impl Engine {
-    pub async fn setup_engine() -> Engine {
+pub struct Renderer {
+    window: Window,
+    gpu: GPU,
+}
+
+impl Renderer {
+    pub fn new() -> Self {
         let (event_loop, window, size) = create_window();
 
         let instance = Instance::new(Backends::all());
@@ -28,9 +29,7 @@ impl Engine {
         surface.configure(&device, &config);
 
         Self {
-            options: Options::default(),
-
-            window: IgnitionWindow {
+            window: Window {
                 event_loop: Some(event_loop),
                 window,
                 size,
@@ -39,14 +38,12 @@ impl Engine {
                 config,
             },
 
-            gpu: IgnitionGPU {
+            gpu: GPU {
                 adapter,
 
                 device,
                 queue,
             },
-
-            scene: IgnitionScene::new(),
         }
     }
 }

@@ -7,7 +7,7 @@ use winit::{
     event_loop::ControlFlow,
 };
 
-use crate::core::shapes::Shape;
+use crate::renderer::shapes::Shape;
 use crate::Engine;
 
 pub mod command_buffer;
@@ -40,7 +40,8 @@ impl Engine {
     where
         F: 'static + FnMut(&mut Engine),
     {
-        self.window
+        self.renderer
+            .window
             .event_loop
             .take()
             .unwrap()
@@ -64,7 +65,7 @@ impl Engine {
                         let mut commands = match Commands::ignite(&self) {
                             Ok(commands) => commands,
                             Err(wgpu::SurfaceError::Lost) => {
-                                self.resize(self.window.size);
+                                self.resize(self.renderer.window.size);
                                 return;
                             }
                             Err(wgpu::SurfaceError::OutOfMemory) => {
@@ -89,7 +90,7 @@ impl Engine {
                     Event::MainEventsCleared => {
                         closure(&mut self);
 
-                        self.window.window.request_redraw();
+                        self.renderer.window.window.request_redraw();
                     }
                     _ => {}
                 }

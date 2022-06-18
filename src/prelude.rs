@@ -1,7 +1,7 @@
 pub use wgpu::include_wgsl;
 
 pub use crate::{
-    core::rendering::{command_buffer::Commands, vertex_buffer::Vertex},
-    ecs::IgnitionScene,
+    ecs::Scene,
+    renderer::core::{command_buffer::Commands, vertex_buffer::Vertex},
     Engine,
 };

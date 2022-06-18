@@ -1,6 +1,6 @@
 use wgpu::{Buffer, RenderPass, RenderPipeline, ShaderModuleDescriptor, TextureFormat};
 
-use crate::core::rendering::{gpu::IgnitionGPU, vertex_buffer::Vertex};
+use crate::renderer::core::{gpu::GPU, vertex_buffer::Vertex};
 
 pub mod crackers;
 pub mod doritos;
@@ -12,7 +12,7 @@ pub struct Shape {
     pub num_vertices: u32,
 }
 
-impl IgnitionGPU {
+impl GPU {
     pub fn shape(
         &mut self,
         vertices: &Vec<Vertex>,

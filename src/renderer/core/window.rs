@@ -4,22 +4,22 @@ use winit::{
     dpi::PhysicalSize,
     event_loop::EventLoop,
     platform::unix::EventLoopExtUnix,
-    window::{Window, WindowBuilder},
+    window::{Window as WinitWindow, WindowBuilder},
 };
 
 use crate::Engine;
 
-pub struct IgnitionWindow {
+pub struct Window {
     pub event_loop: Option<EventLoop<()>>,
 
-    pub window: Window,
+    pub window: WinitWindow,
     pub size: PhysicalSize<u32>,
 
     pub surface: Surface,
     pub config: SurfaceConfiguration,
 }
 
-pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
+pub fn create_window() -> (EventLoop<()>, WinitWindow, PhysicalSize<u32>) {
     let event_loop = EventLoop::new_any_thread();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
@@ -28,7 +28,7 @@ pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
     (event_loop, window, size)
 }
 
-pub fn create_surface(instance: &Instance, window: &Window) -> Surface {
+pub fn create_surface(instance: &Instance, window: &WinitWindow) -> Surface {
     unsafe { instance.create_surface(&window) }
 }
 
@@ -49,18 +49,19 @@ pub fn generate_default_configuration(
 impl Engine {
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
-            self.window.size = new_size;
+            self.renderer.window.size = new_size;
 
-            self.window.config.width = new_size.width;
-            self.window.config.height = new_size.height;
+            self.renderer.window.config.width = new_size.width;
+            self.renderer.window.config.height = new_size.height;
 
             self.configure_surface();
         }
     }
 
     pub fn configure_surface(&mut self) {
-        self.window
+        self.renderer
+            .window
             .surface
-            .configure(&self.gpu.device, &self.window.config);
+            .configure(&self.renderer.gpu.device, &self.renderer.window.config);
     }
 }

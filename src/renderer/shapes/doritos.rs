@@ -1,11 +1,11 @@
 use wgpu::{ShaderModuleDescriptor, TextureFormat};
 
-use crate::core::{
-    rendering::{gpu::IgnitionGPU, vertex_buffer::Vertex},
+use crate::renderer::{
+    core::{gpu::GPU, vertex_buffer::Vertex},
     shapes::Shape,
 };
 
-impl IgnitionGPU {
+impl GPU {
     pub fn doritos(
         &mut self,
         vertices: &Vec<Vertex>,

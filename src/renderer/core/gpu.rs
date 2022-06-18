@@ -3,7 +3,7 @@ use wgpu::{
     RequestAdapterOptions, Surface,
 };
 
-pub struct IgnitionGPU {
+pub struct GPU {
     pub adapter: Adapter,
 
     pub device: Device,

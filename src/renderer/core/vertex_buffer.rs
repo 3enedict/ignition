@@ -3,9 +3,7 @@ use wgpu::{
     Buffer, BufferUsages, VertexAttribute, VertexBufferLayout, VertexFormat, VertexStepMode,
 };
 
-use crate::core::Engine;
-
-use super::gpu::IgnitionGPU;
+use crate::renderer::core::gpu::GPU;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -35,7 +33,7 @@ impl Vertex {
     }
 }
 
-impl IgnitionGPU {
+impl GPU {
     pub fn ignite_vertex_buffer(&mut self, vertices: &Vec<Vertex>) -> Buffer {
         let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
             label: None,

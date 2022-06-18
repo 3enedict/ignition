@@ -3,7 +3,7 @@ use wgpu::{
     RenderPassDescriptor, SurfaceError, SurfaceTexture, TextureView, TextureViewDescriptor,
 };
 
-use crate::core::Engine;
+use crate::Engine;
 
 pub struct Commands {
     frame: SurfaceTexture,
@@ -33,7 +33,7 @@ impl Commands {
 
     pub fn execute(self, engine: &Engine) {
         let command_buffer = Some(self.encoder.finish());
-        engine.gpu.queue.submit(command_buffer);
+        engine.renderer.gpu.queue.submit(command_buffer);
 
         self.frame.present();
     }
@@ -41,6 +41,7 @@ impl Commands {
 
 pub fn create_frame(engine: &Engine) -> Result<SurfaceTexture, SurfaceError> {
     let frame = engine
+        .renderer
         .window
         .surface
         .get_current_texture()
@@ -55,6 +56,7 @@ pub fn create_view(frame: &SurfaceTexture) -> TextureView {
 
 pub fn create_command_encoder(engine: &Engine) -> CommandEncoder {
     engine
+        .renderer
         .gpu
         .device
         .create_command_encoder(&CommandEncoderDescriptor { label: None })

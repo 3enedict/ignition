@@ -1,6 +1,6 @@
-use crate::ecs::IgnitionScene;
+use crate::ecs::Scene;
 
-impl IgnitionScene {
+impl Scene {
     pub fn entity(&mut self) -> usize {
         if self.available_entities.len() == 1 {
             self.generate_new_entity()
@@ -40,18 +40,18 @@ impl IgnitionScene {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::IgnitionScene;
+    use crate::ecs::Scene;
 
     #[test]
     fn generated_entity_is_correct() {
-        let mut scene = IgnitionScene::new();
+        let mut scene = Scene::new();
 
         assert_eq!(0, scene.generate_new_entity());
     }
 
     #[test]
     fn entity_generation_updates_available_entities() {
-        let mut scene = IgnitionScene::new();
+        let mut scene = Scene::new();
         scene.generate_new_entity();
 
         assert_eq!(1, scene.available_entities[0]);
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn deleted_entity_is_added_to_the_list_of_available_entities_for_recycling() {
-        let mut scene = IgnitionScene::new();
+        let mut scene = Scene::new();
 
         let entity = scene.entity();
         scene.delete(entity);
@@ -69,7 +69,7 @@ mod tests {
 
     #[test]
     fn recycle_entities_when_they_exist() {
-        let mut scene = IgnitionScene::new();
+        let mut scene = Scene::new();
 
         let entity = scene.entity();
         scene.delete(entity);

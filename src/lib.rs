@@ -1,18 +1,17 @@
-pub mod core;
 pub mod ecs;
+pub mod options;
 pub mod prelude;
+pub mod renderer;
 
-use crate::core::options::Options;
-use crate::core::rendering::{gpu::IgnitionGPU, window::IgnitionWindow};
-use crate::ecs::IgnitionScene;
+use crate::ecs::Scene;
+use crate::options::Options;
+use crate::renderer::Renderer;
 
 pub struct Engine {
     pub options: Options,
 
-    pub window: IgnitionWindow,
-    pub gpu: IgnitionGPU,
-
-    pub scene: IgnitionScene,
+    pub renderer: Renderer,
+    pub scene: Scene,
 }
 
 impl Engine {
@@ -22,5 +21,14 @@ impl Engine {
         }
 
         pollster::block_on(Engine::setup_engine())
+    }
+
+    pub async fn setup_engine() -> Engine {
+        Self {
+            options: Options::default(),
+
+            renderer: Renderer::new(),
+            scene: Scene::new(),
+        }
     }
 }

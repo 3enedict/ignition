@@ -1,13 +1,13 @@
 use std::{any::TypeId, ops::Deref};
 
-use crate::ecs::IgnitionScene;
+use crate::ecs::Scene;
 
 pub mod component_pool;
 use component_pool::ComponentPool;
 
 pub mod component_pool_trait;
 
-impl IgnitionScene {
+impl Scene {
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<G>() {
             self.assign_component_to_entity(entity, component)

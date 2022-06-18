@@ -6,14 +6,14 @@ pub mod entity;
 pub mod component;
 use component::component_pool_trait::ComponentPoolTrait;
 
-pub struct IgnitionScene {
+pub struct Scene {
     pub available_entities: Vec<usize>,
 
     pub component_indices: HashMap<TypeId, usize>,
     pub component_pools: Vec<Box<dyn ComponentPoolTrait>>,
 }
 
-impl IgnitionScene {
+impl Scene {
     pub fn new() -> Self {
         Self {
             available_entities: vec![0],
@@ -29,7 +29,7 @@ impl IgnitionScene {
 #[cfg(test)]
 mod tests {
     use crate::ecs::component::component_pool::ComponentPool;
-    use crate::ecs::IgnitionScene;
+    use crate::ecs::Scene;
 
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct Pos {
@@ -42,8 +42,8 @@ mod tests {
         speed: u32,
     }
 
-    fn init_four_entities() -> (IgnitionScene, usize, usize, usize, usize) {
-        let mut scene = IgnitionScene::new();
+    fn init_four_entities() -> (Scene, usize, usize, usize, usize) {
+        let mut scene = Scene::new();
 
         // Use older format in the name of backwards compatibility...
         let entity1 = scene.entity();

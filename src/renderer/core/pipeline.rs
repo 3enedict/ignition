@@ -3,9 +3,9 @@ use wgpu::{
     TextureFormat,
 };
 
-use crate::core::{rendering::gpu::IgnitionGPU, rendering::vertex_buffer::Vertex};
+use crate::renderer::{core::gpu::GPU, core::vertex_buffer::Vertex};
 
-impl IgnitionGPU {
+impl GPU {
     pub fn ignite_pipeline(
         &mut self,
         shaders: &ShaderModuleDescriptor,
