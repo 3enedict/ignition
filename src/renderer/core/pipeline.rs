@@ -1,19 +1,16 @@
 use wgpu::{
     PipelineLayoutDescriptor, RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor,
-    TextureFormat,
 };
 
-use crate::renderer::{core::gpu::GPU, core::vertex_buffer::Vertex};
+use crate::renderer::core::vertex_buffer::Vertex;
+use crate::renderer::Renderer;
 
-impl GPU {
-    pub fn ignite_pipeline(
-        &mut self,
-        shaders: &ShaderModuleDescriptor,
-        format: TextureFormat,
-    ) -> RenderPipeline {
-        let shader = self.device.create_shader_module(shaders);
+impl Renderer {
+    pub fn ignite_pipeline(&mut self, shaders: &ShaderModuleDescriptor) -> RenderPipeline {
+        let shader = self.gpu.device.create_shader_module(shaders);
 
         let pipeline_layout = self
+            .gpu
             .device
             .create_pipeline_layout(&PipelineLayoutDescriptor {
                 label: None,
@@ -22,6 +19,7 @@ impl GPU {
             });
 
         let pipeline = self
+            .gpu
             .device
             .create_render_pipeline(&RenderPipelineDescriptor {
                 label: None,
@@ -35,7 +33,7 @@ impl GPU {
                     module: &shader,
                     entry_point: "fs_main",
                     targets: &[wgpu::ColorTargetState {
-                        format,
+                        format: self.window.config.format,
                         blend: Some(wgpu::BlendState::REPLACE),
                         write_mask: wgpu::ColorWrites::ALL,
                     }],

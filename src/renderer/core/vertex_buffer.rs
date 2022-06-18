@@ -3,7 +3,7 @@ use wgpu::{
     Buffer, BufferUsages, VertexAttribute, VertexBufferLayout, VertexFormat, VertexStepMode,
 };
 
-use crate::renderer::core::gpu::GPU;
+use crate::renderer::Renderer;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -33,9 +33,9 @@ impl Vertex {
     }
 }
 
-impl GPU {
+impl Renderer {
     pub fn ignite_vertex_buffer(&mut self, vertices: &Vec<Vertex>) -> Buffer {
-        let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+        let vertex_buffer = self.gpu.device.create_buffer_init(&BufferInitDescriptor {
             label: None,
             contents: bytemuck::cast_slice(vertices),
             usage: BufferUsages::VERTEX,

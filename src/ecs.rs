@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn add_component() {
-        let (mut scene, _entity1, _entity2, _entity3, _entity4) = init_four_entities();
+        let (scene, _entity1, _entity2, _entity3, _entity4) = init_four_entities();
 
         assert_eq!(
             &mut ComponentPool {

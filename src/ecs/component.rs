@@ -1,4 +1,4 @@
-use std::{any::TypeId, ops::Deref};
+use std::any::TypeId;
 
 use crate::ecs::Scene;
 
@@ -31,6 +31,20 @@ impl Scene {
             .unwrap()
             .as_any_mut()
             .downcast_mut::<ComponentPool<G>>()
+            .unwrap()
+    }
+
+    pub fn get_component<G: 'static>(&self, entity: usize) -> &G {
+        self.get_component_pool::<G>()
+            .component_array
+            .get(entity)
+            .unwrap()
+    }
+
+    pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &G {
+        self.get_component_pool_mut::<G>()
+            .component_array
+            .get(entity)
             .unwrap()
     }
 

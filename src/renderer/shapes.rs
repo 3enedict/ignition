@@ -1,6 +1,7 @@
-use wgpu::{Buffer, RenderPass, RenderPipeline, ShaderModuleDescriptor, TextureFormat};
+use wgpu::{Buffer, RenderPass, RenderPipeline, ShaderModuleDescriptor};
 
-use crate::renderer::core::{gpu::GPU, vertex_buffer::Vertex};
+use crate::renderer::core::vertex_buffer::Vertex;
+use crate::renderer::Renderer;
 
 pub mod crackers;
 pub mod doritos;
@@ -12,15 +13,10 @@ pub struct Shape {
     pub num_vertices: u32,
 }
 
-impl GPU {
-    pub fn shape(
-        &mut self,
-        vertices: &Vec<Vertex>,
-        shaders: &ShaderModuleDescriptor,
-        format: TextureFormat,
-    ) -> Shape {
+impl Renderer {
+    pub fn shape(&mut self, vertices: &Vec<Vertex>, shaders: &ShaderModuleDescriptor) -> Shape {
         Shape {
-            pipeline: self.ignite_pipeline(shaders, format),
+            pipeline: self.ignite_pipeline(shaders),
             vertex_buffer: self.ignite_vertex_buffer(vertices),
 
             num_vertices: vertices.len() as u32,

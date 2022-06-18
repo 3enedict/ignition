@@ -1,17 +1,9 @@
-use wgpu::{ShaderModuleDescriptor, TextureFormat};
+use wgpu::ShaderModuleDescriptor;
 
-use crate::renderer::{
-    core::{gpu::GPU, vertex_buffer::Vertex},
-    shapes::Shape,
-};
+use crate::renderer::{core::vertex_buffer::Vertex, shapes::Shape, Renderer};
 
-impl GPU {
-    pub fn doritos(
-        &mut self,
-        vertices: &Vec<Vertex>,
-        shaders: &ShaderModuleDescriptor,
-        format: TextureFormat,
-    ) -> Shape {
-        self.shape(vertices, shaders, format)
+impl Renderer {
+    pub fn doritos(&mut self, vertices: &Vec<Vertex>, shaders: &ShaderModuleDescriptor) -> Shape {
+        self.shape(vertices, shaders)
     }
 }
