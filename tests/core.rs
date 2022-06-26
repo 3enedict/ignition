@@ -1,6 +1,7 @@
 use std::time::{Duration, Instant};
 
 extern crate ignition;
+use ignition::ecs::component::component_pool::ComponentPool;
 use ignition::prelude::*;
 
 pub struct Vertices {
@@ -54,44 +55,57 @@ fn alternating_triangles() {
 
     let mut instant = Instant::now();
     let mut swap = true;
-    let mut already_done = false;
     let mut triangle1_state = true;
     let mut triangle2_state = true;
 
     engine.game_loop(move |engine: &mut Engine| {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
+
+            println!("Start");
+            if swap {
+                if !triangle2_state {
+                    engine.scene.enable::<Vec<Vertex>>(triangle2);
+                    triangle2_state = true;
+                    println!("Enable triangle 2");
+                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                }
+
+                if triangle1_state {
+                    engine.scene.disable::<Vec<Vertex>>(triangle1);
+                    triangle1_state = false;
+                    println!("Disable triangle 1");
+                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                }
+            } else {
+                if !triangle1_state {
+                    engine.scene.enable::<Vec<Vertex>>(triangle1);
+                    triangle1_state = true;
+                    println!("Enable triangle 1");
+                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                }
+
+                if triangle2_state {
+                    engine.scene.disable::<Vec<Vertex>>(triangle2);
+                    triangle2_state = false;
+                    println!("Disable triangle 2");
+                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                }
+            }
+
+            println!("End");
+
             swap = !swap;
-
-            already_done = false;
-        }
-
-        if swap && !already_done {
-            if !triangle2_state {
-                engine.scene.enable::<Shape>(triangle2);
-                triangle2_state = true;
-            }
-
-            if triangle1_state {
-                engine.scene.disable::<Shape>(triangle1);
-                triangle1_state = false;
-            }
-
-            already_done = true;
-        } else if !already_done {
-            if !triangle1_state {
-                engine.scene.enable::<Shape>(triangle1);
-                triangle1_state = true;
-            }
-
-            if triangle2_state {
-                engine.scene.disable::<Shape>(triangle2);
-                triangle2_state = false;
-            }
-
-            already_done = true;
         }
     });
+}
+
+fn print_pool(pool: &ComponentPool<Vec<Vertex>>) {
+    println!("{}", pool.num_components);
+    println!("{:?}", pool.sparse_array);
+    println!("{:?}", pool.packed_array);
+    println!("{:?}", pool.component_array);
+    println!("");
 }
 
 /*
@@ -117,22 +131,18 @@ const POLYGON_VERTICES: &[Vertex] = &[
         color: [0.5, 0.0, 0.5],
     },
 ];
-
 const POLYGON_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
-
 #[ignore]
 #[test]
 fn polygon() {
     let options = OptionsBuilder::default().any_thread(true).build();
     let mut engine = Engine::ignite(options);
-
     let polygon = indexed_shape(
         &mut engine,
         &Vec::from(POLYGON_VERTICES),
         &Vec::from(POLYGON_INDICES),
         include_wgsl!("shaders/gradient.wgsl"),
     );
-
     game_loop! (
         draw!(polygon);
     );

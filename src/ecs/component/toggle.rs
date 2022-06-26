@@ -66,8 +66,8 @@ mod tests {
                 num_components: 2,
 
                 sparse_array: vec! { 2, 1, 0 },
-                packed_array: vec! { 1, 2, 0 },
-                component_array: vec! { 64, 128, 32 },
+                packed_array: vec! { 2, 1, 0 },
+                component_array: vec! { 128, 64, 32 },
             },
             scene.get_component_pool::<i32>(),
         );
