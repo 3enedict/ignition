@@ -7,6 +7,7 @@ use component_pool::ComponentPool;
 
 pub mod component_pool_trait;
 pub mod getters;
+pub mod toggle;
 
 impl Scene {
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {

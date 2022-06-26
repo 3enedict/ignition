@@ -41,11 +41,24 @@ impl<G> ComponentPool<G> {
 
         sparse_array[entity] = value as i32;
     }
+
+    pub fn iter(&self) -> impl Iterator<Item = &G> {
+        let (left, _right) = self.component_array.split_at(self.num_components);
+
+        left.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut G> {
+        let (left, _right) = self.component_array.split_at_mut(self.num_components);
+
+        left.iter_mut()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::ecs::component::component_pool::ComponentPool;
+    use crate::ecs::component::component_pool_trait::ComponentPoolTrait;
 
     #[test]
     fn adding_an_entity_to_sparse_array_fills_the_gaps() {
@@ -61,5 +74,30 @@ mod tests {
         ComponentPool::<i32>::add_entity_to_sparse_array(0, 1, &mut sparse_array);
 
         assert_eq!(vec![1, -1, 0], sparse_array);
+    }
+
+    #[test]
+    fn iterator_does_not_go_over_disabled_components() {
+        let mut component_pool = ComponentPool::new_with_entity(2, 32);
+        component_pool.assign_component_to_entity(4, 64);
+        component_pool.assign_component_to_entity(5, 128);
+
+        component_pool.disable_entity(2);
+
+        assert_eq!(vec![&128, &64], component_pool.iter().collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn iterator_goes_over_reenabled_components() {
+        let mut component_pool = ComponentPool::new_with_entity(2, 32);
+        component_pool.assign_component_to_entity(4, 64);
+        component_pool.assign_component_to_entity(5, 128);
+
+        component_pool.disable_entity(2);
+        component_pool.disable_entity(5);
+
+        component_pool.enable_entity(5);
+
+        assert_eq!(vec![&128, &64], component_pool.iter().collect::<Vec<_>>());
     }
 }

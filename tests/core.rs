@@ -54,22 +54,43 @@ fn alternating_triangles() {
 
     let mut instant = Instant::now();
     let mut swap = true;
+    let mut already_done = false;
+    let mut triangle1_state = true;
+    let mut triangle2_state = true;
 
     engine.game_loop(move |engine: &mut Engine| {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
             swap = !swap;
+
+            already_done = false;
         }
 
-        /*
-        if swap {
-            engine.scene.get_component_pool::<bool>().component_array[0] = true;
-            engine.scene.get_component_pool::<bool>().component_array[1] = false;
-        } else {
-            engine.scene.get_component_pool::<bool>().component_array[1] = true;
-            engine.scene.get_component_pool::<bool>().component_array[0] = false;
+        if swap && !already_done {
+            if !triangle2_state {
+                engine.scene.enable::<Shape>(triangle2);
+                triangle2_state = true;
+            }
+
+            if triangle1_state {
+                engine.scene.disable::<Shape>(triangle1);
+                triangle1_state = false;
+            }
+
+            already_done = true;
+        } else if !already_done {
+            if !triangle1_state {
+                engine.scene.enable::<Shape>(triangle1);
+                triangle1_state = true;
+            }
+
+            if triangle2_state {
+                engine.scene.disable::<Shape>(triangle2);
+                triangle2_state = false;
+            }
+
+            already_done = true;
         }
-        */
     });
 }
 

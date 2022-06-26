@@ -1,5 +1,3 @@
-use std::any::TypeId;
-
 use wgpu::RenderPass;
 
 use winit::{
@@ -21,14 +19,10 @@ pub mod vertex_buffer;
 
 impl Engine {
     pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
-        if self
-            .scene
-            .component_indices
-            .contains_key(&TypeId::of::<Shape>())
-        {
+        if self.scene.component_exists::<Shape>() {
             let shapes = self.scene.get_component_pool::<Shape>();
 
-            for shape in shapes.component_array.iter() {
+            for shape in shapes.iter() {
                 shape.render(render_pass);
             }
 
