@@ -36,7 +36,7 @@ mod tests {
             &ComponentPool {
                 num_components: 1,
 
-                sparse_array: vec! { 2, 0, 1 },
+                sparse_array: vec! { 2, 1, 0 },
                 packed_array: vec! { 2, 1, 0 },
                 component_array: vec! { 128, 64, 32 },
             },

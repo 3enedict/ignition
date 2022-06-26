@@ -98,6 +98,6 @@ mod tests {
 
         component_pool.enable_entity(5);
 
-        assert_eq!(vec![&128, &64], component_pool.iter().collect::<Vec<_>>());
+        assert_eq!(vec![&64, &128], component_pool.iter().collect::<Vec<_>>());
     }
 }

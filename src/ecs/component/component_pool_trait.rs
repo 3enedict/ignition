@@ -65,7 +65,12 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
     }
 
     fn move_to_back(&mut self, entity: usize) {
-        self.swap(entity, self.sparse_array.len() - 1);
+        let component = self.sparse_array[entity] as usize;
+        let component_destination = self.num_components - 1;
+
+        let entity_destination = self.packed_array[component_destination];
+
+        self.swap_arrays(entity, entity_destination, component, component_destination);
     }
 
     fn swap(&mut self, entity: usize, destination: usize) {
