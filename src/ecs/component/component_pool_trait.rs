@@ -11,14 +11,14 @@ pub trait ComponentPoolTrait {
 
     fn move_to_back(&mut self, entity: usize);
 
-    fn swap(&mut self, entity: usize, destination: usize);
+    fn swap_entities(&mut self, entity: usize, destination: usize);
     fn swap_components(&mut self, component: usize, destination: usize);
-    fn swap_arrays(
+    fn swap(
         &mut self,
-        comp_in_sparse: usize,
-        dest_in_sparse: usize,
-        comp_in_packed: usize,
-        dest_in_packed: usize,
+        entity: usize,
+        entity_destination: usize,
+        component: usize,
+        component_destination: usize,
     );
 }
 
@@ -70,33 +70,33 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
         let entity_destination = self.packed_array[component_destination];
 
-        self.swap_arrays(entity, entity_destination, component, component_destination);
+        self.swap(entity, entity_destination, component, component_destination);
     }
 
-    fn swap(&mut self, entity: usize, destination: usize) {
-        let comp_in_packed = self.sparse_array[entity] as usize;
-        let dest_in_packed = self.sparse_array[destination] as usize;
+    fn swap_entities(&mut self, entity: usize, entity_destination: usize) {
+        let component = self.sparse_array[entity] as usize;
+        let component_destination = self.sparse_array[entity_destination] as usize;
 
-        self.swap_arrays(entity, destination, comp_in_packed, dest_in_packed);
+        self.swap(entity, entity_destination, component, component_destination);
     }
 
-    fn swap_components(&mut self, component: usize, destination: usize) {
-        let comp_in_sparse = self.packed_array[component];
-        let dest_in_sparse = self.packed_array[destination];
+    fn swap_components(&mut self, component: usize, component_destination: usize) {
+        let entity = self.packed_array[component];
+        let entity_destination = self.packed_array[component_destination];
 
-        self.swap_arrays(comp_in_sparse, dest_in_sparse, component, destination);
+        self.swap(entity, entity_destination, component, component_destination);
     }
 
-    fn swap_arrays(
+    fn swap(
         &mut self,
-        comp_in_sparse: usize,
-        dest_in_sparse: usize,
-        comp_in_packed: usize,
-        dest_in_packed: usize,
+        entity: usize,
+        entity_destination: usize,
+        component: usize,
+        component_destination: usize,
     ) {
-        self.sparse_array.swap(comp_in_sparse, dest_in_sparse);
-        self.packed_array.swap(comp_in_packed, dest_in_packed);
-        self.component_array.swap(comp_in_packed, dest_in_packed);
+        self.sparse_array.swap(entity, entity_destination);
+        self.packed_array.swap(component, component_destination);
+        self.component_array.swap(component, component_destination);
     }
 }
 
@@ -107,8 +107,8 @@ mod tests {
     #[test]
     fn sparse_array_reflects_entity_deletion_correctly() {
         let mut component_pool = ComponentPool::new_with_entity(2, 32);
-        component_pool.assign_component_to_entity(4, 64);
-        component_pool.assign_component_to_entity(5, 128);
+        component_pool.assign_component(4, 64);
+        component_pool.assign_component(5, 128);
 
         component_pool.delete_entity(2);
 

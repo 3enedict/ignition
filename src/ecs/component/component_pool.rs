@@ -12,19 +12,16 @@ impl<G> ComponentPool<G> {
         let mut sparse_array = Vec::with_capacity(entity + 1);
         Self::add_entity_to_sparse_array(entity, 0, &mut sparse_array);
 
-        let packed_array = vec![entity];
-        let component_array = vec![component];
-
         Self {
             num_components: 1,
 
             sparse_array,
-            packed_array,
-            component_array,
+            packed_array: vec![entity],
+            component_array: vec![component],
         }
     }
 
-    pub fn assign_component_to_entity(&mut self, entity: usize, component: G) {
+    pub fn assign_component(&mut self, entity: usize, component: G) {
         Self::add_entity_to_sparse_array(entity, self.num_components, &mut self.sparse_array);
 
         self.packed_array.push(entity);
@@ -34,12 +31,15 @@ impl<G> ComponentPool<G> {
 
     /* Utility functions */
 
-    fn add_entity_to_sparse_array(entity: usize, value: usize, sparse_array: &mut Vec<i32>) {
+    pub fn add_entity_to_sparse_array(entity: usize, value: usize, sparse_array: &mut Vec<i32>) {
+        Self::prolong_sparse_array(entity, sparse_array);
+        sparse_array[entity] = value as i32;
+    }
+
+    pub fn prolong_sparse_array(entity: usize, sparse_array: &mut Vec<i32>) {
         if entity + 1 > sparse_array.len() {
             sparse_array.resize(entity + 1, -1);
         }
-
-        sparse_array[entity] = value as i32;
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &G> {
@@ -79,8 +79,8 @@ mod tests {
     #[test]
     fn iterator_does_not_go_over_disabled_components() {
         let mut component_pool = ComponentPool::new_with_entity(2, 32);
-        component_pool.assign_component_to_entity(4, 64);
-        component_pool.assign_component_to_entity(5, 128);
+        component_pool.assign_component(4, 64);
+        component_pool.assign_component(5, 128);
 
         component_pool.disable_entity(2);
 
@@ -90,8 +90,8 @@ mod tests {
     #[test]
     fn iterator_goes_over_reenabled_components() {
         let mut component_pool = ComponentPool::new_with_entity(2, 32);
-        component_pool.assign_component_to_entity(4, 64);
-        component_pool.assign_component_to_entity(5, 128);
+        component_pool.assign_component(4, 64);
+        component_pool.assign_component(5, 128);
 
         component_pool.disable_entity(2);
         component_pool.disable_entity(5);

@@ -68,28 +68,28 @@ fn alternating_triangles() {
                     engine.scene.enable::<Vec<Vertex>>(triangle2);
                     triangle2_state = true;
                     println!("Enable triangle 2");
-                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
 
                 if triangle1_state {
                     engine.scene.disable::<Vec<Vertex>>(triangle1);
                     triangle1_state = false;
                     println!("Disable triangle 1");
-                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
             } else {
                 if !triangle1_state {
                     engine.scene.enable::<Vec<Vertex>>(triangle1);
                     triangle1_state = true;
                     println!("Enable triangle 1");
-                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
 
                 if triangle2_state {
                     engine.scene.disable::<Vec<Vertex>>(triangle2);
                     triangle2_state = false;
                     println!("Disable triangle 2");
-                    print_pool(engine.scene.get_component_pool::<Vec<Vertex>>());
+                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
             }
 

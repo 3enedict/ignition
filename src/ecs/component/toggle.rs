@@ -2,13 +2,11 @@ use crate::ecs::Scene;
 
 impl Scene {
     pub fn enable<G: 'static>(&mut self, entity: usize) {
-        self.get_component_pool_trait_mut::<G>()
-            .enable_entity(entity);
+        self.get_trait_mut::<G>().enable_entity(entity);
     }
 
     pub fn disable<G: 'static>(&mut self, entity: usize) {
-        self.get_component_pool_trait_mut::<G>()
-            .disable_entity(entity);
+        self.get_trait_mut::<G>().disable_entity(entity);
     }
 }
 
@@ -40,7 +38,7 @@ mod tests {
                 packed_array: vec! { 2, 1, 0 },
                 component_array: vec! { 128, 64, 32 },
             },
-            scene.get_component_pool::<i32>(),
+            scene.get::<i32>(),
         );
     }
 
@@ -69,7 +67,7 @@ mod tests {
                 packed_array: vec! { 2, 1, 0 },
                 component_array: vec! { 128, 64, 32 },
             },
-            scene.get_component_pool::<i32>(),
+            scene.get::<i32>(),
         );
     }
 }

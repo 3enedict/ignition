@@ -72,7 +72,7 @@ mod tests {
                 packed_array: vec! { 2 },
                 component_array: vec! { Pos { x: 1, y: -3 } },
             },
-            scene.get_component_pool::<Pos>()
+            scene.get::<Pos>()
         );
 
         assert_eq!(
@@ -83,7 +83,7 @@ mod tests {
                 packed_array: vec! { 0, 2 },
                 component_array: vec! { Vel { speed: 286 }, Vel { speed: 30 } },
             },
-            scene.get_component_pool::<Vel>()
+            scene.get::<Vel>()
         );
     }
 
@@ -104,7 +104,7 @@ mod tests {
                 packed_array: vec! { 2, 0 },
                 component_array: vec! { Pos { x: 1, y: -3 }, Pos { x: 26, y: 39 } },
             },
-            scene.get_component_pool::<Pos>()
+            scene.get::<Pos>()
         );
 
         assert_eq!(
@@ -115,7 +115,7 @@ mod tests {
                 packed_array: vec! { 2 },
                 component_array: vec! { Vel { speed: 30 } },
             },
-            scene.get_component_pool::<Vel>()
+            scene.get::<Vel>()
         );
     }
 }
