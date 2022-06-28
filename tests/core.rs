@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 extern crate ignition;
-use ignition::ecs::component::component_pool::ComponentPool;
+use ignition::ecs::ComponentPool;
 use ignition::prelude::*;
 
 pub struct Vertices {

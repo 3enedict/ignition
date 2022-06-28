@@ -1,7 +1,5 @@
-use crate::ecs::{component::ComponentPool, Scene};
+use crate::ecs::{ComponentPool, ComponentPoolTrait, Scene};
 use std::any::TypeId;
-
-use super::component_pool_trait::ComponentPoolTrait;
 
 impl Scene {
     pub fn get_trait<G: 'static>(&self) -> &Box<dyn ComponentPoolTrait> {
@@ -36,5 +34,19 @@ impl Scene {
 
     pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &G {
         self.get_mut::<G>().component_array.get(entity).unwrap()
+    }
+
+    pub fn get_current_entity(&self) -> usize {
+        self.available_entities[self.available_entities.len() - 1]
+    }
+}
+
+impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self as &dyn std::any::Any
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self as &mut dyn std::any::Any
     }
 }
