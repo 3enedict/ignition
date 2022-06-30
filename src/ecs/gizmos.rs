@@ -3,7 +3,7 @@ use std::any::TypeId;
 
 impl Scene {
     pub fn component_exists<G: 'static>(&mut self) -> bool {
-        self.component_indices.contains_key(&TypeId::of::<G>())
+        self.component_pools.contains_key(&TypeId::of::<G>())
     }
 }
 

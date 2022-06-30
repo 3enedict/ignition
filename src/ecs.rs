@@ -14,9 +14,7 @@ pub mod gizmos;
 
 pub struct Scene {
     pub available_entities: Vec<usize>,
-
-    pub component_indices: HashMap<TypeId, usize>,
-    pub component_pools: Vec<Box<dyn ComponentPoolTrait>>,
+    pub component_pools: HashMap<TypeId, Box<dyn ComponentPoolTrait>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]

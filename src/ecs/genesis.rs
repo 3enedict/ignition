@@ -7,9 +7,7 @@ impl Scene {
     pub fn new() -> Self {
         Self {
             available_entities: vec![0],
-
-            component_indices: HashMap::new(),
-            component_pools: Vec::new(),
+            component_pools: HashMap::new(),
         }
     }
 
@@ -49,19 +47,10 @@ impl Scene {
     }
 
     pub fn new_component_pool<G: 'static>(&mut self, entity: usize, component: G) {
-        self.push_new_component_index::<G>();
-        self.push_new_component_pool(entity, component);
-    }
-
-    pub fn push_new_component_index<G: 'static>(&mut self) {
         let type_id = TypeId::of::<G>();
-        let index = self.component_pools.len();
-        self.component_indices.insert(type_id, index);
-    }
-
-    pub fn push_new_component_pool<G: 'static>(&mut self, entity: usize, component: G) {
         let component_pool = Box::new(ComponentPool::new_with_entity(entity, component));
-        self.component_pools.push(component_pool);
+
+        self.component_pools.insert(type_id, component_pool);
     }
 }
 

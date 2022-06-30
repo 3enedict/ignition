@@ -7,7 +7,7 @@ impl Scene {
     }
 
     pub fn delete_entity_from_each_component_pool(&mut self, entity: usize) {
-        for component_pool in self.component_pools.iter_mut() {
+        for (_type_id, component_pool) in self.component_pools.iter_mut() {
             component_pool.delete_entity(entity);
         }
     }

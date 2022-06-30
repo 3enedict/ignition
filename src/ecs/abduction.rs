@@ -3,15 +3,11 @@ use std::any::TypeId;
 
 impl Scene {
     pub fn get_trait<G: 'static>(&self) -> &Box<dyn ComponentPoolTrait> {
-        self.component_pools
-            .get(*self.component_indices.get(&TypeId::of::<G>()).unwrap())
-            .unwrap()
+        self.component_pools.get(&TypeId::of::<G>()).unwrap()
     }
 
     pub fn get_trait_mut<G: 'static>(&mut self) -> &mut Box<dyn ComponentPoolTrait> {
-        self.component_pools
-            .get_mut(*self.component_indices.get(&TypeId::of::<G>()).unwrap())
-            .unwrap()
+        self.component_pools.get_mut(&TypeId::of::<G>()).unwrap()
     }
 
     pub fn get<G: 'static>(&self) -> &ComponentPool<G> {

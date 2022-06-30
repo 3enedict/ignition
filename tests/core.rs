@@ -1,7 +1,6 @@
 use std::time::{Duration, Instant};
 
 extern crate ignition;
-use ignition::ecs::ComponentPool;
 use ignition::prelude::*;
 
 pub struct Vertices {
@@ -62,50 +61,31 @@ fn alternating_triangles() {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
 
-            println!("Start");
             if swap {
                 if !triangle2_state {
-                    engine.scene.enable::<Vec<Vertex>>(triangle2);
+                    engine.scene.enable::<Shape>(triangle2);
                     triangle2_state = true;
-                    println!("Enable triangle 2");
-                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
 
                 if triangle1_state {
-                    engine.scene.disable::<Vec<Vertex>>(triangle1);
+                    engine.scene.disable::<Shape>(triangle1);
                     triangle1_state = false;
-                    println!("Disable triangle 1");
-                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
             } else {
                 if !triangle1_state {
-                    engine.scene.enable::<Vec<Vertex>>(triangle1);
+                    engine.scene.enable::<Shape>(triangle1);
                     triangle1_state = true;
-                    println!("Enable triangle 1");
-                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
 
                 if triangle2_state {
-                    engine.scene.disable::<Vec<Vertex>>(triangle2);
+                    engine.scene.disable::<Shape>(triangle2);
                     triangle2_state = false;
-                    println!("Disable triangle 2");
-                    print_pool(engine.scene.get::<Vec<Vertex>>());
                 }
             }
-
-            println!("End");
 
             swap = !swap;
         }
     });
-}
-
-fn print_pool(pool: &ComponentPool<Vec<Vertex>>) {
-    println!("{}", pool.num_components);
-    println!("{:?}", pool.sparse_array);
-    println!("{:?}", pool.packed_array);
-    println!("{:?}", pool.component_array);
-    println!("");
 }
 
 /*
