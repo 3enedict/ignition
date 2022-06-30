@@ -8,5 +8,5 @@ THIS PROJECT IS NOWHERE NEAR BEING USABLE.
 
 To help understand the inner workings of ignition, I've gone ahead and sketched out more or less what each system looks like. So if you have trouble understanding some part of the code, here are a few very helpful resources.
 
-![ECS](https://user-images.githubusercontent.com/52417950/171990743-e331d18b-82fa-46eb-8b58-4f01898c2bef.png)
+![ECS](https://docs.google.com/drawings/d/e/2PACX-1vSGxmow8gYUg3d7VZTdKDNQFaGwV0jok1Uf3_FFWkUyMIBrCF5IwcfcZX0lOEpNTjizqPoCb9NXa3xi/pub?w=2880&h=2160)
 
