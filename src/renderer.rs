@@ -1,5 +1,6 @@
 use wgpu::{Backends, Instance};
 
+use crate::liberty::Parameters;
 use crate::renderer::core::gpu::{get_adapter, get_device, GPU};
 use crate::renderer::core::window::{
     create_surface, create_window, generate_default_configuration, Window,
@@ -15,8 +16,8 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn new() -> Self {
-        let (event_loop, window, size) = create_window();
+    pub fn new(parameters: &Parameters) -> Self {
+        let (event_loop, window, size) = create_window(parameters);
 
         let instance = Instance::new(Backends::all());
         let surface = create_surface(&instance, &window);

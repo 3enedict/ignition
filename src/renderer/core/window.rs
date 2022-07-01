@@ -7,7 +7,7 @@ use winit::{
     window::{Window as WinitWindow, WindowBuilder},
 };
 
-use crate::Engine;
+use crate::{liberty::Parameters, Engine};
 
 pub struct Window {
     pub event_loop: Option<EventLoop<()>>,
@@ -19,9 +19,12 @@ pub struct Window {
     pub config: SurfaceConfiguration,
 }
 
-pub fn create_window() -> (EventLoop<()>, WinitWindow, PhysicalSize<u32>) {
+pub fn create_window(parameters: &Parameters) -> (EventLoop<()>, WinitWindow, PhysicalSize<u32>) {
     let event_loop = EventLoop::new_any_thread();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
+    let window = WindowBuilder::new()
+        .with_title(parameters.window_title.clone())
+        .build(&event_loop)
+        .unwrap();
 
     let size = window.inner_size();
 

@@ -40,7 +40,7 @@ impl Engine {
             .take()
             .unwrap()
             .run(move |event, _, control_flow| {
-                *control_flow = self.options.control_flow;
+                *control_flow = self.parameters.control_flow;
 
                 match event {
                     Event::WindowEvent {
