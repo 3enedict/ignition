@@ -100,135 +100,17 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::{ComponentPool, Scene};
+    use crate::ecs::Scene;
 
-    #[derive(Debug, Eq, PartialEq, Clone)]
-    struct Pos {
-        x: i32,
-        y: i32,
-    }
-
-    #[derive(Debug, Eq, PartialEq, Clone)]
-    struct Vel {
-        speed: u32,
-    }
-
-    fn init_four_entities() -> (Scene, usize, usize, usize, usize) {
+    #[test]
+    fn creating_entities_simply_increments_an_id() {
         let mut scene = Scene::new();
+        let mut entities: Vec<usize> = Vec::new();
 
-        // Use older format in the name of backwards compatibility...
-        let entity1 = scene.entity();
-        scene.component(entity1, Vel { speed: 286 });
+        for _i in 0..10 {
+            entities.push(scene.entity());
+        }
 
-        let entity2 = scene.entity();
-
-        let entity3 = scene.entity();
-        scene.component(entity3, Pos { x: 1, y: -3 });
-        scene.component(entity3, Vel { speed: 30 });
-
-        let entity4 = scene.entity();
-
-        (scene, entity1, entity2, entity3, entity4)
-    }
-
-    #[test]
-    fn creating_components_results_in_correct_storage_inside_the_component_pool() {
-        let (scene, _entity1, _entity2, _entity3, _entity4) = init_four_entities();
-
-        assert_eq!(
-            &mut ComponentPool {
-                num_components: 1,
-
-                sparse_array: vec! { -1, -1, 0 },
-                packed_array: vec! { 2 },
-                component_array: vec! { Pos { x: 1, y: -3 } },
-            },
-            scene.get::<Pos>()
-        );
-
-        assert_eq!(
-            &mut ComponentPool {
-                num_components: 2,
-
-                sparse_array: vec! { 0, -1, 1 },
-                packed_array: vec! { 0, 2 },
-                component_array: vec! { Vel { speed: 286 }, Vel { speed: 30 } },
-            },
-            scene.get::<Vel>()
-        );
-    }
-
-    #[test]
-    fn deleting_a_component_is_reflected_in_its_component_pool() {
-        let (mut scene, entity1, _entity2, _entity3, _entity4) = init_four_entities();
-
-        scene.delete(entity1);
-
-        let entity4 = scene.entity();
-        scene.component(entity4, Pos { x: 26, y: 39 });
-
-        assert_eq!(
-            &mut ComponentPool {
-                num_components: 2,
-
-                sparse_array: vec! { 1, -1, 0 },
-                packed_array: vec! { 2, 0 },
-                component_array: vec! { Pos { x: 1, y: -3 }, Pos { x: 26, y: 39 } },
-            },
-            scene.get::<Pos>()
-        );
-
-        assert_eq!(
-            &mut ComponentPool {
-                num_components: 1,
-
-                sparse_array: vec! { -1, -1, 0 },
-                packed_array: vec! { 2 },
-                component_array: vec! { Vel { speed: 30 } },
-            },
-            scene.get::<Vel>()
-        );
-    }
-
-    #[test]
-    fn generating_new_entity_id_returns_correct_id() {
-        let mut scene = Scene::new();
-
-        assert_eq!(0, scene.generate_new_entity());
-    }
-
-    #[test]
-    fn generating_new_entity_id_changes_the_list_of_available_entities_correctly() {
-        let mut scene = Scene::new();
-        scene.generate_new_entity();
-
-        assert_eq!(1, scene.available_entities[0]);
-    }
-
-    #[test]
-    fn generating_an_entity_uses_recycled_ids_if_available() {
-        let mut scene = Scene::new();
-
-        let entity = scene.entity();
-        scene.delete(entity);
-        let recycled_entity = scene.entity();
-
-        assert_eq!(0, recycled_entity);
-    }
-
-    #[test]
-    fn adding_an_entity_to_sparse_array_fills_the_gaps() {
-        let mut sparse_array = vec![-1, -1, 0];
-        ComponentPool::<i32>::add_entity_to_sparse_array(5, 1, &mut sparse_array);
-
-        assert_eq!(vec![-1, -1, 0, -1, -1, 1], sparse_array);
-    }
-
-    #[test]
-    fn adding_an_entity_inside_sparse_array_does_not_overwrite_parts_of_it() {
-        let mut sparse_array = vec![-1, -1, 0];
-        ComponentPool::<i32>::add_entity_to_sparse_array(0, 1, &mut sparse_array);
-
-        assert_eq!(vec![1, -1, 0], sparse_array);
+        assert_eq!(vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9], entities);
     }
 }
