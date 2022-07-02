@@ -113,4 +113,14 @@ mod tests {
 
         assert_eq!(vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9], entities);
     }
+
+    #[test]
+    fn creating_an_entity_after_having_deleted_one_uses_recycled_id() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.delete(entity);
+
+        assert_eq!(0, scene.entity());
+    }
 }
