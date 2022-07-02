@@ -52,38 +52,16 @@ fn alternating_triangles() {
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 
+    engine.scene.disable::<Shape>(triangle1);
+
     let mut instant = Instant::now();
-    let mut swap = true;
-    let mut triangle1_state = true;
-    let mut triangle2_state = true;
 
     engine.game_loop(move |engine: &mut Engine| {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
 
-            if swap {
-                if !triangle2_state {
-                    engine.scene.enable::<Shape>(triangle2);
-                    triangle2_state = true;
-                }
-
-                if triangle1_state {
-                    engine.scene.disable::<Shape>(triangle1);
-                    triangle1_state = false;
-                }
-            } else {
-                if !triangle1_state {
-                    engine.scene.enable::<Shape>(triangle1);
-                    triangle1_state = true;
-                }
-
-                if triangle2_state {
-                    engine.scene.disable::<Shape>(triangle2);
-                    triangle2_state = false;
-                }
-            }
-
-            swap = !swap;
+            engine.scene.toggle::<Shape>(triangle1);
+            engine.scene.toggle::<Shape>(triangle2);
         }
     });
 }
