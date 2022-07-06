@@ -125,12 +125,12 @@ mod tests {
     }
 
     #[test]
-    fn creating_a_component_creates_component_pool() {
+    fn creating_new_component_pool_updates_scene() {
         let mut scene = Scene::new();
 
         let entity = scene.entity();
-        scene.delete(entity);
+        scene.new_component_pool(entity, 34 as i32);
 
-        assert_eq!(0, scene.entity());
+        assert_eq!(scene.get::<i32>().iter().collect::<Vec<&i32>>(), vec![&34]);
     }
 }
