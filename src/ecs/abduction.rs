@@ -46,3 +46,27 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
         self as &mut dyn std::any::Any
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::Scene;
+
+    #[test]
+    fn calling_get_current_entity_returns_correct_id() {
+        let scene = Scene::new();
+
+        assert_eq!(0, scene.get_current_entity());
+    }
+
+    #[test]
+    fn calling_get_current_entity_returns_correct_id_even_with_recycled_entities() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.entity();
+
+        scene.delete(entity);
+
+        assert_eq!(0, scene.get_current_entity());
+    }
+}
