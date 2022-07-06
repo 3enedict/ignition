@@ -129,8 +129,24 @@ mod tests {
         let mut scene = Scene::new();
 
         let entity = scene.entity();
-        scene.new_component_pool(entity, 34 as i32);
+        scene.component(entity, 34 as i32);
 
         assert_eq!(scene.get::<i32>().iter().collect::<Vec<&i32>>(), vec![&34]);
+    }
+
+    #[test]
+    fn assigning_component_updates_scene() {
+        let mut scene = Scene::new();
+
+        let entity1 = scene.entity();
+        scene.component(entity1, 34 as i32);
+
+        let entity2 = scene.entity();
+        scene.component(entity2, 25 as i32);
+
+        assert_eq!(
+            scene.get::<i32>().iter().collect::<Vec<&i32>>(),
+            vec![&34, &25]
+        );
     }
 }
