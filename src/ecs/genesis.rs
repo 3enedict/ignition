@@ -123,4 +123,14 @@ mod tests {
 
         assert_eq!(0, scene.entity());
     }
+
+    #[test]
+    fn creating_a_component_creates_component_pool() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.delete(entity);
+
+        assert_eq!(0, scene.entity());
+    }
 }
