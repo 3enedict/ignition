@@ -100,7 +100,7 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::{ComponentPool, Scene};
+    use crate::ecs::{genesis::EntityConstructor, ComponentPool, Scene};
 
     #[test]
     fn creating_an_entity_increments_an_id() {
@@ -194,8 +194,25 @@ mod tests {
     #[test]
     fn prolonging_sparse_array_with_a_smaller_than_length_id_does_nothing() {
         let mut sparse_array = vec![-1, -1, 0];
-        ComponentPool::<i32>::prolong_sparse_array(0, &mut sparse_array);
+        ComponentPool::<i32>::prolong_sparse_array(2, &mut sparse_array);
 
         assert_eq!(vec![-1, -1, 0], sparse_array,);
+    }
+
+    #[test]
+    fn creating_new_entity_in_component_pool_works_correctly() {
+        let mut pool = ComponentPool::new_with_entity(3, 32);
+        pool.create_empty_entity();
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec![-1, -1, -1, 0, -1],
+                packed_array: vec![3],
+                component_array: vec![32],
+            },
+        );
     }
 }
