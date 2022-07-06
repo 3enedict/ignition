@@ -155,6 +155,7 @@ mod tests {
         let pool = ComponentPool::new_with_entity(3, 32);
 
         assert_eq!(
+            pool,
             ComponentPool {
                 num_components: 1,
 
@@ -162,7 +163,6 @@ mod tests {
                 packed_array: vec![3],
                 component_array: vec![32],
             },
-            pool,
         );
     }
 
@@ -172,6 +172,7 @@ mod tests {
         pool.assign_component(6, 28);
 
         assert_eq!(
+            pool,
             ComponentPool {
                 num_components: 2,
 
@@ -179,7 +180,14 @@ mod tests {
                 packed_array: vec![3, 6],
                 component_array: vec![32, 28],
             },
-            pool,
         );
+    }
+
+    #[test]
+    fn prolonging_sparse_array_works_as_intended() {
+        let mut sparse_array = vec![-1, -1, 0];
+        ComponentPool::<i32>::prolong_sparse_array(5, &mut sparse_array);
+
+        assert_eq!(vec![-1, -1, 0, -1, -1, -1], sparse_array,);
     }
 }
