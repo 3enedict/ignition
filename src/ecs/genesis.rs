@@ -190,4 +190,12 @@ mod tests {
 
         assert_eq!(vec![-1, -1, 0, -1, -1, -1], sparse_array,);
     }
+
+    #[test]
+    fn prolonging_sparse_array_with_a_smaller_than_length_id_does_nothing() {
+        let mut sparse_array = vec![-1, -1, 0];
+        ComponentPool::<i32>::prolong_sparse_array(0, &mut sparse_array);
+
+        assert_eq!(vec![-1, -1, 0], sparse_array,);
+    }
 }
