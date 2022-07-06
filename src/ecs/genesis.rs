@@ -100,7 +100,7 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::Scene;
+    use crate::ecs::{ComponentPool, Scene};
 
     #[test]
     fn creating_entities_simply_increments_an_id() {
@@ -147,6 +147,22 @@ mod tests {
         assert_eq!(
             scene.get::<i32>().iter().collect::<Vec<&i32>>(),
             vec![&34, &25]
+        );
+    }
+
+    #[test]
+    fn component_pool_creation_works() {
+        let pool = ComponentPool::new_with_entity(3, 32);
+
+        assert_eq!(
+            ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec![-1, -1, -1, 0],
+                packed_array: vec![3],
+                component_array: vec![32],
+            },
+            pool,
         );
     }
 }
