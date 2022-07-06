@@ -103,7 +103,7 @@ mod tests {
     use crate::ecs::{ComponentPool, Scene};
 
     #[test]
-    fn creating_entities_simply_increments_an_id() {
+    fn creating_an_entity_increments_an_id() {
         let mut scene = Scene::new();
         let mut entities: Vec<usize> = Vec::new();
 
@@ -161,6 +161,23 @@ mod tests {
                 sparse_array: vec![-1, -1, -1, 0],
                 packed_array: vec![3],
                 component_array: vec![32],
+            },
+            pool,
+        );
+    }
+
+    #[test]
+    fn assigning_component_updates_component_pool() {
+        let mut pool = ComponentPool::new_with_entity(3, 32);
+        pool.assign_component(6, 28);
+
+        assert_eq!(
+            ComponentPool {
+                num_components: 2,
+
+                sparse_array: vec![-1, -1, -1, 0, -1, -1, 1],
+                packed_array: vec![3, 6],
+                component_array: vec![32, 28],
             },
             pool,
         );
