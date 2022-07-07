@@ -35,3 +35,27 @@ impl<G: 'static> EntityDestructor for ComponentPool<G> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ecs::{annihilation::EntityDestructor, ComponentPool};
+
+    #[test]
+    fn deleting_an_entity_updates_component_pool_correctly() {
+        let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
+        pool.assign_component(2, 21 as i32);
+
+        pool.delete_entity(1);
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec![-1, -1, 0],
+                packed_array: vec![2],
+                component_array: vec![21],
+            },
+        );
+    }
+}
