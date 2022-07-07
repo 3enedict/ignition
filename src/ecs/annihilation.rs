@@ -58,4 +58,21 @@ mod tests {
             },
         );
     }
+
+    #[test]
+    fn deleting_a_non_existing_entity_does_nothing() {
+        let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
+        pool.delete_entity(0);
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec![-1, 0],
+                packed_array: vec![1],
+                component_array: vec![32],
+            },
+        );
+    }
 }
