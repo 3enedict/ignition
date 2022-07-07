@@ -19,6 +19,10 @@ impl<G> ComponentPool<G> {
 
         left.iter_mut()
     }
+
+    pub fn has_component(&self, entity: usize) -> bool {
+        self.sparse_array.get(entity).unwrap_or(&-1) != &-1
+    }
 }
 
 pub trait PoolToolbox {
@@ -58,5 +62,31 @@ impl<G: 'static> PoolToolbox for ComponentPool<G> {
         self.sparse_array.swap(entity, entity_destination);
         self.packed_array.swap(component, component_destination);
         self.component_array.swap(component, component_destination);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ecs::ComponentPool;
+
+    #[test]
+    fn entity_out_of_bounds_does_not_have_component() {
+        let pool = ComponentPool::new_with_entity(3, 32);
+
+        assert_eq!(pool.has_component(4), false);
+    }
+
+    #[test]
+    fn entity_without_component_does_not_have_component() {
+        let pool = ComponentPool::new_with_entity(3, 32);
+
+        assert_eq!(pool.has_component(2), false);
+    }
+
+    #[test]
+    fn entity_with_component_has_component() {
+        let pool = ComponentPool::new_with_entity(3, 32);
+
+        assert_eq!(pool.has_component(3), true);
     }
 }
