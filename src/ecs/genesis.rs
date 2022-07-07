@@ -69,11 +69,15 @@ impl<G> ComponentPool<G> {
     }
 
     pub fn assign_component(&mut self, entity: usize, component: G) {
-        Self::add_entity_to_sparse_array(entity, self.num_components, &mut self.sparse_array);
+        if self.sparse_array.len() - 1 < entity || self.sparse_array[entity] == -1 {
+            Self::add_entity_to_sparse_array(entity, self.num_components, &mut self.sparse_array);
 
-        self.packed_array.push(entity);
-        self.component_array.push(component);
-        self.num_components += 1;
+            self.packed_array.push(entity);
+            self.component_array.push(component);
+            self.num_components += 1;
+        } else {
+            self.component_array[self.sparse_array[entity] as usize] = component;
+        }
     }
 
     pub fn add_entity_to_sparse_array(entity: usize, value: usize, sparse_array: &mut Vec<i32>) {
