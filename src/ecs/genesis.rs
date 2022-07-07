@@ -151,6 +151,17 @@ mod tests {
     }
 
     #[test]
+    fn assigning_already_existing_component_modifies_current_component() {
+        let mut scene = Scene::new();
+        let entity = scene.entity();
+
+        scene.component(entity, 34 as i32);
+        scene.component(entity, 25 as i32);
+
+        assert_eq!(scene.get::<i32>().iter().collect::<Vec<&i32>>(), vec![&25]);
+    }
+
+    #[test]
     fn component_pool_creation_works() {
         let pool = ComponentPool::new_with_entity(3, 32);
 
@@ -179,6 +190,23 @@ mod tests {
                 sparse_array: vec![-1, -1, -1, 0, -1, -1, 1],
                 packed_array: vec![3, 6],
                 component_array: vec![32, 28],
+            },
+        );
+    }
+
+    #[test]
+    fn assigning_already_existing_component_does_not_add_component() {
+        let mut pool = ComponentPool::new_with_entity(0, 32);
+        pool.assign_component(0, 28);
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 1,
+
+                sparse_array: vec![0],
+                packed_array: vec![0],
+                component_array: vec![28],
             },
         );
     }
