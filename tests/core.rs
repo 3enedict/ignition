@@ -3,52 +3,22 @@ use std::time::{Duration, Instant};
 extern crate ignition;
 use ignition::prelude::*;
 
-pub struct Vertices {
-    pub vertices: Vec<Vertex>,
-}
-
-const TRIANGLE_BUFFER_ONE: &[Vertex] = &[
-    Vertex {
-        position: [0.55, -0.5, 0.0],
-        color: [1.0, 0.0, 0.0],
-    },
-    Vertex {
-        position: [0.55, 0.55, 0.0],
-        color: [0.0, 1.0, 0.0],
-    },
-    Vertex {
-        position: [-0.5, 0.55, 0.0],
-        color: [0.0, 0.0, 1.0],
-    },
-];
-
-const TRIANGLE_BUFFER_TWO: &[Vertex] = &[
-    Vertex {
-        position: [-0.55, 0.5, 0.0],
-        color: [1.0, 0.0, 0.0],
-    },
-    Vertex {
-        position: [-0.55, -0.55, 0.0],
-        color: [0.0, 1.0, 0.0],
-    },
-    Vertex {
-        position: [0.5, -0.55, 0.0],
-        color: [0.0, 0.0, 1.0],
-    },
-];
-
 #[ignore]
 #[test]
 fn alternating_triangles() {
     let mut engine = Engine::ignite();
 
     let triangle1 = engine
-        .with_component(Vec::from(TRIANGLE_BUFFER_ONE))
+        .point(0.55, -0.5, 0.0, 1.0, 0.0, 0.0)
+        .point(0.55, 0.55, 0.0, 0.0, 1.0, 0.0)
+        .point(-0.5, 0.55, 0.0, 0.0, 0.0, 1.0)
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 
     let triangle2 = engine
-        .with_component(Vec::from(TRIANGLE_BUFFER_TWO))
+        .point(-0.55, 0.5, 0.0, 1.0, 0.0, 0.0)
+        .point(-0.55, -0.55, 0.0, 0.0, 1.0, 0.0)
+        .point(0.5, -0.55, 0.0, 0.0, 0.0, 1.0)
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 

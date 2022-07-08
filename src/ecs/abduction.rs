@@ -28,8 +28,8 @@ impl Scene {
         self.get::<G>().component_array.get(entity).unwrap()
     }
 
-    pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &G {
-        self.get_mut::<G>().component_array.get(entity).unwrap()
+    pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &mut G {
+        self.get_mut::<G>().component_array.get_mut(entity).unwrap()
     }
 
     pub fn get_current_entity(&self) -> usize {
