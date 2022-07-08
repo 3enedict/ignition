@@ -247,4 +247,28 @@ mod tests {
             },
         );
     }
+
+    #[test]
+    fn creating_vectorized_component_encapsulates_it_in_vector() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.vectorized_component(entity, 34 as i32);
+
+        assert_eq!(scene.component_exists::<Vec<i32>>(), true);
+    }
+
+    #[test]
+    fn adding_to_vectorized_component_pushes_to_vector() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.vectorized_component(entity, 34 as i32);
+        scene.vectorized_component(entity, 59 as i32);
+
+        assert_eq!(
+            scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
+            vec![&vec![34, 59]]
+        );
+    }
 }
