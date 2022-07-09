@@ -55,7 +55,11 @@ impl Scene {
 
     pub fn vectorized_component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<Vec<G>>() {
-            self.get_component_mut::<Vec<G>>(entity).push(component);
+            if self.get::<Vec<G>>().has_component(entity) {
+                self.get_component_mut::<Vec<G>>(entity).push(component);
+            } else {
+                self.assign_component(entity, vec![component]);
+            }
         } else {
             self.new_component_pool(entity, vec![component]);
         }
@@ -277,6 +281,24 @@ mod tests {
         assert_eq!(
             scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
             vec![&vec![34, 59]]
+        );
+    }
+
+    #[test]
+    fn adding_to_second_vectorized_component_pushes_to_vector() {
+        let mut scene = Scene::new();
+
+        let entity1 = scene.entity();
+        scene.vectorized_component(entity1, 34 as i32);
+        scene.vectorized_component(entity1, 59 as i32);
+
+        let entity2 = scene.entity();
+        scene.vectorized_component(entity2, 63 as i32);
+        scene.vectorized_component(entity2, 16 as i32);
+
+        assert_eq!(
+            scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
+            vec![&vec![34, 59], &vec![63, 16]]
         );
     }
 }
