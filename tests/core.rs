@@ -9,14 +9,14 @@ fn alternating_triangles() {
     let mut engine = Engine::ignite();
 
     let triangle1 = engine
-        .xy(&[0.55, -0.5, 0.55, 0.55, -0.5, 0.55])
-        .rgb(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
+        .xy([0.55, -0.5, 0.55, 0.55, -0.5, 0.55])
+        .rgb([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 
     let triangle2 = engine
-        .xy(&[-0.55, 0.5, -0.55, -0.55, 0.5, -0.55])
-        .rgb(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
+        .xy([-0.55, 0.5, -0.55, -0.55, 0.5, -0.55])
+        .rgb([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 

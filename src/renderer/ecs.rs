@@ -20,7 +20,7 @@ impl Engine {
         self
     }
 
-    pub fn xy(&mut self, coordinates: &[f32]) -> &mut Self {
+    pub fn xy<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
         let entity = self.scene.get_current_entity();
 
         for pos in coordinates.windows(2).step_by(2) {
@@ -33,7 +33,7 @@ impl Engine {
         self
     }
 
-    pub fn rgb(&mut self, colors: &[f32]) -> &mut Self {
+    pub fn rgb<const N: usize>(&mut self, colors: [f32; N]) -> &mut Self {
         let entity = self.scene.get_current_entity();
 
         for color in colors.windows(3).step_by(3) {
