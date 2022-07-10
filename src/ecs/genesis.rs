@@ -35,10 +35,20 @@ impl Scene {
     /* Component */
 
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
-        if self.component_exists::<G>() {
+        if self.component_pool_exists::<G>() {
             self.assign_component(entity, component);
         } else {
             self.new_component_pool(entity, component);
+        }
+    }
+
+    pub fn vectorized_component<G: 'static>(&mut self, entity: usize, component: G) {
+        if self.component_exists::<Vec<G>>(entity) {
+            self.get_component_mut::<Vec<G>>(entity).push(component);
+        } else if self.component_pool_exists::<Vec<G>>() {
+            self.assign_component(entity, vec![component]);
+        } else {
+            self.new_component_pool(entity, vec![component]);
         }
     }
 
@@ -51,18 +61,6 @@ impl Scene {
         let component_pool = Box::new(ComponentPool::new_with_entity(entity, component));
 
         self.component_pools.insert(type_id, component_pool);
-    }
-
-    pub fn vectorized_component<G: 'static>(&mut self, entity: usize, component: G) {
-        if self.component_exists::<Vec<G>>() {
-            if self.get::<Vec<G>>().has_component(entity) {
-                self.get_component_mut::<Vec<G>>(entity).push(component);
-            } else {
-                self.assign_component(entity, vec![component]);
-            }
-        } else {
-            self.new_component_pool(entity, vec![component]);
-        }
     }
 }
 
@@ -267,7 +265,7 @@ mod tests {
         let entity = scene.entity();
         scene.vectorized_component(entity, 34 as i32);
 
-        assert_eq!(scene.component_exists::<Vec<i32>>(), true);
+        assert_eq!(scene.component_pool_exists::<Vec<i32>>(), true);
     }
 
     #[test]
@@ -299,6 +297,35 @@ mod tests {
         assert_eq!(
             scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
             vec![&vec![34, 59], &vec![63, 16]]
+        );
+    }
+
+    #[test]
+    fn adding_differently_typed_vectorized_components_does_not_crash() {
+        let mut scene = Scene::new();
+
+        let entity1 = scene.entity();
+        scene.vectorized_component(entity1, 34 as i32);
+        scene.vectorized_component(entity1, 0.59 as f32);
+        scene.vectorized_component(entity1, 81 as i32);
+
+        let entity2 = scene.entity();
+        scene.vectorized_component(entity2, 63 as u32);
+        scene.vectorized_component(entity2, 16 as u32);
+
+        assert_eq!(
+            scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
+            vec![&vec![34, 81]]
+        );
+
+        assert_eq!(
+            scene.get::<Vec<f32>>().iter().collect::<Vec<&Vec<f32>>>(),
+            vec![&vec![0.59]]
+        );
+
+        assert_eq!(
+            scene.get::<Vec<u32>>().iter().collect::<Vec<&Vec<u32>>>(),
+            vec![&vec![63, 16]]
         );
     }
 }

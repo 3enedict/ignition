@@ -2,8 +2,12 @@ use crate::ecs::{ComponentPool, Scene};
 use std::any::TypeId;
 
 impl Scene {
-    pub fn component_exists<G: 'static>(&mut self) -> bool {
+    pub fn component_pool_exists<G: 'static>(&mut self) -> bool {
         self.component_pools.contains_key(&TypeId::of::<G>())
+    }
+
+    pub fn component_exists<G: 'static>(&mut self, entity: usize) -> bool {
+        self.component_pool_exists::<G>() && self.get::<G>().has_component(entity)
     }
 }
 

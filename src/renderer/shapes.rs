@@ -18,9 +18,13 @@ pub struct Shape {
 }
 
 impl Renderer {
-    pub fn shape(&mut self, vertices: &Vec<Vertex>, shaders: &ShaderModuleDescriptor) -> Shape {
+    pub fn shape<G: Vertex + bytemuck::Pod>(
+        &mut self,
+        vertices: &Vec<G>,
+        shaders: &ShaderModuleDescriptor,
+    ) -> Shape {
         Shape {
-            pipeline: self.ignite_pipeline(shaders),
+            pipeline: self.ignite_pipeline::<G>(shaders),
             vertex_buffer: self.ignite_vertex_buffer(vertices),
 
             num_vertices: vertices.len() as u32,

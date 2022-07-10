@@ -6,7 +6,10 @@ use crate::renderer::core::vertex_buffer::Vertex;
 use crate::renderer::Renderer;
 
 impl Renderer {
-    pub fn ignite_pipeline(&mut self, shaders: &ShaderModuleDescriptor) -> RenderPipeline {
+    pub fn ignite_pipeline<G: Vertex>(
+        &mut self,
+        shaders: &ShaderModuleDescriptor,
+    ) -> RenderPipeline {
         let shader = self.gpu.device.create_shader_module(shaders);
 
         let pipeline_layout = self
@@ -27,7 +30,7 @@ impl Renderer {
                 vertex: wgpu::VertexState {
                     module: &shader,
                     entry_point: "vs_main",
-                    buffers: &[Vertex::layout()],
+                    buffers: &[G::layout()],
                 },
                 fragment: Some(wgpu::FragmentState {
                     module: &shader,

@@ -1,9 +1,17 @@
 use wgpu::ShaderModuleDescriptor;
 
-use crate::{renderer::core::vertex_buffer::Vertex, Engine};
+use crate::{
+    renderer::core::vertex_buffer::{XYRGB, XYZRGB},
+    Engine,
+};
 
 #[derive(Debug)]
-pub struct Position {
+pub struct XY {
+    pos: [f32; 2],
+}
+
+#[derive(Debug)]
+pub struct XYZ {
     pos: [f32; 3],
 }
 
@@ -25,9 +33,23 @@ impl Engine {
 
         for pos in coordinates.windows(2).step_by(2) {
             let [x, y]: [f32; 2] = pos.try_into().unwrap();
-            let xy = Position { pos: [x, y, 0.0] };
+            let xy = XY { pos: [x, y] };
 
             self.scene.vectorized_component(entity, xy);
+        }
+
+        self
+    }
+
+    pub fn xyz<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
+        let entity = self.scene.get_current_entity();
+        println!("Hello...");
+
+        for pos in coordinates.windows(3).step_by(3) {
+            let [x, y, z]: [f32; 3] = pos.try_into().unwrap();
+            let xyz = XYZ { pos: [x, y, z] };
+
+            self.scene.vectorized_component(entity, xyz);
         }
 
         self
@@ -52,26 +74,47 @@ impl Engine {
 
     pub fn doritos(&mut self) -> usize {
         let entity = self.scene.get_current_entity();
-        let mut vertices: Vec<Vertex> = Vec::new();
 
-        let positions = self.scene.get_component::<Vec<Position>>(entity);
-        let colors = self.scene.get_component::<Vec<Color>>(entity);
+        if self.scene.component_exists::<Vec<XY>>(entity) {
+            let mut vertices = Vec::new();
+            let positions = self.scene.get_component::<Vec<XY>>(entity);
+            let colors = self.scene.get_component::<Vec<Color>>(entity);
 
-        for i in 0..positions.len() {
-            vertices.push(Vertex {
-                position: positions[i].pos,
-                color: colors[i].color,
-            });
+            for i in 0..positions.len() {
+                vertices.push(XYRGB {
+                    position: positions[i].pos,
+                    color: colors[i].color,
+                });
+            }
+
+            let doritos = self.renderer.doritos(
+                &vertices,
+                self.scene.get_component::<ShaderModuleDescriptor>(entity),
+            );
+
+            self.scene.component(entity, doritos);
+            return self.scene.entity();
+        } else if self.scene.component_exists::<Vec<XYZ>>(entity) {
+            let mut vertices = Vec::new();
+            let positions = self.scene.get_component::<Vec<XYZ>>(entity);
+            let colors = self.scene.get_component::<Vec<Color>>(entity);
+
+            for i in 0..positions.len() {
+                vertices.push(XYZRGB {
+                    position: positions[i].pos,
+                    color: colors[i].color,
+                });
+            }
+
+            let doritos = self.renderer.doritos(
+                &vertices,
+                self.scene.get_component::<ShaderModuleDescriptor>(entity),
+            );
+
+            self.scene.component(entity, doritos);
+            return self.scene.entity();
+        } else {
+            unimplemented!()
         }
-
-        println!("{:?}", &positions);
-
-        let doritos = self.renderer.doritos(
-            &vertices,
-            self.scene.get_component::<ShaderModuleDescriptor>(entity),
-        );
-
-        self.scene.component(entity, doritos);
-        self.scene.entity()
     }
 }

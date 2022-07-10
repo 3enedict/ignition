@@ -25,15 +25,27 @@ impl Scene {
     }
 
     pub fn get_component<G: 'static>(&self, entity: usize) -> &G {
-        self.get::<G>().component_array.get(entity).unwrap()
+        self.get::<G>().get(entity)
     }
 
     pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &mut G {
-        self.get_mut::<G>().component_array.get_mut(entity).unwrap()
+        self.get_mut::<G>().get_mut(entity)
     }
 
     pub fn get_current_entity(&self) -> usize {
         self.available_entities[self.available_entities.len() - 1]
+    }
+}
+
+impl<G> ComponentPool<G> {
+    pub fn get(&self, entity: usize) -> &G {
+        let index = self.sparse_array[entity] as usize;
+        self.component_array.get(index).unwrap()
+    }
+
+    pub fn get_mut(&mut self, entity: usize) -> &mut G {
+        let index = self.sparse_array[entity] as usize;
+        self.component_array.get_mut(index).unwrap()
     }
 }
 
