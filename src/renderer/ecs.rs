@@ -66,7 +66,7 @@ impl Engine {
 
         println!("{:?}", &positions);
 
-        let doritos = self.renderer.shape(
+        let doritos = self.renderer.doritos(
             &vertices,
             self.scene.get_component::<ShaderModuleDescriptor>(entity),
         );

@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 extern crate ignition;
-use ignition::prelude::*;
+use ignition::{prelude::*, renderer::shapes::Renderable};
 
 #[ignore]
 #[test]
@@ -20,7 +20,7 @@ fn alternating_triangles() {
         .with_component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 
-    engine.scene.disable::<Shape>(triangle1);
+    engine.scene.disable::<Box<dyn Renderable>>(triangle1);
 
     let mut instant = Instant::now();
 
@@ -28,8 +28,8 @@ fn alternating_triangles() {
         if instant.elapsed() > Duration::from_millis(200) {
             instant = Instant::now();
 
-            engine.scene.toggle::<Shape>(triangle1);
-            engine.scene.toggle::<Shape>(triangle2);
+            engine.scene.toggle::<Box<dyn Renderable>>(triangle1);
+            engine.scene.toggle::<Box<dyn Renderable>>(triangle2);
         }
     });
 }

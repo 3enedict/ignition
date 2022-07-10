@@ -5,7 +5,7 @@ use winit::{
     event_loop::ControlFlow,
 };
 
-use crate::renderer::shapes::Shape;
+use crate::renderer::shapes::Renderable;
 use crate::Engine;
 
 pub mod command_buffer;
@@ -19,8 +19,8 @@ pub mod vertex_buffer;
 
 impl Engine {
     pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
-        if self.scene.component_exists::<Shape>() {
-            let shapes = self.scene.get::<Shape>();
+        if self.scene.component_exists::<Box<dyn Renderable>>() {
+            let shapes = self.scene.get::<Box<dyn Renderable>>();
 
             for shape in shapes.iter() {
                 shape.render(render_pass);

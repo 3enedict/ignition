@@ -6,6 +6,10 @@ use crate::renderer::Renderer;
 pub mod crackers;
 pub mod doritos;
 
+pub trait Renderable {
+    fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>);
+}
+
 pub struct Shape {
     pub pipeline: RenderPipeline,
     pub vertex_buffer: Buffer,
@@ -24,8 +28,8 @@ impl Renderer {
     }
 }
 
-impl Shape {
-    pub fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
+impl Renderable for Shape {
+    fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
