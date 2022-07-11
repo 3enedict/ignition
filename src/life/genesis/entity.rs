@@ -87,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    fn creating_new_entity_in_component_pool_works_correctly() {
+    fn adding_a_new_empty_entity_appends_minus_one_to_sparse_array() {
         let mut pool = ComponentPool::new_with_entity(3, 32);
         pool.create_empty_entity();
 
