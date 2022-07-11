@@ -45,10 +45,8 @@ impl Scene {
     pub fn vectorized_component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<Vec<G>>(entity) {
             self.get_component_mut::<Vec<G>>(entity).push(component);
-        } else if self.component_pool_exists::<Vec<G>>() {
-            self.assign_component(entity, vec![component]);
         } else {
-            self.new_component_pool(entity, vec![component]);
+            self.component(entity, vec![component]);
         }
     }
 

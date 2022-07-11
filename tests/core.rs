@@ -19,6 +19,7 @@ fn alternating_triangles() {
         .rgb([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
         .component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
+
     engine.scene.disable::<Box<dyn Renderable>>(triangle1);
 
     let mut instant = Instant::now();
