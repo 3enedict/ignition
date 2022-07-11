@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 extern crate ignition;
-use ignition::{prelude::*, renderer::shapes::Renderable};
+use ignition::{manifestation::silhouette::Renderable, prelude::*};
 
 #[ignore]
 #[test]
@@ -11,15 +11,14 @@ fn alternating_triangles() {
     let triangle1 = engine
         .xy([0.55, -0.5, 0.55, 0.55, -0.5, 0.55])
         .rgb([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
-        .with_component(include_wgsl!("shaders/gradient.wgsl"))
+        .component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
 
     let triangle2 = engine
         .xyz([-0.55, 0.5, 0.0, -0.55, -0.55, 0.0, 0.5, -0.55, 0.0])
         .rgb([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
-        .with_component(include_wgsl!("shaders/gradient.wgsl"))
+        .component(include_wgsl!("shaders/gradient.wgsl"))
         .doritos();
-
     engine.scene.disable::<Box<dyn Renderable>>(triangle1);
 
     let mut instant = Instant::now();

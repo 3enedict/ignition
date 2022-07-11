@@ -1,27 +1,12 @@
 use wgpu::ShaderModuleDescriptor;
 
 use crate::{
-    renderer::core::vertex_buffer::{XYRGB, XYZRGB},
+    manifestation::apex::{xyrgb::XYRGB, xyzrgb::XYZRGB, RGB, XY, XYZ},
     Engine,
 };
 
-#[derive(Debug)]
-pub struct XY {
-    pos: [f32; 2],
-}
-
-#[derive(Debug)]
-pub struct XYZ {
-    pos: [f32; 3],
-}
-
-#[derive(Debug)]
-pub struct Color {
-    color: [f32; 3],
-}
-
 impl Engine {
-    pub fn with_component<G: 'static>(&mut self, component: G) -> &mut Self {
+    pub fn component<G: 'static>(&mut self, component: G) -> &mut Self {
         let entity = self.scene.get_current_entity();
         self.scene.component(entity, component);
 
@@ -32,8 +17,9 @@ impl Engine {
         let entity = self.scene.get_current_entity();
 
         for pos in coordinates.windows(2).step_by(2) {
-            let [x, y]: [f32; 2] = pos.try_into().unwrap();
-            let xy = XY { pos: [x, y] };
+            let xy = XY {
+                xy: pos.try_into().unwrap(),
+            };
 
             self.scene.vectorized_component(entity, xy);
         }
@@ -43,11 +29,11 @@ impl Engine {
 
     pub fn xyz<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
         let entity = self.scene.get_current_entity();
-        println!("Hello...");
 
         for pos in coordinates.windows(3).step_by(3) {
-            let [x, y, z]: [f32; 3] = pos.try_into().unwrap();
-            let xyz = XYZ { pos: [x, y, z] };
+            let xyz = XYZ {
+                xyz: pos.try_into().unwrap(),
+            };
 
             self.scene.vectorized_component(entity, xyz);
         }
@@ -59,8 +45,9 @@ impl Engine {
         let entity = self.scene.get_current_entity();
 
         for color in colors.windows(3).step_by(3) {
-            let [r, g, b]: [f32; 3] = color.try_into().unwrap();
-            let rgb = Color { color: [r, g, b] };
+            let rgb = RGB {
+                rgb: color.try_into().unwrap(),
+            };
 
             self.scene.vectorized_component(entity, rgb);
         }
@@ -78,14 +65,16 @@ impl Engine {
         if self.scene.component_exists::<Vec<XY>>(entity) {
             let mut vertices = Vec::new();
             let positions = self.scene.get_component::<Vec<XY>>(entity);
-            let colors = self.scene.get_component::<Vec<Color>>(entity);
+            let colors = self.scene.get_component::<Vec<RGB>>(entity);
 
             for i in 0..positions.len() {
                 vertices.push(XYRGB {
-                    position: positions[i].pos,
-                    color: colors[i].color,
+                    position: positions[i].xy,
+                    color: colors[i].rgb,
                 });
             }
+
+            println!("{:?}", vertices);
 
             let doritos = self.renderer.doritos(
                 &vertices,
@@ -97,12 +86,12 @@ impl Engine {
         } else if self.scene.component_exists::<Vec<XYZ>>(entity) {
             let mut vertices = Vec::new();
             let positions = self.scene.get_component::<Vec<XYZ>>(entity);
-            let colors = self.scene.get_component::<Vec<Color>>(entity);
+            let colors = self.scene.get_component::<Vec<RGB>>(entity);
 
             for i in 0..positions.len() {
                 vertices.push(XYZRGB {
-                    position: positions[i].pos,
-                    color: colors[i].color,
+                    position: positions[i].xyz,
+                    color: colors[i].rgb,
                 });
             }
 

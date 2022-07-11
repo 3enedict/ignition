@@ -1,7 +1,7 @@
 use std::any::TypeId;
 use std::collections::HashMap;
 
-use crate::ecs::{ComponentPool, Scene};
+use crate::life::{ComponentPool, Scene};
 
 impl Scene {
     pub fn new() -> Self {
@@ -114,7 +114,7 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::{genesis::EntityConstructor, ComponentPool, Scene};
+    use crate::life::{genesis::EntityConstructor, ComponentPool, Scene};
 
     #[test]
     fn creating_an_entity_increments_an_id() {

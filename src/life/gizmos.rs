@@ -1,4 +1,4 @@
-use crate::ecs::{ComponentPool, Scene};
+use crate::life::{ComponentPool, Scene};
 use std::any::TypeId;
 
 impl Scene {
@@ -71,7 +71,7 @@ impl<G: 'static> PoolToolbox for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::ComponentPool;
+    use crate::life::ComponentPool;
 
     #[test]
     fn entity_out_of_bounds_does_not_have_component() {

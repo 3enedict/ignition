@@ -1,19 +1,16 @@
 use wgpu::{
-    PipelineLayoutDescriptor, RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor,
+    BlendState, ColorTargetState, ColorWrites, Face, FragmentState, FrontFace, MultisampleState,
+    PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPipeline,
+    RenderPipelineDescriptor, ShaderModuleDescriptor, VertexState,
 };
 
-use crate::renderer::core::vertex_buffer::Vertex;
-use crate::renderer::Renderer;
+use crate::manifestation::{apex::Vertex, Renderer};
 
 impl Renderer {
-    pub fn ignite_pipeline<G: Vertex>(
-        &mut self,
-        shaders: &ShaderModuleDescriptor,
-    ) -> RenderPipeline {
-        let shader = self.gpu.device.create_shader_module(shaders);
+    pub fn pipeline<G: Vertex>(&mut self, shaders: &ShaderModuleDescriptor) -> RenderPipeline {
+        let shader = self.device.create_shader_module(shaders);
 
         let pipeline_layout = self
-            .gpu
             .device
             .create_pipeline_layout(&PipelineLayoutDescriptor {
                 label: None,
@@ -22,36 +19,35 @@ impl Renderer {
             });
 
         let pipeline = self
-            .gpu
             .device
             .create_render_pipeline(&RenderPipelineDescriptor {
                 label: None,
                 layout: Some(&pipeline_layout),
-                vertex: wgpu::VertexState {
+                vertex: VertexState {
                     module: &shader,
                     entry_point: "vs_main",
                     buffers: &[G::layout()],
                 },
-                fragment: Some(wgpu::FragmentState {
+                fragment: Some(FragmentState {
                     module: &shader,
                     entry_point: "fs_main",
-                    targets: &[wgpu::ColorTargetState {
-                        format: self.window.config.format,
-                        blend: Some(wgpu::BlendState::REPLACE),
-                        write_mask: wgpu::ColorWrites::ALL,
+                    targets: &[ColorTargetState {
+                        format: self.config.format,
+                        blend: Some(BlendState::REPLACE),
+                        write_mask: ColorWrites::ALL,
                     }],
                 }),
-                primitive: wgpu::PrimitiveState {
-                    topology: wgpu::PrimitiveTopology::TriangleList,
+                primitive: PrimitiveState {
+                    topology: PrimitiveTopology::TriangleList,
                     strip_index_format: None,
-                    front_face: wgpu::FrontFace::Ccw,
-                    cull_mode: Some(wgpu::Face::Back),
-                    polygon_mode: wgpu::PolygonMode::Fill,
+                    front_face: FrontFace::Ccw,
+                    cull_mode: Some(Face::Back),
+                    polygon_mode: PolygonMode::Fill,
                     unclipped_depth: false,
                     conservative: false,
                 },
                 depth_stencil: None,
-                multisample: wgpu::MultisampleState {
+                multisample: MultisampleState {
                     count: 1,
                     mask: !0,
                     alpha_to_coverage_enabled: false,

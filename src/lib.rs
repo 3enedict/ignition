@@ -1,14 +1,14 @@
 #[macro_use]
 extern crate derive_builder;
 
-pub mod ecs;
 pub mod liberty;
+pub mod life;
+pub mod manifestation;
 pub mod prelude;
-pub mod renderer;
 
-use crate::ecs::Scene;
 use crate::liberty::{Parameters, ParametersBuilder};
-use crate::renderer::Renderer;
+use crate::life::Scene;
+use crate::manifestation::Renderer;
 
 pub struct Engine {
     pub renderer: Renderer,

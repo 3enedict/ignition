@@ -1,4 +1,4 @@
-use crate::ecs::{ComponentPool, ComponentPoolTrait, Scene};
+use crate::life::{ComponentPool, ComponentPoolTrait, Scene};
 use std::any::TypeId;
 
 impl Scene {
@@ -61,7 +61,7 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::Scene;
+    use crate::life::Scene;
 
     #[test]
     fn calling_get_current_entity_returns_correct_id() {

@@ -1,4 +1,4 @@
-use crate::ecs::{ComponentPool, Scene};
+use crate::life::{ComponentPool, Scene};
 
 impl Scene {
     pub fn delete(&mut self, entity: usize) {
@@ -38,7 +38,7 @@ impl<G: 'static> EntityDestructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::{annihilation::EntityDestructor, ComponentPool};
+    use crate::life::{annihilation::EntityDestructor, ComponentPool};
 
     #[test]
     fn deleting_an_entity_updates_component_pool_correctly() {

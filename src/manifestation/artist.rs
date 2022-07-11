@@ -1,41 +1,24 @@
+pub mod command_buffer;
+pub mod pipeline;
 use wgpu::RenderPass;
 
 use winit::{
+    dpi::PhysicalSize,
     event::{Event, WindowEvent},
     event_loop::ControlFlow,
 };
 
-use crate::renderer::shapes::Renderable;
-use crate::Engine;
-
-pub mod command_buffer;
-pub mod gpu;
-pub mod window;
-use command_buffer::Commands;
-
-pub mod index_buffer;
-pub mod pipeline;
-pub mod vertex_buffer;
+use crate::{
+    manifestation::{artist::command_buffer::Commands, silhouette::Renderable},
+    Engine,
+};
 
 impl Engine {
-    pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
-        if self.scene.component_pool_exists::<Box<dyn Renderable>>() {
-            let shapes = self.scene.get::<Box<dyn Renderable>>();
-
-            for shape in shapes.iter() {
-                shape.render(render_pass);
-            }
-
-            return;
-        }
-    }
-
     pub fn game_loop<F>(mut self, mut closure: F)
     where
         F: 'static + FnMut(&mut Engine),
     {
         self.renderer
-            .window
             .event_loop
             .take()
             .unwrap()
@@ -59,7 +42,7 @@ impl Engine {
                         let mut commands = match Commands::ignite(&self) {
                             Ok(commands) => commands,
                             Err(wgpu::SurfaceError::Lost) => {
-                                self.resize(self.renderer.window.size);
+                                self.resize(self.renderer.size);
                                 return;
                             }
                             Err(wgpu::SurfaceError::OutOfMemory) => {
@@ -84,10 +67,37 @@ impl Engine {
                     Event::MainEventsCleared => {
                         closure(&mut self);
 
-                        self.renderer.window.window.request_redraw();
+                        self.renderer.window.request_redraw();
                     }
                     _ => {}
                 }
             });
+    }
+
+    pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
+        if self.scene.component_pool_exists::<Box<dyn Renderable>>() {
+            let shapes = self.scene.get::<Box<dyn Renderable>>();
+
+            for shape in shapes.iter() {
+                shape.render(render_pass);
+            }
+        }
+    }
+
+    pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
+        if new_size.width > 0 && new_size.height > 0 {
+            self.renderer.size = new_size;
+
+            self.renderer.config.width = new_size.width;
+            self.renderer.config.height = new_size.height;
+
+            self.configure_surface();
+        }
+    }
+
+    pub fn configure_surface(&mut self) {
+        self.renderer
+            .surface
+            .configure(&self.renderer.device, &self.renderer.config);
     }
 }

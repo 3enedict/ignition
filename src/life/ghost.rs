@@ -1,4 +1,4 @@
-use crate::ecs::{gizmos::PoolToolbox, ComponentPool, Scene};
+use crate::life::{gizmos::PoolToolbox, ComponentPool, Scene};
 
 impl Scene {
     pub fn toggle<G: 'static>(&mut self, entity: usize) {
