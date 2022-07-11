@@ -2,7 +2,7 @@ use std::any::TypeId;
 use std::collections::HashMap;
 
 use annihilation::EntityDestructor;
-use genesis::EntityConstructor;
+use genesis::entity::EntityConstructor;
 use ghost::ComponentToggler;
 use gizmos::PoolToolbox;
 
