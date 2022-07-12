@@ -13,57 +13,18 @@ impl Engine {
         self
     }
 
-    pub fn generate_vertex_data<D, G: 'static + VertexData<Data = D>, const N: usize>(
-        &mut self,
-        data: [D; N],
-        step: usize,
-    ) {
-        let entity = self.scene.get_current_entity();
-
-        for x in data.windows(step).step_by(step) {
-            self.scene.vectorized_component(entity, G::new(x));
-        }
-    }
-
     pub fn xy<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
-        let entity = self.scene.get_current_entity();
-
-        for pos in coordinates.windows(2).step_by(2) {
-            let xy = XY {
-                xy: pos.try_into().unwrap(),
-            };
-
-            self.scene.vectorized_component(entity, xy);
-        }
-
+        self.generate_vertex_data::<XY, _, N>(coordinates, 2);
         self
     }
 
     pub fn xyz<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
-        let entity = self.scene.get_current_entity();
-
-        for pos in coordinates.windows(3).step_by(3) {
-            let xyz = XYZ {
-                xyz: pos.try_into().unwrap(),
-            };
-
-            self.scene.vectorized_component(entity, xyz);
-        }
-
+        self.generate_vertex_data::<XYZ, _, N>(coordinates, 3);
         self
     }
 
     pub fn rgb<const N: usize>(&mut self, colors: [f32; N]) -> &mut Self {
-        let entity = self.scene.get_current_entity();
-
-        for color in colors.windows(3).step_by(3) {
-            let rgb = RGB {
-                rgb: color.try_into().unwrap(),
-            };
-
-            self.scene.vectorized_component(entity, rgb);
-        }
-
+        self.generate_vertex_data::<RGB, _, N>(colors, 3);
         self
     }
 
@@ -118,6 +79,18 @@ impl Engine {
             unimplemented!()
         }
     }
+
+    pub fn generate_vertex_data<G: 'static + VertexData<Data = D>, D, const N: usize>(
+        &mut self,
+        data: [D; N],
+        step: usize,
+    ) {
+        let entity = self.scene.get_current_entity();
+
+        for x in data.windows(step).step_by(step) {
+            self.scene.vectorized_component(entity, G::new(x));
+        }
+    }
 }
 
 #[cfg(test)]
@@ -127,7 +100,7 @@ mod tests {
     #[test]
     fn vertex_data_creation_seperates_arrays_correctly() {
         let mut engine = Engine::ignite();
-        engine.generate_vertex_data::<f32, XY, 4>([0.34, 0.81, 0.63, 0.16] as [f32; 4], 2);
+        engine.generate_vertex_data::<XY, _, 4>([0.34, 0.81, 0.63, 0.16], 2);
 
         assert_eq!(
             engine

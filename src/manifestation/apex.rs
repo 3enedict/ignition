@@ -28,10 +28,32 @@ impl VertexData for XY {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct XYZ {
     pub xyz: [f32; 3],
 }
 
+impl VertexData for XYZ {
+    type Data = f32;
+
+    fn new(data: &[Self::Data]) -> Self {
+        Self {
+            xyz: data.try_into().unwrap(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub struct RGB {
     pub rgb: [f32; 3],
+}
+
+impl VertexData for RGB {
+    type Data = f32;
+
+    fn new(data: &[Self::Data]) -> Self {
+        Self {
+            rgb: data.try_into().unwrap(),
+        }
+    }
 }
