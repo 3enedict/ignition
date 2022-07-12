@@ -1,7 +1,7 @@
 use wgpu::ShaderModuleDescriptor;
 
 use crate::{
-    manifestation::apex::{xyrgb::XYRGB, xyzrgb::XYZRGB, RGB, XY, XYZ},
+    manifestation::apex::{xyrgb::XYRGB, xyzrgb::XYZRGB, VertexData, RGB, XY, XYZ},
     Engine,
 };
 
@@ -11,6 +11,18 @@ impl Engine {
         self.scene.component(entity, component);
 
         self
+    }
+
+    pub fn generate_vertex_data<D, G: 'static + VertexData<Data = D>, const N: usize>(
+        &mut self,
+        data: [D; N],
+        step: usize,
+    ) {
+        let entity = self.scene.get_current_entity();
+
+        for x in data.windows(step).step_by(step) {
+            self.scene.vectorized_component(entity, G::new(x));
+        }
     }
 
     pub fn xy<const N: usize>(&mut self, coordinates: [f32; N]) -> &mut Self {
@@ -105,5 +117,25 @@ impl Engine {
         } else {
             unimplemented!()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{manifestation::apex::XY, Engine};
+
+    #[test]
+    fn vertex_data_creation_seperates_arrays_correctly() {
+        let mut engine = Engine::ignite();
+        engine.generate_vertex_data::<f32, XY, 4>([0.34, 0.81, 0.63, 0.16] as [f32; 4], 2);
+
+        assert_eq!(
+            engine
+                .scene
+                .get::<Vec<XY>>()
+                .iter()
+                .collect::<Vec<&Vec<XY>>>(),
+            vec![&vec![XY { xy: [0.34, 0.81] }, XY { xy: [0.63, 0.16] }]]
+        );
     }
 }
