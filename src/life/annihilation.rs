@@ -60,6 +60,24 @@ mod tests {
     }
 
     #[test]
+    fn deleting_a_lonely_entity_doesn_t_swap_with_non_existing_component() {
+        let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
+
+        pool.delete_entity(1);
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 0,
+
+                sparse_array: vec![],
+                packed_array: vec![],
+                component_array: vec![],
+            },
+        );
+    }
+
+    #[test]
     fn deleting_a_non_existing_entity_does_nothing() {
         let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
         pool.delete_entity(0);
