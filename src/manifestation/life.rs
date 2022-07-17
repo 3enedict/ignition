@@ -35,6 +35,7 @@ impl Engine {
     pub fn doritos(&mut self) -> usize {
         let entity = self.scene.get_current_entity();
 
+        /*
         if self.scene.component_exists::<Vec<XY>>(entity) {
             let mut vertices = Vec::new();
             let positions = self.scene.get_component::<Vec<XY>>(entity);
@@ -51,7 +52,7 @@ impl Engine {
 
             let doritos = self.renderer.doritos(
                 &vertices,
-                self.scene.get_component::<ShaderModuleDescriptor>(entity),
+                self.scene.take_component::<ShaderModuleDescriptor>(entity),
             );
 
             self.scene.component(entity, doritos);
@@ -70,14 +71,17 @@ impl Engine {
 
             let doritos = self.renderer.doritos(
                 &vertices,
-                self.scene.get_component::<ShaderModuleDescriptor>(entity),
+                self.scene.take_component::<ShaderModuleDescriptor>(entity),
             );
 
             self.scene.component(entity, doritos);
-            return self.scene.entity();
+        */
+        return self.scene.entity();
+        /*
         } else {
             unimplemented!()
         }
+        */
     }
 
     pub fn generate_vertex_data<G: 'static + VertexData<Data = D>, D, const N: usize>(

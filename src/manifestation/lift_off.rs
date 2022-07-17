@@ -35,7 +35,7 @@ pub fn generate_default_configuration(
 ) -> SurfaceConfiguration {
     SurfaceConfiguration {
         usage: TextureUsages::RENDER_ATTACHMENT,
-        format: surface.get_preferred_format(adapter).unwrap(),
+        format: surface.get_supported_formats(&adapter)[0],
         width: size.width,
         height: size.height,
         present_mode: PresentMode::Fifo,

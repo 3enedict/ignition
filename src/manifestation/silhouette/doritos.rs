@@ -14,7 +14,7 @@ impl Renderer {
     pub fn doritos<G: Vertex + bytemuck::Pod>(
         &mut self,
         vertices: &Vec<G>,
-        shaders: &ShaderModuleDescriptor,
+        shaders: ShaderModuleDescriptor,
     ) -> Box<dyn Renderable> {
         let doritos = Doritos {
             pipeline: self.pipeline::<G>(shaders),

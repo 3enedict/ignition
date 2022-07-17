@@ -66,7 +66,7 @@ pub fn create_render_pass<'a>(
 ) -> RenderPass<'a> {
     encoder.begin_render_pass(&RenderPassDescriptor {
         label: None,
-        color_attachments: &[wgpu::RenderPassColorAttachment {
+        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
             view,
             resolve_target: None,
             ops: Operations {
@@ -78,7 +78,7 @@ pub fn create_render_pass<'a>(
                 }),
                 store: true,
             },
-        }],
+        })],
         depth_stencil_attachment: None,
     })
 }

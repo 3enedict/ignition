@@ -7,7 +7,7 @@ use wgpu::{
 use crate::manifestation::{apex::Vertex, Renderer};
 
 impl Renderer {
-    pub fn pipeline<G: Vertex>(&mut self, shaders: &ShaderModuleDescriptor) -> RenderPipeline {
+    pub fn pipeline<G: Vertex>(&mut self, shaders: ShaderModuleDescriptor) -> RenderPipeline {
         let shader = self.device.create_shader_module(shaders);
 
         let pipeline_layout = self
@@ -31,11 +31,11 @@ impl Renderer {
                 fragment: Some(FragmentState {
                     module: &shader,
                     entry_point: "fs_main",
-                    targets: &[ColorTargetState {
+                    targets: &[Some(ColorTargetState {
                         format: self.config.format,
                         blend: Some(BlendState::REPLACE),
                         write_mask: ColorWrites::ALL,
-                    }],
+                    })],
                 }),
                 primitive: PrimitiveState {
                     topology: PrimitiveTopology::TriangleList,
