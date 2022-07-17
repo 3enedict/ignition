@@ -4,10 +4,10 @@ use wgpu::{
     RenderPipelineDescriptor, ShaderModuleDescriptor, VertexState,
 };
 
-use crate::manifestation::{apex::Vertex, Renderer};
+use crate::manifestation::Renderer;
 
 impl Renderer {
-    pub fn pipeline<G: Vertex>(&mut self, shaders: ShaderModuleDescriptor) -> RenderPipeline {
+    pub fn pipeline(&mut self, shaders: ShaderModuleDescriptor) -> RenderPipeline {
         let shader = self.device.create_shader_module(shaders);
 
         let pipeline_layout = self
@@ -26,7 +26,7 @@ impl Renderer {
                 vertex: VertexState {
                     module: &shader,
                     entry_point: "vs_main",
-                    buffers: &[G::layout()],
+                    buffers: &[],
                 },
                 fragment: Some(FragmentState {
                     module: &shader,

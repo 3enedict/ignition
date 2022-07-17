@@ -1,6 +1,6 @@
 use wgpu::{Buffer, RenderPass, RenderPipeline, ShaderModuleDescriptor};
 
-use crate::manifestation::{apex::Vertex, silhouette::Renderable, Renderer};
+use crate::manifestation::{apex::VertexGroup, silhouette::Renderable, Renderer};
 
 #[derive(Debug)]
 pub struct Doritos {
@@ -11,16 +11,16 @@ pub struct Doritos {
 }
 
 impl Renderer {
-    pub fn doritos<G: Vertex + bytemuck::Pod>(
+    pub fn doritos(
         &mut self,
-        vertices: &Vec<G>,
+        vertex_group: &VertexGroup,
         shaders: ShaderModuleDescriptor,
     ) -> Box<dyn Renderable> {
         let doritos = Doritos {
-            pipeline: self.pipeline::<G>(shaders),
-            vertex_buffer: self.vertex_buffer(vertices),
+            pipeline: self.pipeline(shaders),
+            vertex_buffer: self.vertex_buffer(vertex_group),
 
-            num_vertices: vertices.len() as u32,
+            num_vertices: 0,
         };
 
         Box::new(doritos)

@@ -3,13 +3,13 @@ use wgpu::{
     Buffer, BufferUsages,
 };
 
-use crate::manifestation::{apex::Vertex, Renderer};
+use crate::manifestation::{apex::VertexGroup, Renderer};
 
 impl Renderer {
-    pub fn vertex_buffer<G: Vertex + bytemuck::Pod>(&mut self, vertices: &Vec<G>) -> Buffer {
+    pub fn vertex_buffer(&mut self, vertex_group: &VertexGroup) -> Buffer {
         let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
             label: None,
-            contents: bytemuck::cast_slice(vertices),
+            contents: &[],
             usage: BufferUsages::VERTEX,
         });
 

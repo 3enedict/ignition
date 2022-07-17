@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 extern crate ignition;
 use ignition::{manifestation::silhouette::Renderable, prelude::*};
 
+/*
 #[ignore]
 #[test]
 fn alternating_triangles() {
@@ -33,6 +34,7 @@ fn alternating_triangles() {
         }
     });
 }
+*/
 
 /*
 const POLYGON_VERTICES: &[Vertex] = &[
