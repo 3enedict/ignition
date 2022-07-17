@@ -13,18 +13,12 @@ impl Scene {
     }
 }
 
-pub trait EntityDestructor {
-    fn delete_entity(&mut self, entity: usize);
-}
-
-impl<G: 'static> EntityDestructor for ComponentPool<G> {
-    fn delete_entity(&mut self, entity: usize) {
+impl<G> ComponentPool<G> {
+    pub fn take_entity(&mut self, entity: usize) -> Option<G> {
         let index = self.sparse_array[entity];
 
         if index != -1 {
             self.num_components -= 1;
-
-            self.component_array.swap_remove(index as usize);
 
             let last_index = self.sparse_array.len() - 1;
             self.sparse_array[last_index] = self.sparse_array[entity];
@@ -32,7 +26,21 @@ impl<G: 'static> EntityDestructor for ComponentPool<G> {
 
             self.packed_array[index as usize] = last_index;
             self.packed_array.remove(index as usize);
+
+            Some(self.component_array.swap_remove(index as usize))
+        } else {
+            None
         }
+    }
+}
+
+pub trait EntityDestructor {
+    fn delete_entity(&mut self, entity: usize);
+}
+
+impl<G: 'static> EntityDestructor for ComponentPool<G> {
+    fn delete_entity(&mut self, entity: usize) {
+        self.take_entity(entity);
     }
 }
 

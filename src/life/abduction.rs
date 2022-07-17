@@ -32,6 +32,10 @@ impl Scene {
         self.get_mut::<G>().get_mut(entity)
     }
 
+    pub fn take_component<G: 'static>(&mut self, entity: usize) -> G {
+        self.get_mut::<G>().take_entity(entity).unwrap()
+    }
+
     pub fn get_current_entity(&self) -> usize {
         self.available_entities[self.available_entities.len() - 1]
     }
