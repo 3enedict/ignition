@@ -24,7 +24,6 @@ impl<G: 'static> EntityDestructor for ComponentPool<G> {
         if index != -1 {
             self.num_components -= 1;
 
-            self.packed_array.swap_remove(index as usize);
             self.component_array.swap_remove(index as usize);
 
             let last_index = self.sparse_array.len() - 1;
@@ -32,6 +31,7 @@ impl<G: 'static> EntityDestructor for ComponentPool<G> {
             self.sparse_array[entity] = -1;
 
             self.packed_array[index as usize] = last_index;
+            self.packed_array.remove(index as usize);
         }
     }
 }
@@ -60,7 +60,7 @@ mod tests {
     }
 
     #[test]
-    fn deleting_a_lonely_entity_doesn_t_swap_with_non_existing_component() {
+    fn deleting_last_entity_doesn_t_swap_with_non_existing_component() {
         let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
 
         pool.delete_entity(1);
@@ -70,7 +70,7 @@ mod tests {
             ComponentPool {
                 num_components: 0,
 
-                sparse_array: vec![],
+                sparse_array: vec![-1, -1],
                 packed_array: vec![],
                 component_array: vec![],
             },
