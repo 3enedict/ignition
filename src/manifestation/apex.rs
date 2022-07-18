@@ -40,4 +40,38 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn different_types_of_vertex_data_get_processed_correctly() {
+        let mut vertex_group = VertexGroup::new();
+        vertex_group.data(&[0.55, -0.5, 0.55, 0.55, -0.5, 0.55], 2);
+        vertex_group.data(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], 3);
+
+        assert_eq!(
+            vertex_group.data,
+            vec![
+                vec![
+                    bytes_of(&0.55),
+                    bytes_of(&-0.5),
+                    bytes_of(&1.0),
+                    bytes_of(&0.0),
+                    bytes_of(&0.0)
+                ],
+                vec![
+                    bytes_of(&0.55),
+                    bytes_of(&0.55),
+                    bytes_of(&0.0),
+                    bytes_of(&1.0),
+                    bytes_of(&0.0)
+                ],
+                vec![
+                    bytes_of(&-0.5),
+                    bytes_of(&0.55),
+                    bytes_of(&0.0),
+                    bytes_of(&0.0),
+                    bytes_of(&1.0)
+                ],
+            ]
+        );
+    }
 }
