@@ -23,6 +23,7 @@ impl<'a> VertexGroup<'a> {
 #[cfg(test)]
 mod tests {
     use bytemuck::bytes_of;
+    use wgpu::{BufferAddress, VertexAttribute, VertexBufferLayout, VertexFormat, VertexStepMode};
 
     use crate::manifestation::apex::VertexGroup;
 
@@ -72,6 +73,33 @@ mod tests {
                     bytes_of(&1.0)
                 ],
             ]
+        );
+    }
+
+    #[test]
+    fn layout_is_generated_correctly() {
+        let mut vertex_group = VertexGroup::new();
+        vertex_group.data(&[0.55, -0.5, 0.55, 0.55, -0.5, 0.55], 2);
+        vertex_group.data(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], 3);
+
+        assert_eq!(
+            vertex_group.layout(),
+            VertexBufferLayout {
+                array_stride: std::mem::size_of::<[f32; 5]> as BufferAddress,
+                step_mode: VertexStepMode::Vertex,
+                attributes: &[
+                    VertexAttribute {
+                        offset: 0,
+                        shader_location: 0,
+                        format: VertexFormat::Float32x2,
+                    },
+                    VertexAttribute {
+                        offset: std::mem::size_of::<[f32; 2]> as BufferAddress,
+                        shader_location: 1,
+                        format: VertexFormat::Float32x3,
+                    }
+                ]
+            }
         );
     }
 }
