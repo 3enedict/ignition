@@ -45,6 +45,10 @@ impl VertexGroup {
         }
     }
 
+    pub fn get(&self) -> Vec<u8> {
+        self.data.concat().concat()
+    }
+
     pub fn layout(&mut self) -> VertexBufferLayout {
         VertexBufferLayout {
             array_stride: self.stride as BufferAddress,
@@ -173,5 +177,27 @@ mod tests {
                 ]
             }
         );
+    }
+
+    #[test]
+    fn data_is_outputed_correctly() {
+        let mut vertex_group = VertexGroup::new();
+        vertex_group.data(
+            [0.55, -0.5, 0.55, 0.55, -0.5, 0.55],
+            2,
+            VertexFormat::Float32x2,
+        );
+        vertex_group.data(
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            3,
+            VertexFormat::Float32x3,
+        );
+
+        assert_eq!(
+            &vertex_group.get(),
+            bytemuck::cast_slice(&[
+                0.55, -0.5, 1.0, 0.0, 0.0, 0.55, 0.55, 0.0, 1.0, 0.0, -0.5, 0.55, 0.0, 0.0, 1.0
+            ])
+        )
     }
 }
