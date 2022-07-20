@@ -17,10 +17,10 @@ impl Renderer {
         shaders: ShaderModuleDescriptor,
     ) -> Box<dyn Renderable> {
         let doritos = Doritos {
-            pipeline: self.pipeline(shaders),
+            pipeline: self.pipeline(vertex_group, shaders),
             vertex_buffer: self.vertex_buffer(vertex_group),
 
-            num_vertices: 0,
+            num_vertices: vertex_group.num_vertices,
         };
 
         Box::new(doritos)

@@ -1,11 +1,13 @@
 use wgpu::{BufferAddress, VertexAttribute, VertexBufferLayout, VertexFormat, VertexStepMode};
 
+#[derive(Debug)]
 pub struct VertexGroup {
-    data: Vec<Vec<Vec<u8>>>,
+    pub data: Vec<Vec<Vec<u8>>>,
 
-    stride: usize,
-    shader_location: u32,
-    layout: Vec<VertexAttribute>,
+    pub stride: usize,
+    pub num_vertices: u32,
+    pub shader_location: u32,
+    pub layout: Vec<VertexAttribute>,
 }
 
 impl VertexGroup {
@@ -14,6 +16,7 @@ impl VertexGroup {
             data: Vec::new(),
 
             stride: 0,
+            num_vertices: 0,
             shader_location: 0,
             layout: Vec::new(),
         }
@@ -32,6 +35,7 @@ impl VertexGroup {
         });
 
         self.stride += std::mem::size_of::<G>() * step;
+        self.num_vertices = (data.len() / step) as u32;
         self.shader_location += 1;
 
         for (i, point) in data.windows(step).step_by(step).enumerate() {
@@ -49,7 +53,7 @@ impl VertexGroup {
         self.data.concat().concat()
     }
 
-    pub fn layout(&mut self) -> VertexBufferLayout {
+    pub fn layout(&self) -> VertexBufferLayout {
         VertexBufferLayout {
             array_stride: self.stride as BufferAddress,
             step_mode: VertexStepMode::Vertex,
@@ -193,11 +197,15 @@ mod tests {
             VertexFormat::Float32x3,
         );
 
+        let mut vertices: Vec<f64> = Vec::new();
+
+        for i in vertex_group.data.concat().iter() {
+            vertices.push(bincode::deserialize::<f64>(i).unwrap());
+        }
+
         assert_eq!(
-            &vertex_group.get(),
-            bytemuck::cast_slice(&[
-                0.55, -0.5, 1.0, 0.0, 0.0, 0.55, 0.55, 0.0, 1.0, 0.0, -0.5, 0.55, 0.0, 0.0, 1.0
-            ])
+            vertices,
+            [0.55, -0.5, 1.0, 0.0, 0.0, 0.55, 0.55, 0.0, 1.0, 0.0, -0.5, 0.55, 0.0, 0.0, 1.0],
         )
     }
 }

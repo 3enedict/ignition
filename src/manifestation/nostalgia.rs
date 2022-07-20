@@ -9,7 +9,7 @@ impl Renderer {
     pub fn vertex_buffer(&mut self, vertex_group: &VertexGroup) -> Buffer {
         let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
             label: None,
-            contents: &[],
+            contents: &vertex_group.get(),
             usage: BufferUsages::VERTEX,
         });
 
