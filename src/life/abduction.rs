@@ -85,4 +85,12 @@ mod tests {
 
         assert_eq!(0, scene.get_current_entity());
     }
+
+    #[test]
+    fn requesting_for_non_existing_component_pool_returns_error() {
+        let mut scene = Scene::new();
+        scene.component(scene.entity(), 1 as i32);
+
+        assert_eq!(scene.get_trait::<f32>(), LifeError::NoComponentPool);
+    }
 }
