@@ -109,7 +109,9 @@ mod tests {
 
         match scene.get_trait::<f32>() {
             Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
-            Ok(_) => panic!("Test should not have found f32 in scene"),
+            Ok(_) => panic!(
+                "Scene should not have been able to find f32 component pool with get_trait()"
+            ),
         }
     }
 
@@ -122,7 +124,9 @@ mod tests {
 
         match scene.get_trait_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
-            Ok(_) => panic!("Test should not have found f32 in scene"),
+            Ok(_) => panic!(
+                "Scene should not have been able to find f32 component pool with get_trait_mut()"
+            ),
         }
     }
 
@@ -137,7 +141,7 @@ mod tests {
         match scene.get::<f32>() {
             Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
             Ok(_) => panic!(
-                "Scene should not have been able to downcast &Box<dyn ComponentPoolTrait> for f32"
+                "Scene should not have been able to downcast &Box<dyn ComponentPoolTrait> to &ComponentPool<f32> in get()"
             ),
         }
     }
@@ -166,7 +170,7 @@ mod tests {
         match scene.get_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
             Ok(_) => panic!(
-                "Scene should not have been able to downcast &mut Box<dyn ComponentPoolTrait> for f32"
+                "Scene should not have been able to downcast &Box<dyn ComponentPoolTrait> to &ComponentPool<f32> in get_mut()"
             ),
         }
     }
@@ -183,6 +187,35 @@ mod tests {
             Ok(_) => {
                 panic!("Error was not propagated successfully from get_trait_mut() to get_mut()")
             }
+        }
+    }
+
+    #[test]
+    fn getting_component_from_entity_thats_out_of_scope_return_error() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.component(entity, 1 as i32);
+
+        match scene.get_component::<i32>(3) {
+            Err(e) => assert_eq!(e, LifeError::EntityOutOfScope(String::from("i32"), 3)),
+            Ok(_) => panic!(
+                "Scene should not be able to find a component that's out of scope in get_component()"
+            ),
+        }
+    }
+
+    #[test]
+    fn downcast_error_is_correctly_propagated_at_get_component() {
+        let mut scene = Scene::new();
+
+        let type_id = TypeId::of::<f32>();
+        let component_pool = Box::new(ComponentPool::new_with_entity(1, 32 as i32));
+        scene.component_pools.insert(type_id, component_pool);
+
+        match scene.get_component::<f32>() {
+            Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
+            Ok(_) => panic!("Error was not propagated successfully from get() to get_component()"),
         }
     }
 }
