@@ -1,16 +1,32 @@
+use log::warn;
+
 use crate::life::{gizmos::PoolToolbox, ComponentPool, Scene};
 
+use super::{glitch::LifeError, ComponentPoolTrait};
+
 impl Scene {
+    pub fn handle_no_component_pool_error<G: 'static, C: Fn(&mut Box<dyn ComponentPoolTrait>)>(
+        &mut self,
+        closure: C,
+    ) {
+        match self.get_trait_mut::<G>() {
+            Ok(pool) => closure(pool),
+            Err(LifeError::NoComponentPool(_)) => warn!(
+                "Cannot get entity from {} component pool",
+                std::any::type_name::<G>()
+            ),
+        }
+    }
     pub fn toggle<G: 'static>(&mut self, entity: usize) {
-        self.get_trait_mut::<G>().toggle_entity(entity);
+        self.handle_no_component_pool_error::<G, _>(|pool| pool.toggle_entity(entity));
     }
 
     pub fn enable<G: 'static>(&mut self, entity: usize) {
-        self.get_trait_mut::<G>().enable_entity(entity);
+        self.handle_no_component_pool_error::<G, _>(|pool| pool.enable_entity(entity));
     }
 
     pub fn disable<G: 'static>(&mut self, entity: usize) {
-        self.get_trait_mut::<G>().disable_entity(entity);
+        self.handle_no_component_pool_error::<G, _>(|pool| pool.disable_entity(entity));
     }
 }
 

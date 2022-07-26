@@ -12,8 +12,14 @@ impl Scene {
             ))
     }
 
-    pub fn get_trait_mut<G: 'static>(&mut self) -> &mut Box<dyn ComponentPoolTrait> {
-        self.component_pools.get_mut(&TypeId::of::<G>()).unwrap()
+    pub fn get_trait_mut<G: 'static>(
+        &mut self,
+    ) -> Result<&mut Box<dyn ComponentPoolTrait>, LifeError> {
+        self.component_pools
+            .get_mut(&TypeId::of::<G>())
+            .ok_or(LifeError::NoComponentPool(
+                std::any::type_name::<G>().to_string(),
+            ))
     }
 
     pub fn get<G: 'static>(&self) -> &ComponentPool<G> {
@@ -26,6 +32,7 @@ impl Scene {
 
     pub fn get_mut<G: 'static>(&mut self) -> &mut ComponentPool<G> {
         self.get_trait_mut::<G>()
+            .unwrap()
             .as_any_mut()
             .downcast_mut::<ComponentPool<G>>()
             .unwrap()
@@ -101,6 +108,19 @@ mod tests {
         scene.component(entity, 1 as i32);
 
         match scene.get_trait::<f32>() {
+            Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
+            Ok(_) => panic!("Test should not have found f32 in scene"),
+        }
+    }
+
+    #[test]
+    fn requesting_for_non_existing_component_pool_returns_error_mut_version() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.component(entity, 1 as i32);
+
+        match scene.get_trait_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
             Ok(_) => panic!("Test should not have found f32 in scene"),
         }
