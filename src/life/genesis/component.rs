@@ -20,7 +20,9 @@ impl Scene {
     }
 
     pub fn assign_component<G: 'static>(&mut self, entity: usize, component: G) {
-        self.get_mut::<G>().assign_component(entity, component);
+        self.get_mut::<G>()
+            .unwrap()
+            .assign_component(entity, component);
     }
 
     pub fn new_component_pool<G: 'static>(&mut self, entity: usize, component: G) {

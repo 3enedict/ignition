@@ -29,12 +29,11 @@ impl Scene {
             .ok_or(LifeError::Downcast(std::any::type_name::<G>().to_string()))
     }
 
-    pub fn get_mut<G: 'static>(&mut self) -> &mut ComponentPool<G> {
-        self.get_trait_mut::<G>()
-            .unwrap()
+    pub fn get_mut<G: 'static>(&mut self) -> Result<&mut ComponentPool<G>, LifeError> {
+        self.get_trait_mut::<G>()?
             .as_any_mut()
             .downcast_mut::<ComponentPool<G>>()
-            .unwrap()
+            .ok_or(LifeError::Downcast(std::any::type_name::<G>().to_string()))
     }
 
     pub fn get_component<G: 'static>(&self, entity: usize) -> &G {
@@ -42,11 +41,11 @@ impl Scene {
     }
 
     pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &mut G {
-        self.get_mut::<G>().get_mut(entity)
+        self.get_mut::<G>().unwrap().get_mut(entity)
     }
 
     pub fn take_component<G: 'static>(&mut self, entity: usize) -> G {
-        self.get_mut::<G>().take_entity(entity).unwrap()
+        self.get_mut::<G>().unwrap().take_entity(entity).unwrap()
     }
 
     pub fn get_current_entity(&self) -> usize {
@@ -138,7 +137,7 @@ mod tests {
         match scene.get::<f32>() {
             Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
             Ok(_) => panic!(
-                "Scene should not have been able to downcast Box<dyn ComponentPoolTrait> for f32"
+                "Scene should not have been able to downcast &Box<dyn ComponentPoolTrait> for f32"
             ),
         }
     }
@@ -164,10 +163,10 @@ mod tests {
         let component_pool = Box::new(ComponentPool::new_with_entity(1, 32 as i32));
         scene.component_pools.insert(type_id, component_pool);
 
-        match scene.get::<f32>() {
+        match scene.get_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
             Ok(_) => panic!(
-                "Scene should not have been able to downcast Box<dyn ComponentPoolTrait> for f32"
+                "Scene should not have been able to downcast &mut Box<dyn ComponentPoolTrait> for f32"
             ),
         }
     }
@@ -179,9 +178,11 @@ mod tests {
         let entity = scene.entity();
         scene.component(entity, 1 as i32);
 
-        match scene.get::<f32>() {
+        match scene.get_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
-            Ok(_) => panic!("Error was not propagated successfully from get_trait() to get()"),
+            Ok(_) => {
+                panic!("Error was not propagated successfully from get_trait_mut() to get_mut()")
+            }
         }
     }
 }
