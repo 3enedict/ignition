@@ -56,7 +56,10 @@ mod tests {
         let entity = scene.entity();
         scene.component(entity, 34 as i32);
 
-        assert_eq!(scene.get::<i32>().iter().collect::<Vec<&i32>>(), vec![&34]);
+        assert_eq!(
+            scene.get::<i32>().unwrap().iter().collect::<Vec<&i32>>(),
+            vec![&34]
+        );
     }
 
     #[test]
@@ -70,7 +73,7 @@ mod tests {
         scene.component(entity2, 25 as i32);
 
         assert_eq!(
-            scene.get::<i32>().iter().collect::<Vec<&i32>>(),
+            scene.get::<i32>().unwrap().iter().collect::<Vec<&i32>>(),
             vec![&34, &25]
         );
     }
@@ -83,7 +86,10 @@ mod tests {
         scene.component(entity, 34 as i32);
         scene.component(entity, 25 as i32);
 
-        assert_eq!(scene.get::<i32>().iter().collect::<Vec<&i32>>(), vec![&25]);
+        assert_eq!(
+            scene.get::<i32>().unwrap().iter().collect::<Vec<&i32>>(),
+            vec![&25]
+        );
     }
 
     #[test]
@@ -109,12 +115,20 @@ mod tests {
         scene.vectorized_component(entity2, 16 as u32);
 
         assert_eq!(
-            scene.get::<Vec<i32>>().iter().collect::<Vec<&Vec<i32>>>(),
+            scene
+                .get::<Vec<i32>>()
+                .unwrap()
+                .iter()
+                .collect::<Vec<&Vec<i32>>>(),
             vec![&vec![34, 81]]
         );
 
         assert_eq!(
-            scene.get::<Vec<u32>>().iter().collect::<Vec<&Vec<u32>>>(),
+            scene
+                .get::<Vec<u32>>()
+                .unwrap()
+                .iter()
+                .collect::<Vec<&Vec<u32>>>(),
             vec![&vec![63, 16]]
         );
     }

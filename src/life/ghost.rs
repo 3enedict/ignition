@@ -15,6 +15,7 @@ impl Scene {
                 "Cannot get entity from {} component pool",
                 std::any::type_name::<G>()
             ),
+            _ => panic!("Bug: Error type not caught"),
         }
     }
     pub fn toggle<G: 'static>(&mut self, entity: usize) {

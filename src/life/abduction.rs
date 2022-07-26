@@ -22,12 +22,11 @@ impl Scene {
             ))
     }
 
-    pub fn get<G: 'static>(&self) -> &ComponentPool<G> {
-        self.get_trait::<G>()
-            .unwrap()
+    pub fn get<G: 'static>(&self) -> Result<&ComponentPool<G>, LifeError> {
+        self.get_trait::<G>()?
             .as_any()
             .downcast_ref::<ComponentPool<G>>()
-            .unwrap()
+            .ok_or(LifeError::Downcast(std::any::type_name::<G>().to_string()))
     }
 
     pub fn get_mut<G: 'static>(&mut self) -> &mut ComponentPool<G> {
@@ -39,7 +38,7 @@ impl Scene {
     }
 
     pub fn get_component<G: 'static>(&self, entity: usize) -> &G {
-        self.get::<G>().get(entity)
+        self.get::<G>().unwrap().get(entity)
     }
 
     pub fn get_component_mut<G: 'static>(&mut self, entity: usize) -> &mut G {
@@ -79,7 +78,9 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::life::{glitch::LifeError, Scene};
+    use std::any::TypeId;
+
+    use crate::life::{glitch::LifeError, ComponentPool, Scene};
 
     #[test]
     fn calling_get_current_entity_returns_correct_id() {
@@ -123,6 +124,22 @@ mod tests {
         match scene.get_trait_mut::<f32>() {
             Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
             Ok(_) => panic!("Test should not have found f32 in scene"),
+        }
+    }
+
+    #[test]
+    fn unable_to_downcast_component_pool_trait_returns_error() {
+        let mut scene = Scene::new();
+
+        let type_id = TypeId::of::<f32>();
+        let component_pool = Box::new(ComponentPool::new_with_entity(1, 32 as i32));
+        scene.component_pools.insert(type_id, component_pool);
+
+        match scene.get::<f32>() {
+            Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
+            Ok(_) => panic!(
+                "Scene should not have been able to downcast Box<dyn ComponentPoolTrait> for f32"
+            ),
         }
     }
 }

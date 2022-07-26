@@ -76,7 +76,7 @@ impl Engine {
 
     pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
         if self.scene.component_pool_exists::<Box<dyn Renderable>>() {
-            let shapes = self.scene.get::<Box<dyn Renderable>>();
+            let shapes = self.scene.get::<Box<dyn Renderable>>().unwrap();
 
             for shape in shapes.iter() {
                 shape.render(render_pass);

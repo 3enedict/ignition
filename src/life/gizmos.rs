@@ -7,7 +7,7 @@ impl Scene {
     }
 
     pub fn component_exists<G: 'static>(&mut self, entity: usize) -> bool {
-        self.component_pool_exists::<G>() && self.get::<G>().has_component(entity)
+        self.component_pool_exists::<G>() && self.get::<G>().unwrap().has_component(entity)
     }
 }
 
