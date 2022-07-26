@@ -767,6 +767,7 @@ dependencies = [
  "log",
  "pollster",
  "serde",
+ "thiserror",
  "wgpu",
  "winit",
 ]

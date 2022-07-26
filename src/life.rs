@@ -11,6 +11,7 @@ pub mod annihilation;
 pub mod genesis;
 pub mod ghost;
 pub mod gizmos;
+pub mod glitch;
 
 pub struct Scene {
     pub available_entities: Vec<usize>,

@@ -1,9 +1,15 @@
 use crate::life::{ComponentPool, ComponentPoolTrait, Scene};
 use std::any::TypeId;
 
+use super::glitch::LifeError;
+
 impl Scene {
-    pub fn get_trait<G: 'static>(&self) -> &Box<dyn ComponentPoolTrait> {
-        self.component_pools.get(&TypeId::of::<G>()).unwrap()
+    pub fn get_trait<G: 'static>(&self) -> Result<&Box<dyn ComponentPoolTrait>, LifeError> {
+        self.component_pools
+            .get(&TypeId::of::<G>())
+            .ok_or(LifeError::NoComponentPool(
+                std::any::type_name::<G>().to_string(),
+            ))
     }
 
     pub fn get_trait_mut<G: 'static>(&mut self) -> &mut Box<dyn ComponentPoolTrait> {
@@ -12,6 +18,7 @@ impl Scene {
 
     pub fn get<G: 'static>(&self) -> &ComponentPool<G> {
         self.get_trait::<G>()
+            .unwrap()
             .as_any()
             .downcast_ref::<ComponentPool<G>>()
             .unwrap()
@@ -65,7 +72,7 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::life::Scene;
+    use crate::life::{glitch::LifeError, Scene};
 
     #[test]
     fn calling_get_current_entity_returns_correct_id() {
@@ -89,8 +96,13 @@ mod tests {
     #[test]
     fn requesting_for_non_existing_component_pool_returns_error() {
         let mut scene = Scene::new();
-        scene.component(scene.entity(), 1 as i32);
 
-        assert_eq!(scene.get_trait::<f32>(), LifeError::NoComponentPool);
+        let entity = scene.entity();
+        scene.component(entity, 1 as i32);
+
+        match scene.get_trait::<f32>() {
+            Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
+            Ok(_) => panic!("Test should not have found f32 in scene"),
+        }
     }
 }
