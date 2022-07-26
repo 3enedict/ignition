@@ -142,4 +142,17 @@ mod tests {
             ),
         }
     }
+
+    #[test]
+    fn no_component_pool_error_is_correctly_propagated_at_get() {
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.component(entity, 1 as i32);
+
+        match scene.get::<f32>() {
+            Err(e) => assert_eq!(e, LifeError::NoComponentPool(String::from("f32"))),
+            Ok(_) => panic!("Error was not propagated successfully from get_trait() to get()"),
+        }
+    }
 }
