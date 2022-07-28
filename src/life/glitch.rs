@@ -6,4 +6,6 @@ pub enum LifeError {
     NoComponentPool(String),
     #[error("Downcasting from Box<dyn ComponentPoolTrait> to ComponentPool<G> failed for : {0}")]
     Downcast(String),
+    #[error("Entity {1} is out of scope for : {0}")]
+    EntityOutOfScope(String, usize),
 }

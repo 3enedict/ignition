@@ -22,6 +22,7 @@ impl Engine {
         if self.scene.component_exists::<VertexGroup>(entity) {
             self.scene
                 .get_component_mut::<VertexGroup>(entity)
+                .unwrap()
                 .data(data, step, format);
         } else {
             let mut vertex_group = VertexGroup::new();
@@ -52,7 +53,7 @@ impl Engine {
     pub fn doritos(&mut self) -> usize {
         let entity = self.scene.get_current_entity();
         let shaders = self.scene.take_component::<ShaderModuleDescriptor>(entity);
-        let vertex_group = self.scene.get_component::<VertexGroup>(entity);
+        let vertex_group = self.scene.get_component::<VertexGroup>(entity).unwrap();
 
         let doritos = self.renderer.doritos(vertex_group, shaders);
         self.scene.component(entity, doritos);
