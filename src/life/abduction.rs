@@ -220,6 +220,28 @@ mod tests {
     }
 
     #[test]
+    fn getting_component_from_entity_that_isnt_bound_to_any_component_returns_error() {
+        let mut scene = Scene::new();
+
+        let type_id = TypeId::of::<i32>();
+        let component_pool = Box::new(ComponentPool {
+            num_components: 1,
+
+            sparse_array: vec![-1, -1, -1, 1],
+            packed_array: vec![3],
+            component_array: vec![32],
+        });
+        scene.component_pools.insert(type_id, component_pool);
+
+        match scene.get_component::<i32>(3) {
+            Err(e) => assert_eq!(e, LifeError::EntityNotBoundToComponent(String::from("i32"), 3)),
+            Ok(_) => panic!(
+                "Scene should not have been able to find component with get_component() since entity 3 is not bound to anything"
+            ),
+        }
+    }
+
+    #[test]
     fn downcast_error_is_correctly_propagated_at_get_component() {
         let mut scene = Scene::new();
 
@@ -234,7 +256,7 @@ mod tests {
     }
 
     #[test]
-    fn getting_component_mut_from_entity_thats_out_of_scope_return_error() {
+    fn getting_mut_component_from_entity_thats_out_of_scope_return_error() {
         let mut scene = Scene::new();
 
         let entity = scene.entity();
@@ -243,7 +265,29 @@ mod tests {
         match scene.get_component_mut::<i32>(3) {
             Err(e) => assert_eq!(e, LifeError::EntityOutOfScope(String::from("i32"), 3)),
             Ok(_) => panic!(
-                "Scene should not be able to find a component that's out of scope in get_component()"
+                "Scene should not be able to find a component that's out of scope in get_component_mut()"
+            ),
+        }
+    }
+
+    #[test]
+    fn getting_mut_component_from_entity_that_isnt_bound_to_any_component_returns_error() {
+        let mut scene = Scene::new();
+
+        let type_id = TypeId::of::<i32>();
+        let component_pool = Box::new(ComponentPool {
+            num_components: 1,
+
+            sparse_array: vec![-1, -1, -1, 1],
+            packed_array: vec![3],
+            component_array: vec![32],
+        });
+        scene.component_pools.insert(type_id, component_pool);
+
+        match scene.get_component_mut::<i32>(3) {
+            Err(e) => assert_eq!(e, LifeError::EntityNotBoundToComponent(String::from("i32"), 3)),
+            Ok(_) => panic!(
+                "Scene should not have been able to find component with get_component_mut() since entity 3 is not bound to anything"
             ),
         }
     }
@@ -258,7 +302,9 @@ mod tests {
 
         match scene.get_component_mut::<f32>(3) {
             Err(e) => assert_eq!(e, LifeError::Downcast(String::from("f32"))),
-            Ok(_) => panic!("Error was not propagated successfully from get() to get_component()"),
+            Ok(_) => panic!(
+                "Error was not propagated successfully from get_mut() to get_component_mut()"
+            ),
         }
     }
 }
