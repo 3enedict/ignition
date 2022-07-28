@@ -63,7 +63,12 @@ impl<G> ComponentPool<G> {
                 entity,
             ))? as usize;
 
-        Ok(self.component_array.get(index).unwrap())
+        self.component_array
+            .get(index)
+            .ok_or(LifeError::EntityNotBoundToComponent(
+                std::any::type_name::<G>().to_string(),
+                entity,
+            ))
     }
 
     pub fn get_mut(&mut self, entity: usize) -> Result<&mut G, LifeError> {
@@ -75,7 +80,12 @@ impl<G> ComponentPool<G> {
                 entity,
             ))? as usize;
 
-        Ok(self.component_array.get_mut(index).unwrap())
+        self.component_array
+            .get_mut(index)
+            .ok_or(LifeError::EntityNotBoundToComponent(
+                std::any::type_name::<G>().to_string(),
+                entity,
+            ))
     }
 }
 

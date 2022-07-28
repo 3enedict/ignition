@@ -8,4 +8,6 @@ pub enum LifeError {
     Downcast(String),
     #[error("Entity {1} is out of scope for : {0}")]
     EntityOutOfScope(String, usize),
+    #[error("Entity {1} does not have any component bound to it for : {0}")]
+    EntityNotBoundToComponent(String, usize),
 }
