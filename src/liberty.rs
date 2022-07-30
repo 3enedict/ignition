@@ -1,6 +1,6 @@
 use winit::event_loop::ControlFlow;
 
-use crate::Engine;
+use crate::{logger, Engine};
 
 #[derive(Builder, Debug, PartialEq)]
 #[builder(default)]
@@ -22,7 +22,7 @@ impl Default for Parameters {
 
 impl ParametersBuilder {
     pub fn ignite(&mut self) -> Engine {
-        Engine::env_logger();
+        logger();
         Engine::setup_engine(self.build().unwrap())
     }
 }

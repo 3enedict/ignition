@@ -1,4 +1,6 @@
-use crate::life::{ComponentPool, Scene};
+use std::any::type_name;
+
+use crate::life::{glitch::LifeError, ComponentPool, Scene};
 
 impl Scene {
     pub fn delete(&mut self, entity: usize) {
@@ -14,7 +16,7 @@ impl Scene {
 }
 
 impl<G> ComponentPool<G> {
-    pub fn take_entity(&mut self, entity: usize) -> Option<G> {
+    pub fn take_entity(&mut self, entity: usize) -> Result<G, LifeError> {
         let index = self.sparse_array[entity];
 
         if index != -1 {
@@ -27,9 +29,12 @@ impl<G> ComponentPool<G> {
             self.packed_array[index as usize] = last_index;
             self.packed_array.remove(index as usize);
 
-            Some(self.component_array.swap_remove(index as usize))
+            Ok(self.component_array.swap_remove(index as usize))
         } else {
-            None
+            Err(LifeError::EntityNotBoundToComponent(
+                type_name::<G>(),
+                entity,
+            ))
         }
     }
 }
@@ -40,7 +45,7 @@ pub trait EntityDestructor {
 
 impl<G: 'static> EntityDestructor for ComponentPool<G> {
     fn delete_entity(&mut self, entity: usize) {
-        self.take_entity(entity);
+        unwrap!(self.take_entity(entity));
     }
 }
 

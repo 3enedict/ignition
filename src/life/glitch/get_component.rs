@@ -13,12 +13,12 @@ mod tests {
 
         assert_err!(
             scene.get_component::<i32>(3),
-            LifeError::EntityOutOfScope("i32", 3)
+            LifeError::EntityNotFound("i32", 3)
         );
 
         assert_err!(
             scene.get_component_mut::<i32>(3),
-            LifeError::EntityOutOfScope("i32", 3)
+            LifeError::EntityNotFound("i32", 3)
         );
     }
 

@@ -1,6 +1,6 @@
 use std::any::TypeId;
 
-use crate::life::{ComponentPool, Scene};
+use crate::life::{ComponentPool, PoolToolbox, Scene};
 
 impl Scene {
     pub fn component<G: 'static>(&mut self, entity: usize, component: G) {
@@ -35,7 +35,7 @@ impl Scene {
     }
 }
 
-impl<G> ComponentPool<G> {
+impl<G: 'static> ComponentPool<G> {
     pub fn assign_component(&mut self, entity: usize, component: G) {
         if self.has_component(entity) {
             *self.get_mut(entity).unwrap() = component;

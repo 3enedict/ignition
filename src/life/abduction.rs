@@ -1,13 +1,14 @@
-use crate::life::{ComponentPool, ComponentPoolTrait, Scene};
-use std::any::TypeId;
+use std::any::{type_name, TypeId};
 
-use super::glitch::LifeError;
+use crate::life::{
+    gizmos::PoolToolbox, glitch::LifeError, ComponentPool, ComponentPoolTrait, Scene,
+};
 
 impl Scene {
     pub fn get_trait<G: 'static>(&self) -> Result<&Box<dyn ComponentPoolTrait>, LifeError> {
         self.component_pools
             .get(&TypeId::of::<G>())
-            .ok_or(LifeError::NoComponentPool(std::any::type_name::<G>()))
+            .ok_or(LifeError::NoComponentPool(type_name::<G>()))
     }
 
     pub fn get_trait_mut<G: 'static>(
@@ -15,21 +16,21 @@ impl Scene {
     ) -> Result<&mut Box<dyn ComponentPoolTrait>, LifeError> {
         self.component_pools
             .get_mut(&TypeId::of::<G>())
-            .ok_or(LifeError::NoComponentPool(std::any::type_name::<G>()))
+            .ok_or(LifeError::NoComponentPool(type_name::<G>()))
     }
 
     pub fn get<G: 'static>(&self) -> Result<&ComponentPool<G>, LifeError> {
         self.get_trait::<G>()?
             .as_any()
             .downcast_ref::<ComponentPool<G>>()
-            .ok_or(LifeError::Downcast(std::any::type_name::<G>()))
+            .ok_or(LifeError::Downcast(type_name::<G>()))
     }
 
     pub fn get_mut<G: 'static>(&mut self) -> Result<&mut ComponentPool<G>, LifeError> {
         self.get_trait_mut::<G>()?
             .as_any_mut()
             .downcast_mut::<ComponentPool<G>>()
-            .ok_or(LifeError::Downcast(std::any::type_name::<G>()))
+            .ok_or(LifeError::Downcast(type_name::<G>()))
     }
 
     pub fn get_component<G: 'static>(&self, entity: usize) -> Result<&G, LifeError> {
@@ -40,8 +41,8 @@ impl Scene {
         self.get_mut::<G>()?.get_mut(entity)
     }
 
-    pub fn take_component<G: 'static>(&mut self, entity: usize) -> G {
-        self.get_mut::<G>().unwrap().take_entity(entity).unwrap()
+    pub fn take_component<G: 'static>(&mut self, entity: usize) -> Result<G, LifeError> {
+        self.get_mut::<G>()?.take_entity(entity)
     }
 
     pub fn get_current_entity(&self) -> usize {
@@ -49,37 +50,20 @@ impl Scene {
     }
 }
 
-impl<G> ComponentPool<G> {
+impl<G: 'static> ComponentPool<G> {
     pub fn get(&self, entity: usize) -> Result<&G, LifeError> {
-        let index = *self
-            .sparse_array
-            .get(entity)
-            .ok_or(LifeError::EntityOutOfScope(
-                std::any::type_name::<G>(),
-                entity,
-            ))? as usize;
-
-        self.component_array
-            .get(index)
-            .ok_or(LifeError::EntityNotBoundToComponent(
-                std::any::type_name::<G>(),
-                entity,
-            ))
+        self.component_array.get(self.component_id(entity)?).ok_or(
+            LifeError::EntityNotBoundToComponent(type_name::<G>(), entity),
+        )
     }
 
     pub fn get_mut(&mut self, entity: usize) -> Result<&mut G, LifeError> {
-        let index = *self
-            .sparse_array
-            .get(entity)
-            .ok_or(LifeError::EntityOutOfScope(
-                std::any::type_name::<G>(),
-                entity,
-            ))? as usize;
+        let id = self.component_id(entity)?;
 
         self.component_array
-            .get_mut(index)
+            .get_mut(id)
             .ok_or(LifeError::EntityNotBoundToComponent(
-                std::any::type_name::<G>(),
+                type_name::<G>(),
                 entity,
             ))
     }

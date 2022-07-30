@@ -52,8 +52,16 @@ impl Engine {
 
     pub fn doritos(&mut self) -> usize {
         let entity = self.scene.get_current_entity();
-        let shaders = self.scene.take_component::<ShaderModuleDescriptor>(entity);
-        let vertex_group = self.scene.get_component::<VertexGroup>(entity).unwrap();
+
+        let shaders = unwrap_or!(
+            self.scene.take_component::<ShaderModuleDescriptor>(entity),
+            self.scene.entity()
+        );
+
+        let vertex_group = unwrap_or!(
+            self.scene.get_component::<VertexGroup>(entity),
+            self.scene.entity()
+        );
 
         let doritos = self.renderer.doritos(vertex_group, shaders);
         self.scene.component(entity, doritos);
