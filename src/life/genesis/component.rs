@@ -163,4 +163,23 @@ mod tests {
             assert_eq!(captured_logs[0].level, Level::Warn);
         });
     }
+
+    #[test]
+    fn error_in_assign_component_is_logged() {
+        testing_logger::setup();
+
+        let mut scene = Scene::new();
+
+        let entity = scene.entity();
+        scene.assign_component(entity, 3 as i32);
+
+        testing_logger::validate(|captured_logs| {
+            assert_eq!(captured_logs.len(), 1);
+            assert_eq!(
+                captured_logs[0].body,
+                format!("There's no component pool for : {}", type_name::<i32>())
+            );
+            assert_eq!(captured_logs[0].level, Level::Warn);
+        });
+    }
 }

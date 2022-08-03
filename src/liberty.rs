@@ -34,6 +34,8 @@ mod tests {
 
     #[test]
     fn instantiating_parameters_with_engine_returns_correct_defaults() {
+        testing_logger::setup(); // This is only to prevent env_logger to start up
+
         let engine = Engine::ignite();
         let default_parameters = ParametersBuilder::default().build().unwrap();
 
@@ -42,6 +44,8 @@ mod tests {
 
     #[test]
     fn changing_parameters_in_engine_returns_correct_parameters() {
+        testing_logger::setup(); // This is only to prevent env_logger to start up
+
         let engine = Engine::parameters()
             .control_flow(ControlFlow::Wait)
             .ignite();
