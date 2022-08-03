@@ -47,8 +47,6 @@ impl<G: 'static> ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use std::any::type_name;
-
     use log::Level;
     extern crate testing_logger;
 
@@ -153,14 +151,12 @@ mod tests {
 
         testing_logger::validate(|captured_logs| {
             assert_eq!(captured_logs.len(), 1);
-            assert_eq!(
-                captured_logs[0].body,
-                format!(
-                    "Entity 0 does not have any component bound to it for : {}",
-                    type_name::<Vec<i32>>()
-                )
-            );
             assert_eq!(captured_logs[0].level, Level::Warn);
+
+            assert!(captured_logs[0]
+                .body
+                .contains("Entity 0 is bound to a non existing component for"));
+            assert!(captured_logs[0].body.contains("i32")); // The reason why i'm pattern matching against i32 instead of using type_name::<i32>() is because the latter isn't reliable as said in the docs
         });
     }
 
@@ -175,11 +171,12 @@ mod tests {
 
         testing_logger::validate(|captured_logs| {
             assert_eq!(captured_logs.len(), 1);
-            assert_eq!(
-                captured_logs[0].body,
-                format!("There's no component pool for : {}", type_name::<i32>())
-            );
             assert_eq!(captured_logs[0].level, Level::Warn);
+
+            assert!(captured_logs[0]
+                .body
+                .contains("There's no component pool for"));
+            assert!(captured_logs[0].body.contains("i32")); // The reason why i'm pattern matching against i32 instead of using type_name::<i32>() is because the latter isn't reliable as said in the docs
         });
     }
 }

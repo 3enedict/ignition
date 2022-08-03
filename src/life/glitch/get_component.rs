@@ -23,7 +23,7 @@ mod tests {
     }
 
     #[test]
-    fn getting_component_from_entity_that_isnt_bound_to_any_component_returns_error() {
+    fn getting_component_from_entity_that_is_bound_to_a_non_existing_component_returns_error() {
         let mut scene = Scene::new();
 
         let type_id = TypeId::of::<i32>();
@@ -38,12 +38,12 @@ mod tests {
 
         assert_err!(
             scene.get_component::<i32>(3),
-            LifeError::EntityNotBoundToComponent("i32", 3)
+            LifeError::EntityBoundToNonExistingComponent("i32", 3)
         );
 
         assert_err!(
             scene.get_component_mut::<i32>(3),
-            LifeError::EntityNotBoundToComponent("i32", 3)
+            LifeError::EntityBoundToNonExistingComponent("i32", 3)
         );
     }
 

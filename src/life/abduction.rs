@@ -56,7 +56,7 @@ impl<G: 'static> ComponentPool<G> {
 
         self.component_array
             .get(id)
-            .ok_or(LifeError::EntityNotBoundToComponent(
+            .ok_or(LifeError::EntityBoundToNonExistingComponent(
                 type_name::<G>(),
                 entity,
             ))
@@ -67,7 +67,7 @@ impl<G: 'static> ComponentPool<G> {
 
         self.component_array
             .get_mut(id)
-            .ok_or(LifeError::EntityNotBoundToComponent(
+            .ok_or(LifeError::EntityBoundToNonExistingComponent(
                 type_name::<G>(),
                 entity,
             ))
