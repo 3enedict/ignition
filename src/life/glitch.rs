@@ -2,9 +2,9 @@ use thiserror::Error;
 
 #[cfg(test)]
 macro_rules! assert_err {
-    ($expression:expr, $($pattern:tt)+) => {
+    ($expression:expr, $($error:tt)+) => {
         match $expression {
-            Err(e) => assert_eq!(e, $($pattern)+),
+            Err(e) => assert_eq!(e, $($error)+),
             Ok(_) => panic!("`{}` did not return error as expected", stringify!($expression)),
         }
     }
