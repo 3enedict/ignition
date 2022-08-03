@@ -8,6 +8,7 @@ impl Scene {
     }
 
     pub fn component_exists<G: 'static>(&mut self, entity: usize) -> bool {
+        // No need for error handling because unwrap() can't fail since `self.component_pool_exists::<G>()` is called before it
         self.component_pool_exists::<G>() && self.get::<G>().unwrap().has_component(entity)
     }
 }

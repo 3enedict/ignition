@@ -8,6 +8,7 @@ winit = "0.26"
 wgpu = "0.13"
 
 env_logger = "0.9"
+testing_logger = "0.1"
 log = { version = "0.4", features = ["release_max_level_off"] }
 thiserror = "1.0"
 
