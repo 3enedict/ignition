@@ -52,9 +52,14 @@ impl Scene {
 
 impl<G: 'static> ComponentPool<G> {
     pub fn get(&self, entity: usize) -> Result<&G, LifeError> {
-        self.component_array.get(self.component_id(entity)?).ok_or(
-            LifeError::EntityNotBoundToComponent(type_name::<G>(), entity),
-        )
+        let id = self.component_id(entity)?;
+
+        self.component_array
+            .get(id)
+            .ok_or(LifeError::EntityNotBoundToComponent(
+                type_name::<G>(),
+                entity,
+            ))
     }
 
     pub fn get_mut(&mut self, entity: usize) -> Result<&mut G, LifeError> {

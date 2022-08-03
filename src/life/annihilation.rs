@@ -1,6 +1,4 @@
-use std::any::type_name;
-
-use crate::life::{glitch::LifeError, ComponentPool, Scene};
+use crate::life::{gizmos::PoolToolbox, glitch::LifeError, ComponentPool, Scene};
 
 impl Scene {
     pub fn delete(&mut self, entity: usize) {
@@ -15,27 +13,18 @@ impl Scene {
     }
 }
 
-impl<G> ComponentPool<G> {
+impl<G: 'static> ComponentPool<G> {
     pub fn take_entity(&mut self, entity: usize) -> Result<G, LifeError> {
-        let index = self.sparse_array[entity];
+        let component = self.component_id(entity)?;
+        let last_index = self.packed_array.last().unwrap().clone();
 
-        if index != -1 {
-            self.num_components -= 1;
+        self.num_components -= 1;
 
-            let last_index = self.sparse_array.len() - 1;
-            self.sparse_array[last_index] = self.sparse_array[entity];
-            self.sparse_array[entity] = -1;
+        self.sparse_array[last_index] = component as i32;
+        self.sparse_array[entity] = -1;
 
-            self.packed_array[index as usize] = last_index;
-            self.packed_array.remove(index as usize);
-
-            Ok(self.component_array.swap_remove(index as usize))
-        } else {
-            Err(LifeError::EntityNotBoundToComponent(
-                type_name::<G>(),
-                entity,
-            ))
-        }
+        self.packed_array.swap_remove(component);
+        Ok(self.component_array.swap_remove(component))
     }
 }
 
@@ -103,6 +92,26 @@ mod tests {
                 sparse_array: vec![-1, 0],
                 packed_array: vec![1],
                 component_array: vec![32],
+            },
+        );
+    }
+
+    #[test]
+    fn deleting_two_entities_works_as_expected() {
+        let mut pool = ComponentPool::new_with_entity(1, 32 as i32);
+        pool.assign_component(3, 81 as i32);
+
+        pool.delete_entity(1);
+        pool.delete_entity(3);
+
+        assert_eq!(
+            pool,
+            ComponentPool {
+                num_components: 0,
+
+                sparse_array: vec![-1, -1, -1, -1],
+                packed_array: vec![],
+                component_array: vec![],
             },
         );
     }

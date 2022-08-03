@@ -28,6 +28,7 @@ impl<G> ComponentPool<G> {
 
 pub trait PoolToolbox {
     fn has_component(&self, entity: usize) -> bool;
+
     fn entity_id(&self, component_id: usize) -> Result<usize, LifeError>;
     fn component_id(&self, entity_id: usize) -> Result<usize, LifeError>;
 
@@ -45,14 +46,18 @@ impl<G: 'static> PoolToolbox for ComponentPool<G> {
         self.packed_array
             .get(component_id)
             .map(|x| x.clone())
-            .ok_or(LifeError::EntityNotFound(type_name::<G>(), component_id))
+            .ok_or(LifeError::ComponentNotFound(type_name::<G>(), component_id))
     }
 
     fn component_id(&self, entity_id: usize) -> Result<usize, LifeError> {
-        self.sparse_array
-            .get(entity_id)
-            .map(|x| x.clone() as usize)
-            .ok_or(LifeError::EntityNotFound(type_name::<G>(), entity_id))
+        match self.sparse_array.get(entity_id) {
+            None => Err(LifeError::EntityNotFound(type_name::<G>(), entity_id)),
+            Some(&-1) => Err(LifeError::EntityNotBoundToComponent(
+                type_name::<G>(),
+                entity_id,
+            )),
+            Some(id) => Ok(id.clone() as usize),
+        }
     }
 
     fn swap_entities(&mut self, entity: usize, entity_destination: usize) {

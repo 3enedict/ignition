@@ -13,18 +13,14 @@ impl Scene {
 
     pub fn vectorized_component<G: 'static>(&mut self, entity: usize, component: G) {
         if self.component_exists::<Vec<G>>(entity) {
-            self.get_component_mut::<Vec<G>>(entity)
-                .unwrap()
-                .push(component);
+            unwrap!(self.get_component_mut::<Vec<G>>(entity)).push(component);
         } else {
             self.component(entity, vec![component]);
         }
     }
 
     pub fn assign_component<G: 'static>(&mut self, entity: usize, component: G) {
-        self.get_mut::<G>()
-            .unwrap()
-            .assign_component(entity, component);
+        unwrap!(self.get_mut::<G>()).assign_component(entity, component);
     }
 
     pub fn new_component_pool<G: 'static>(&mut self, entity: usize, component: G) {
@@ -38,7 +34,7 @@ impl Scene {
 impl<G: 'static> ComponentPool<G> {
     pub fn assign_component(&mut self, entity: usize, component: G) {
         if self.has_component(entity) {
-            *self.get_mut(entity).unwrap() = component;
+            *unwrap!(self.get_mut(entity)) = component;
         } else {
             Self::add_entity_to_sparse_array(entity, self.num_components, &mut self.sparse_array);
 
