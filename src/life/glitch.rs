@@ -10,9 +10,20 @@ macro_rules! assert_err {
     }
 }
 
+#[cfg(test)]
+macro_rules! assert_contains {
+    ($error:expr, $msg:literal) => {
+        if !$error.contains($msg) {
+            panic!("Expected to find `{}` in `{}` ", $msg, $error);
+        }
+    };
+}
+
 mod get;
 mod get_component;
 mod get_trait;
+
+mod genesis_component;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum LifeError {
