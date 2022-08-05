@@ -10,6 +10,8 @@ use crate::{
     Engine,
 };
 
+pub mod window;
+
 pub struct EngineBuilder {
     pub window: WindowBuilder,
 }
@@ -50,10 +52,5 @@ impl EngineBuilder {
                 queue,
             },
         }
-    }
-
-    pub fn title<G: Into<String>>(mut self, title: G) -> Self {
-        self.window = self.window.with_title(title.into());
-        self
     }
 }
