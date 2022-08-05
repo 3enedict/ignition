@@ -1,5 +1,6 @@
-use crate::manifestation::Renderer;
+use crate::{liberty::EngineBuilder, manifestation::Renderer};
 
+pub mod liberty;
 pub mod manifestation;
 pub mod prelude;
 
@@ -20,5 +21,9 @@ impl Engine {
         Self {
             renderer: Renderer::new(),
         }
+    }
+
+    pub fn parameters() -> EngineBuilder {
+        EngineBuilder::new()
     }
 }
