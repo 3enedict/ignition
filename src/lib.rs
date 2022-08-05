@@ -1,3 +1,6 @@
+use crate::manifestation::Renderer;
+
+pub mod manifestation;
 pub mod prelude;
 
 pub fn logger() {
@@ -6,12 +9,16 @@ pub fn logger() {
     }
 }
 
-pub struct Engine {}
+pub struct Engine {
+    pub renderer: Renderer,
+}
 
 impl Engine {
     pub fn ignite() -> Self {
         logger();
 
-        Self {}
+        Self {
+            renderer: Renderer::new(),
+        }
     }
 }
