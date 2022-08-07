@@ -16,14 +16,10 @@ pub struct Engine {
 
 impl Engine {
     pub fn ignite() -> Self {
-        logger();
-
-        Self {
-            renderer: Renderer::new(),
-        }
+        EngineBuilder::default().ignite()
     }
 
-    pub fn parameters() -> EngineBuilder {
-        EngineBuilder::new()
+    pub fn default() -> EngineBuilder {
+        EngineBuilder::default()
     }
 }

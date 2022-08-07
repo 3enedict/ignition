@@ -1,12 +1,16 @@
 use winit::{
     dpi::{Position, Size},
-    window::{Fullscreen, Icon},
+    event_loop::EventLoopWindowTarget,
+    window::{Fullscreen, Icon, Window},
 };
 
 use crate::liberty::EngineBuilder;
 
 impl EngineBuilder {
-    pub fn title<G: Into<String>>(mut self, title: G) -> Self {
+    pub fn window<T: 'static>(&self, target: &EventLoopWindowTarget<T>) -> Window {
+        self.window.clone().build(target).unwrap()
+    }
+    pub fn title(mut self, title: &str) -> Self {
         self.window = self.window.with_title(title);
         self
     }
@@ -31,38 +35,41 @@ impl EngineBuilder {
         self
     }
 
-    pub fn resizable(mut self, resizable: bool) -> Self {
-        self.window = self.window.with_resizable(resizable);
+    pub fn unresizable(mut self) -> Self {
+        self.window = self.window.with_resizable(false);
         self
     }
 
-    pub fn fullscreen(mut self, fullscreen: Option<Fullscreen>) -> Self {
-        self.window = self.window.with_fullscreen(fullscreen);
+    pub fn fullscreen(mut self) -> Self {
+        self.window = self
+            .window
+            .with_fullscreen(Some(Fullscreen::Borderless(None)));
         self
     }
 
-    pub fn maximized(mut self, maximized: bool) -> Self {
-        self.window = self.window.with_maximized(maximized);
+    pub fn maximized(mut self) -> Self {
+        self.window = self.window.with_maximized(true);
         self
     }
 
-    pub fn visible(mut self, visible: bool) -> Self {
-        self.window = self.window.with_visible(visible);
+    pub fn invisible(mut self) -> Self {
+        self.window = self.window.with_visible(false);
         self
     }
 
-    pub fn transparent(mut self, transparent: bool) -> Self {
-        self.window = self.window.with_transparent(transparent);
+    // Reminder: Remember that when updating to winit 0.27, there's a function for checking if transparent is supported
+    pub fn transparent(mut self) -> Self {
+        self.window = self.window.with_transparent(true);
         self
     }
 
-    pub fn decorations(mut self, decorations: bool) -> Self {
-        self.window = self.window.with_decorations(decorations);
+    pub fn no_decorations(mut self) -> Self {
+        self.window = self.window.with_decorations(false);
         self
     }
 
-    pub fn always_on_top(mut self, always_on_top: bool) -> Self {
-        self.window = self.window.with_always_on_top(always_on_top);
+    pub fn always_on_top(mut self) -> Self {
+        self.window = self.window.with_always_on_top(true);
         self
     }
 

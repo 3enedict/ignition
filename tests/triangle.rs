@@ -4,5 +4,5 @@ use ignition::prelude::*;
 #[ignore]
 #[test]
 fn triangle() {
-    let _engine = Engine::parameters().title("Dark Web").ignite();
+    let _engine = Engine::default().title("Triangle").ignite();
 }

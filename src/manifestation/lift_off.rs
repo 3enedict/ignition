@@ -1,21 +1,47 @@
+use log::info;
+
 use wgpu::{
     Adapter, Backends, Device, DeviceDescriptor, Features, Instance, PowerPreference, PresentMode,
     Queue, RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
 };
 
 use winit::{
-    dpi::PhysicalSize,
-    event_loop::EventLoop,
-    platform::unix::EventLoopExtUnix,
-    window::{Window, WindowBuilder},
+    dpi::PhysicalSize, event_loop::EventLoop, platform::unix::EventLoopExtUnix, window::Window,
 };
 
-use crate::manifestation::Renderer;
+use crate::{liberty::EngineBuilder, manifestation::Renderer};
 
-pub fn create_window() -> (EventLoop<()>, Window, PhysicalSize<u32>) {
+impl Renderer {
+    pub fn new(parameters: &EngineBuilder) -> Self {
+        let (event_loop, window, size) = create_window(parameters);
+
+        let instance = Instance::new(Backends::all());
+        let surface = create_surface(&instance, &window);
+
+        let adapter = pollster::block_on(get_adapter(&instance, &surface));
+        info!("Device name : {}", adapter.get_info().name);
+        let (device, queue) = pollster::block_on(get_device(&adapter));
+
+        let config = generate_default_configuration(&size, &surface, &adapter);
+        surface.configure(&device, &config);
+
+        Self {
+            event_loop: Some(event_loop),
+            window,
+            size,
+            surface,
+            config,
+
+            adapter,
+            device,
+            queue,
+        }
+    }
+}
+
+pub fn create_window(parameters: &EngineBuilder) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
     let event_loop = EventLoop::new_any_thread();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
+    let window = parameters.window(&event_loop);
     let size = window.inner_size();
 
     (event_loop, window, size)
@@ -63,32 +89,4 @@ pub async fn get_device(adapter: &Adapter) -> (Device, Queue) {
         )
         .await
         .expect("Error: Failed to create device - Ignition")
-}
-
-impl Renderer {
-    pub fn new() -> Self {
-        let (event_loop, window, size) = create_window();
-
-        let instance = Instance::new(Backends::all());
-        let surface = create_surface(&instance, &window);
-
-        let adapter = pollster::block_on(get_adapter(&instance, &surface));
-        println!("Device name : {}", adapter.get_info().name);
-        let (device, queue) = pollster::block_on(get_device(&adapter));
-
-        let config = generate_default_configuration(&size, &surface, &adapter);
-        surface.configure(&device, &config);
-
-        Self {
-            event_loop: Some(event_loop),
-            window,
-            size,
-            surface,
-            config,
-
-            adapter,
-            device,
-            queue,
-        }
-    }
 }
