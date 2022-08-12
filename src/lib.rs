@@ -1,3 +1,5 @@
+use wgpu::Backends;
+
 use crate::manifestation::Renderer;
 
 pub mod manifestation;
@@ -29,11 +31,15 @@ impl Engine {
 
 pub struct Configuration {
     title: &'static str,
+    backend: Backends,
 }
 
 impl Default for Configuration {
     fn default() -> Self {
-        Self { title: "Darkweb" }
+        Self {
+            title: "Darkweb",
+            backend: Backends::all(),
+        }
     }
 }
 
@@ -44,6 +50,11 @@ impl Configuration {
 
     pub fn title(self, title: &'static str) -> Self {
         self.title = title;
+        self
+    }
+
+    pub fn backend(self, backend: Backends) -> Self {
+        self.backend = backend;
         self
     }
 }

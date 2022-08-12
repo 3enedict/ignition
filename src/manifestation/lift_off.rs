@@ -18,7 +18,7 @@ impl Renderer {
     pub fn new(config: &Configuration) -> Self {
         let (event_loop, window, size) = create_window(config);
 
-        let instance = Instance::new(Backends::all());
+        let instance = Instance::new(config.backend);
         let surface = create_surface(&instance, &window);
 
         let adapter = pollster::block_on(get_adapter(&instance, &surface));
