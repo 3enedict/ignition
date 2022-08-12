@@ -6,14 +6,17 @@ use wgpu::{
 };
 
 use winit::{
-    dpi::PhysicalSize, event_loop::EventLoop, platform::unix::EventLoopExtUnix, window::Window,
+    dpi::PhysicalSize,
+    event_loop::EventLoop,
+    platform::unix::EventLoopExtUnix,
+    window::{Window, WindowBuilder},
 };
 
-use crate::{liberty::EngineBuilder, manifestation::Renderer};
+use crate::{manifestation::Renderer, Configuration};
 
 impl Renderer {
-    pub fn new(parameters: &EngineBuilder) -> Self {
-        let (event_loop, window, size) = create_window(parameters);
+    pub fn new(config: &Configuration) -> Self {
+        let (event_loop, window, size) = create_window(config);
 
         let instance = Instance::new(Backends::all());
         let surface = create_surface(&instance, &window);
@@ -39,9 +42,13 @@ impl Renderer {
     }
 }
 
-pub fn create_window(parameters: &EngineBuilder) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
+pub fn create_window(config: &Configuration) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
     let event_loop = EventLoop::new_any_thread();
-    let window = parameters.window(&event_loop);
+    let window = WindowBuilder::new()
+        .with_title(config.title)
+        .build(&event_loop)
+        .expect("Error: Unable to create window - Ignition");
+
     let size = window.inner_size();
 
     (event_loop, window, size)
