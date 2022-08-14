@@ -1,8 +1,8 @@
 use log::info;
 
 use wgpu::{
-    Adapter, Backends, Device, DeviceDescriptor, Features, Instance, PowerPreference, PresentMode,
-    Queue, RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
+    Adapter, Device, DeviceDescriptor, Features, Instance, PowerPreference, PresentMode, Queue,
+    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
 };
 
 use winit::{
@@ -43,7 +43,11 @@ impl Renderer {
 }
 
 pub fn create_window(config: &Configuration) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
-    let event_loop = EventLoop::new_any_thread();
+    let event_loop = match config.any_thread {
+        false => EventLoop::new(),
+        true => EventLoop::new_any_thread(),
+    };
+
     let window = WindowBuilder::new()
         .with_title(config.title)
         .build(&event_loop)

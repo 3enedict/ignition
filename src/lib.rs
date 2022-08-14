@@ -29,9 +29,13 @@ impl Engine {
     }
 }
 
+/* Engine configuration */
+
 pub struct Configuration {
     title: &'static str,
     backend: Backends,
+
+    any_thread: bool,
 }
 
 impl Default for Configuration {
@@ -39,6 +43,8 @@ impl Default for Configuration {
         Self {
             title: "Darkweb",
             backend: Backends::all(),
+
+            any_thread: false,
         }
     }
 }
@@ -48,13 +54,18 @@ impl Configuration {
         Engine::ignite_conf(self)
     }
 
-    pub fn title(self, title: &'static str) -> Self {
+    pub fn title(mut self, title: &'static str) -> Self {
         self.title = title;
         self
     }
 
-    pub fn backend(self, backend: Backends) -> Self {
+    pub fn backend(mut self, backend: Backends) -> Self {
         self.backend = backend;
+        self
+    }
+
+    pub fn any_thread(mut self) -> Self {
+        self.any_thread = true;
         self
     }
 }
