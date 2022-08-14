@@ -1,6 +1,7 @@
 use wgpu::{Adapter, Device, Queue, Surface, SurfaceConfiguration};
 use winit::{dpi::PhysicalSize, event_loop::EventLoop, window::Window};
 
+pub mod artist;
 pub mod lift_off;
 
 pub struct Renderer {

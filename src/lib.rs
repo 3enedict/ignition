@@ -1,4 +1,5 @@
 use wgpu::Backends;
+use winit::event_loop::ControlFlow;
 
 use crate::manifestation::Renderer;
 
@@ -13,6 +14,8 @@ pub fn logger() {
 
 pub struct Engine {
     pub renderer: Renderer,
+
+    pub config: RuntimeConfiguration,
 }
 
 impl Engine {
@@ -25,17 +28,33 @@ impl Engine {
 
         Engine {
             renderer: Renderer::new(&config),
+
+            config: config.runtime_config,
         }
     }
 }
 
 /* Engine configuration */
 
+pub struct RuntimeConfiguration {
+    pub control_flow: ControlFlow,
+}
+
+impl Default for RuntimeConfiguration {
+    fn default() -> Self {
+        Self {
+            control_flow: ControlFlow::Poll,
+        }
+    }
+}
+
 pub struct Configuration {
     title: &'static str,
     backend: Backends,
 
     any_thread: bool,
+
+    runtime_config: RuntimeConfiguration,
 }
 
 impl Default for Configuration {
@@ -45,6 +64,8 @@ impl Default for Configuration {
             backend: Backends::all(),
 
             any_thread: false,
+
+            runtime_config: RuntimeConfiguration::default(),
         }
     }
 }
@@ -66,6 +87,11 @@ impl Configuration {
 
     pub fn any_thread(mut self) -> Self {
         self.any_thread = true;
+        self
+    }
+
+    pub fn control_flow(mut self, control_flow: ControlFlow) -> Self {
+        self.runtime_config.control_flow = control_flow;
         self
     }
 }
