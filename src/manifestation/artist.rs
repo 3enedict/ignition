@@ -1,17 +1,10 @@
-pub mod command_buffer;
-pub mod pipeline;
-use wgpu::RenderPass;
-
 use winit::{
     dpi::PhysicalSize,
     event::{Event, WindowEvent},
     event_loop::ControlFlow,
 };
 
-use crate::{
-    manifestation::{artist::command_buffer::Commands, silhouette::Renderable},
-    Engine,
-};
+use crate::Engine;
 
 impl Engine {
     pub fn game_loop<F>(mut self, mut closure: F)
@@ -32,37 +25,12 @@ impl Engine {
                     } => {
                         self.resize(size);
                     }
-
                     Event::WindowEvent {
                         event: WindowEvent::CloseRequested,
                         ..
                     } => *control_flow = ControlFlow::Exit,
 
-                    Event::RedrawRequested(_) => {
-                        let mut commands = match Commands::ignite(&self) {
-                            Ok(commands) => commands,
-                            Err(wgpu::SurfaceError::Lost) => {
-                                self.resize(self.renderer.size);
-                                return;
-                            }
-                            Err(wgpu::SurfaceError::OutOfMemory) => {
-                                *control_flow = ControlFlow::Exit;
-                                return;
-                            }
-                            Err(e) => {
-                                eprintln!("{:?}", e);
-                                return;
-                            }
-                        };
-
-                        {
-                            let mut render_pass = commands.ignite_render_pass();
-
-                            self.render(&mut render_pass);
-                        }
-
-                        commands.execute(&self);
-                    }
+                    Event::RedrawRequested(_) => {}
 
                     Event::MainEventsCleared => {
                         closure(&mut self);
@@ -72,16 +40,6 @@ impl Engine {
                     _ => {}
                 }
             });
-    }
-
-    pub fn render<'a>(&'a mut self, render_pass: &mut RenderPass<'a>) {
-        if self.scene.component_pool_exists::<Box<dyn Renderable>>() {
-            let shapes = self.scene.get::<Box<dyn Renderable>>().unwrap();
-
-            for shape in shapes.iter() {
-                shape.render(render_pass);
-            }
-        }
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {

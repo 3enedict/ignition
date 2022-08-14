@@ -9,5 +9,5 @@ fn triangle() {
         .any_thread()
         .ignite();
 
-    engine.game_loop(_);
+    engine.game_loop(move |_engine: &mut Engine| {});
 }
