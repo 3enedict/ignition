@@ -3,6 +3,7 @@ use winit::{dpi::PhysicalSize, event_loop::EventLoop, window::Window};
 
 pub mod artist;
 pub mod lift_off;
+pub mod silhouette;
 
 pub struct Renderer {
     pub event_loop: Option<EventLoop<()>>,

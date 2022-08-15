@@ -8,7 +8,6 @@ use winit::{
 use crate::Engine;
 
 pub mod commands;
-pub mod pipeline;
 
 impl Engine {
     /*
