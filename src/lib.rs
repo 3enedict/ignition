@@ -53,6 +53,7 @@ impl Default for RuntimeConfiguration {
 pub struct Configuration {
     title: &'static str,
     backend: Backends,
+    headless: bool,
 
     runtime_config: RuntimeConfiguration,
 }
@@ -62,6 +63,7 @@ impl Default for Configuration {
         Self {
             title: "Darkweb",
             backend: Backends::all(),
+            headless: false,
 
             runtime_config: RuntimeConfiguration::default(),
         }
@@ -80,6 +82,11 @@ impl Configuration {
 
     pub fn backend(mut self, backend: Backends) -> Self {
         self.backend = backend;
+        self
+    }
+
+    pub fn headless(mut self) -> Self {
+        self.headless = true;
         self
     }
 

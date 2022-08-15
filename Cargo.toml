@@ -20,6 +20,8 @@ bincode = "1.3"
 derive_builder = "0.11.2"
 serde = "1.0"
 
+futures-intrusive = "0.4"
+
 [dev-dependencies]
 criterion = "0.3"
 

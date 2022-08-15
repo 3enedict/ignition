@@ -8,6 +8,7 @@ use winit::{
 use crate::Engine;
 
 pub mod commands;
+pub mod pipeline;
 
 impl Engine {
     /*
@@ -27,7 +28,14 @@ impl Engine {
     where
         F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
     {
-        let event_loop = self.renderer.event_loop.take().unwrap();
+        let event_loop = self
+            .renderer
+            .screen
+            .as_mut()
+            .unwrap()
+            .event_loop
+            .take()
+            .unwrap();
 
         match self.config.any_thread {
             true => self.run_return(event_loop, closure),
@@ -80,7 +88,12 @@ impl Engine {
 
             Event::MainEventsCleared => {
                 if closure(self).is_ok() {
-                    self.renderer.window.request_redraw();
+                    self.renderer
+                        .screen
+                        .as_ref()
+                        .unwrap()
+                        .window
+                        .request_redraw();
                 }
             }
             _ => {}
@@ -89,18 +102,19 @@ impl Engine {
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
-            self.renderer.size = new_size;
+            self.renderer.screen.as_mut().unwrap().size = new_size;
 
-            self.renderer.config.width = new_size.width;
-            self.renderer.config.height = new_size.height;
+            self.renderer.screen.as_mut().unwrap().config.width = new_size.width;
+            self.renderer.screen.as_mut().unwrap().config.height = new_size.height;
 
             self.configure_surface();
         }
     }
 
     pub fn configure_surface(&mut self) {
-        self.renderer
-            .surface
-            .configure(&self.renderer.device, &self.renderer.config);
+        self.renderer.screen.as_ref().unwrap().surface.configure(
+            &self.renderer.device,
+            &self.renderer.screen.as_ref().unwrap().config,
+        );
     }
 }

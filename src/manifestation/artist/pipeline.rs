@@ -1,34 +1,17 @@
 use wgpu::{
-    util::{BufferInitDescriptor, DeviceExt},
-    BlendState, Buffer, BufferUsages, ColorTargetState, ColorWrites, Face, FragmentState,
-    FrontFace, MultisampleState, PipelineLayoutDescriptor, PolygonMode, PrimitiveState,
-    PrimitiveTopology, RenderPipeline, RenderPipelineDescriptor, ShaderModuleDescriptor,
-    VertexState,
+    BlendState, ColorTargetState, ColorWrites, Face, FragmentState, FrontFace, MultisampleState,
+    PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RenderPipeline,
+    RenderPipelineDescriptor, ShaderModuleDescriptor, TextureFormat, VertexState,
 };
 
 use crate::Engine;
 
 impl Engine {
-    pub fn vertex_buffer(&mut self, vertices: Vec<f32>) -> Buffer {
-        // Note: Probably replacable with .map()
-        let mut contents: Vec<u8> = Vec::new();
-        for value in vertices.into_iter() {
-            contents.append(&mut bincode::serialize(&value).unwrap());
-        }
-
-        let vertex_buffer = self
-            .renderer
-            .device
-            .create_buffer_init(&BufferInitDescriptor {
-                label: None,
-                contents: &contents,
-                usage: BufferUsages::VERTEX,
-            });
-
-        vertex_buffer
-    }
-
-    pub fn pipeline<'a>(&mut self, shaders: ShaderModuleDescriptor) -> RenderPipeline {
+    pub fn pipeline<'a>(
+        &mut self,
+        shaders: ShaderModuleDescriptor,
+        format: TextureFormat,
+    ) -> RenderPipeline {
         let shader = self.renderer.device.create_shader_module(shaders);
 
         let pipeline_layout =
@@ -48,7 +31,7 @@ impl Engine {
                 layout: Some(&pipeline_layout),
                 vertex: VertexState {
                     module: &shader,
-                    entry_point: "vs_main",
+                    entry_point: "vertex",
                     buffers: &[wgpu::VertexBufferLayout {
                         array_stride: std::mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
                         step_mode: wgpu::VertexStepMode::Vertex,
@@ -57,9 +40,9 @@ impl Engine {
                 },
                 fragment: Some(FragmentState {
                     module: &shader,
-                    entry_point: "fs_main",
+                    entry_point: "fragment",
                     targets: &[Some(ColorTargetState {
-                        format: self.renderer.config.format,
+                        format,
                         blend: Some(BlendState::REPLACE),
                         write_mask: ColorWrites::ALL,
                     })],

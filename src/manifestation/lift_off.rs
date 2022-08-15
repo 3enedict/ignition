@@ -12,28 +12,53 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-use crate::{manifestation::Renderer, Configuration};
+use crate::{
+    manifestation::{Renderer, Screen},
+    Configuration,
+};
 
 impl Renderer {
     pub fn new(config: &Configuration) -> Self {
-        let (event_loop, window, size) = create_window(config);
+        if config.headless {
+            return Self::new_headless(config);
+        }
 
         let instance = Instance::new(config.backend);
+        let (event_loop, window, size) = create_window(config);
         let surface = create_surface(&instance, &window);
 
-        let adapter = pollster::block_on(get_adapter(&instance, &surface));
-        info!("Device name : {}", adapter.get_info().name);
+        let adapter = pollster::block_on(get_adapter(&instance, Some(&surface)));
         let (device, queue) = pollster::block_on(get_device(&adapter));
 
         let config = generate_default_configuration(&size, &surface, &adapter);
         surface.configure(&device, &config);
 
+        info!("Device name : {}", adapter.get_info().name);
+
         Self {
-            event_loop: Some(event_loop),
-            window,
-            size,
-            surface,
-            config,
+            screen: Some(Screen {
+                event_loop: Some(event_loop),
+                window,
+                size,
+                surface,
+                config,
+            }),
+
+            adapter,
+            device,
+            queue,
+        }
+    }
+
+    pub fn new_headless(config: &Configuration) -> Self {
+        let instance = Instance::new(config.backend);
+        let adapter = pollster::block_on(get_adapter(&instance, None));
+        let (device, queue) = pollster::block_on(get_device_headless(&adapter));
+
+        info!("Device name : {}", adapter.get_info().name);
+
+        Self {
+            screen: None,
 
             adapter,
             device,
@@ -76,11 +101,11 @@ pub fn generate_default_configuration(
     }
 }
 
-pub async fn get_adapter(instance: &Instance, surface: &Surface) -> Adapter {
+pub async fn get_adapter(instance: &Instance, surface: Option<&Surface>) -> Adapter {
     instance
         .request_adapter(&RequestAdapterOptions {
             power_preference: PowerPreference::default(),
-            compatible_surface: Some(&surface),
+            compatible_surface: surface,
             force_fallback_adapter: false,
         })
         .await
@@ -98,6 +123,13 @@ pub async fn get_device(adapter: &Adapter) -> (Device, Queue) {
             },
             None,
         )
+        .await
+        .expect("Error: Failed to create device - Ignition")
+}
+
+pub async fn get_device_headless(adapter: &Adapter) -> (Device, Queue) {
+    adapter
+        .request_device(&Default::default(), None)
         .await
         .expect("Error: Failed to create device - Ignition")
 }

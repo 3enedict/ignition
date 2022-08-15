@@ -61,10 +61,17 @@ impl Commands {
 }
 
 pub fn create_frame(engine: &mut Engine) -> Result<SurfaceTexture, ()> {
-    match engine.renderer.surface.get_current_texture() {
+    match engine
+        .renderer
+        .screen
+        .as_ref()
+        .unwrap()
+        .surface
+        .get_current_texture()
+    {
         Ok(frame) => Ok(frame),
         Err(SurfaceError::Lost) => {
-            engine.resize(engine.renderer.size);
+            engine.resize(engine.renderer.screen.as_ref().unwrap().size);
             Err(())
         }
         Err(SurfaceError::OutOfMemory) => {
