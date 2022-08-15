@@ -43,7 +43,7 @@ impl Renderer {
 }
 
 pub fn create_window(config: &Configuration) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
-    let event_loop = match config.any_thread {
+    let event_loop = match config.runtime_config.any_thread {
         false => EventLoop::new(),
         true => EventLoop::new_any_thread(),
     };

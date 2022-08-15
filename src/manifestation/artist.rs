@@ -1,7 +1,8 @@
 use winit::{
     dpi::PhysicalSize,
     event::{Event, WindowEvent},
-    event_loop::ControlFlow,
+    event_loop::{ControlFlow, EventLoop},
+    platform::run_return::EventLoopExtRunReturn,
 };
 
 use crate::Engine;
@@ -14,7 +15,7 @@ impl Engine {
     where
         F: 'static + FnMut(&mut Engine),
     {
-        self.handle_events(move |engine: &mut Engine| {
+        self.event_loop(move |engine: &mut Engine| {
             closure(engine);
 
             engine.render();
@@ -22,39 +23,68 @@ impl Engine {
     }
     */
 
-    pub fn handle_events<F>(mut self, mut closure: F)
+    pub fn event_loop<F>(mut self, closure: F)
     where
         F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
     {
-        self.renderer
-            .event_loop
-            .take()
-            .unwrap()
-            .run(move |event, _, control_flow| {
-                *control_flow = self.config.control_flow;
+        let event_loop = self.renderer.event_loop.take().unwrap();
 
-                match event {
-                    Event::WindowEvent {
-                        event: WindowEvent::Resized(size),
-                        ..
-                    } => {
-                        self.resize(size);
-                    }
-                    Event::WindowEvent {
-                        event: WindowEvent::CloseRequested,
-                        ..
-                    } => *control_flow = ControlFlow::Exit,
+        match self.config.any_thread {
+            true => self.run_return(event_loop, closure),
+            false => self.run(event_loop, closure),
+        }
+    }
 
-                    Event::RedrawRequested(_) => {}
+    pub fn run<F>(mut self, event_loop: EventLoop<()>, mut closure: F)
+    where
+        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+    {
+        event_loop.run(move |event, _, control_flow| {
+            self.event(event, control_flow, &mut closure);
+        });
+    }
 
-                    Event::MainEventsCleared => {
-                        if closure(&mut self).is_ok() {
-                            self.renderer.window.request_redraw();
-                        }
-                    }
-                    _ => {}
-                }
+    pub fn run_return<F>(mut self, mut event_loop: EventLoop<()>, mut closure: F)
+    where
+        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+    {
+        while self.config.control_flow != ControlFlow::Exit {
+            event_loop.run_return(|event, _, control_flow| {
+                self.event(event, control_flow, &mut closure);
             });
+        }
+    }
+
+    pub fn event<F, T>(&mut self, event: Event<T>, control_flow: &mut ControlFlow, closure: &mut F)
+    where
+        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+    {
+        *control_flow = self.config.control_flow;
+
+        match event {
+            Event::WindowEvent {
+                event: WindowEvent::Resized(size),
+                ..
+            } => {
+                self.resize(size);
+            }
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested,
+                ..
+            } => {
+                *control_flow = ControlFlow::Exit;
+                self.config.control_flow = ControlFlow::Exit;
+            }
+
+            Event::RedrawRequested(_) => {}
+
+            Event::MainEventsCleared => {
+                if closure(self).is_ok() {
+                    self.renderer.window.request_redraw();
+                }
+            }
+            _ => {}
+        }
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {

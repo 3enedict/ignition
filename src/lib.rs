@@ -38,12 +38,14 @@ impl Engine {
 
 pub struct RuntimeConfiguration {
     pub control_flow: ControlFlow,
+    pub any_thread: bool,
 }
 
 impl Default for RuntimeConfiguration {
     fn default() -> Self {
         Self {
             control_flow: ControlFlow::Poll,
+            any_thread: false,
         }
     }
 }
@@ -51,8 +53,6 @@ impl Default for RuntimeConfiguration {
 pub struct Configuration {
     title: &'static str,
     backend: Backends,
-
-    any_thread: bool,
 
     runtime_config: RuntimeConfiguration,
 }
@@ -62,8 +62,6 @@ impl Default for Configuration {
         Self {
             title: "Darkweb",
             backend: Backends::all(),
-
-            any_thread: false,
 
             runtime_config: RuntimeConfiguration::default(),
         }
@@ -86,7 +84,7 @@ impl Configuration {
     }
 
     pub fn any_thread(mut self) -> Self {
-        self.any_thread = true;
+        self.runtime_config.any_thread = true;
         self
     }
 

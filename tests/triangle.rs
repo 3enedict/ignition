@@ -9,7 +9,7 @@ fn triangle() {
         .any_thread()
         .ignite();
 
-    engine.handle_events(move |engine: &mut Engine| {
+    engine.event_loop(move |engine: &mut Engine| {
         let mut commands = Commands::ignite(engine)?;
         let render_pass = commands.ignite_render_pass();
 
