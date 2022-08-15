@@ -1,1 +1,1 @@
-pub use crate::{Configuration, Engine};
+pub use crate::{manifestation::artist::commands::Commands, Configuration, Engine};
