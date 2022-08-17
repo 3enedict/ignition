@@ -5,12 +5,12 @@ use winit::{
     platform::run_return::EventLoopExtRunReturn,
 };
 
-use crate::Engine;
+use crate::{manifestation::Screen, Engine};
 
 pub mod commands;
 pub mod pipeline;
 
-impl Engine {
+impl Engine<Screen> {
     /*
     pub fn game_loop<F>(self, mut closure: F)
     where
@@ -26,16 +26,9 @@ impl Engine {
 
     pub fn event_loop<F>(mut self, closure: F)
     where
-        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
-        let event_loop = self
-            .renderer
-            .screen
-            .as_mut()
-            .unwrap()
-            .event_loop
-            .take()
-            .unwrap();
+        let event_loop = self.renderer.event_loop.take().unwrap();
 
         match self.config.any_thread {
             true => self.run_return(event_loop, closure),
@@ -45,7 +38,7 @@ impl Engine {
 
     pub fn run<F>(mut self, event_loop: EventLoop<()>, mut closure: F)
     where
-        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
         event_loop.run(move |event, _, control_flow| {
             self.event(event, control_flow, &mut closure);
@@ -54,7 +47,7 @@ impl Engine {
 
     pub fn run_return<F>(mut self, mut event_loop: EventLoop<()>, mut closure: F)
     where
-        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
         while self.config.control_flow != ControlFlow::Exit {
             event_loop.run_return(|event, _, control_flow| {
@@ -65,7 +58,7 @@ impl Engine {
 
     pub fn event<F, T>(&mut self, event: Event<T>, control_flow: &mut ControlFlow, closure: &mut F)
     where
-        F: 'static + FnMut(&mut Engine) -> Result<(), ()>,
+        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
         *control_flow = self.config.control_flow;
 
@@ -88,12 +81,7 @@ impl Engine {
 
             Event::MainEventsCleared => {
                 if closure(self).is_ok() {
-                    self.renderer
-                        .screen
-                        .as_ref()
-                        .unwrap()
-                        .window
-                        .request_redraw();
+                    self.renderer.window.request_redraw();
                 }
             }
             _ => {}
@@ -102,19 +90,18 @@ impl Engine {
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
-            self.renderer.screen.as_mut().unwrap().size = new_size;
+            self.renderer.size = new_size;
 
-            self.renderer.screen.as_mut().unwrap().config.width = new_size.width;
-            self.renderer.screen.as_mut().unwrap().config.height = new_size.height;
+            self.renderer.config.width = new_size.width;
+            self.renderer.config.height = new_size.height;
 
             self.configure_surface();
         }
     }
 
     pub fn configure_surface(&mut self) {
-        self.renderer.screen.as_ref().unwrap().surface.configure(
-            &self.renderer.device,
-            &self.renderer.screen.as_ref().unwrap().config,
-        );
+        self.renderer
+            .surface
+            .configure(&self.renderer.device, &self.renderer.config);
     }
 }

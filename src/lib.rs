@@ -1,7 +1,7 @@
 use wgpu::Backends;
 use winit::event_loop::ControlFlow;
 
-use crate::manifestation::Renderer;
+use crate::manifestation::{Renderer, Screen, GPU};
 
 pub mod manifestation;
 pub mod prelude;
@@ -12,22 +12,30 @@ pub fn logger() {
     }
 }
 
-pub struct Engine {
-    pub renderer: Renderer,
+pub struct Engine<R: Renderer> {
+    pub renderer: R,
 
     pub config: RuntimeConfiguration,
 }
 
-impl Engine {
+impl Engine<Screen> {
     pub fn ignite() -> Self {
-        Self::ignite_conf(Configuration::default())
+        Self::configuration(Configuration::default())
     }
+}
 
-    pub fn ignite_conf(config: Configuration) -> Self {
+impl Engine<GPU> {
+    pub fn headless() -> Self {
+        Self::configuration(Configuration::default())
+    }
+}
+
+impl<R: Renderer> Engine<R> {
+    pub fn configuration(config: Configuration) -> Self {
         logger();
 
         Engine {
-            renderer: Renderer::new(&config),
+            renderer: R::new(&config),
 
             config: config.runtime_config,
         }
@@ -53,7 +61,6 @@ impl Default for RuntimeConfiguration {
 pub struct Configuration {
     title: &'static str,
     backend: Backends,
-    headless: bool,
 
     runtime_config: RuntimeConfiguration,
 }
@@ -63,7 +70,6 @@ impl Default for Configuration {
         Self {
             title: "Darkweb",
             backend: Backends::all(),
-            headless: false,
 
             runtime_config: RuntimeConfiguration::default(),
         }
@@ -71,8 +77,12 @@ impl Default for Configuration {
 }
 
 impl Configuration {
-    pub fn ignite(self) -> Engine {
-        Engine::ignite_conf(self)
+    pub fn ignite(self) -> Engine<Screen> {
+        Engine::configuration(self)
+    }
+
+    pub fn headless(self) -> Engine<GPU> {
+        Engine::configuration(self)
     }
 
     pub fn title(mut self, title: &'static str) -> Self {
@@ -82,11 +92,6 @@ impl Configuration {
 
     pub fn backend(mut self, backend: Backends) -> Self {
         self.backend = backend;
-        self
-    }
-
-    pub fn headless(mut self) -> Self {
-        self.headless = true;
         self
     }
 

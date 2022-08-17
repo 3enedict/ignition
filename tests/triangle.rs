@@ -18,10 +18,10 @@ fn triangle() {
     let vertex_buffer = engine.vertex_buffer(vertices);
     let pipeline = engine.pipeline(
         wgpu::include_wgsl!("shaders/gradient.wgsl"),
-        engine.renderer.screen.as_ref().unwrap().config.format,
+        engine.renderer.config.format,
     );
 
-    engine.event_loop(move |engine: &mut Engine| {
+    engine.event_loop(move |engine: &mut Engine<Screen>| {
         let mut commands = Commands::ignite(engine)?;
         let mut render_pass = commands.ignite_render_pass();
 
@@ -41,7 +41,7 @@ fn headless() {
 }
 
 async fn run() {
-    let mut engine = Configuration::default().headless().ignite();
+    let mut engine = Configuration::default().headless();
 
     let texture_size = 256u32;
     let texture_desc = wgpu::TextureDescriptor {

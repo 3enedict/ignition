@@ -1,5 +1,3 @@
-use log::info;
-
 use wgpu::{
     Adapter, Device, DeviceDescriptor, Features, Instance, PowerPreference, PresentMode, Queue,
     RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
@@ -12,60 +10,7 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-use crate::{
-    manifestation::{Renderer, Screen},
-    Configuration,
-};
-
-impl Renderer {
-    pub fn new(config: &Configuration) -> Self {
-        if config.headless {
-            return Self::new_headless(config);
-        }
-
-        let instance = Instance::new(config.backend);
-        let (event_loop, window, size) = create_window(config);
-        let surface = create_surface(&instance, &window);
-
-        let adapter = pollster::block_on(get_adapter(&instance, Some(&surface)));
-        let (device, queue) = pollster::block_on(get_device(&adapter));
-
-        let config = generate_default_configuration(&size, &surface, &adapter);
-        surface.configure(&device, &config);
-
-        info!("Device name : {}", adapter.get_info().name);
-
-        Self {
-            screen: Some(Screen {
-                event_loop: Some(event_loop),
-                window,
-                size,
-                surface,
-                config,
-            }),
-
-            adapter,
-            device,
-            queue,
-        }
-    }
-
-    pub fn new_headless(config: &Configuration) -> Self {
-        let instance = Instance::new(config.backend);
-        let adapter = pollster::block_on(get_adapter(&instance, None));
-        let (device, queue) = pollster::block_on(get_device_headless(&adapter));
-
-        info!("Device name : {}", adapter.get_info().name);
-
-        Self {
-            screen: None,
-
-            adapter,
-            device,
-            queue,
-        }
-    }
-}
+use crate::Configuration;
 
 pub fn create_window(config: &Configuration) -> (EventLoop<()>, Window, PhysicalSize<u32>) {
     let event_loop = match config.runtime_config.any_thread {
@@ -127,7 +72,7 @@ pub async fn get_device(adapter: &Adapter) -> (Device, Queue) {
         .expect("Error: Failed to create device - Ignition")
 }
 
-pub async fn get_device_headless(adapter: &Adapter) -> (Device, Queue) {
+pub async fn get_headless_device(adapter: &Adapter) -> (Device, Queue) {
     adapter
         .request_device(&Default::default(), None)
         .await

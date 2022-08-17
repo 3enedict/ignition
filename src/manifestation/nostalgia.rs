@@ -3,15 +3,15 @@ use wgpu::{
     Buffer, BufferDescriptor, BufferUsages,
 };
 
-use crate::Engine;
+use crate::{manifestation::Renderer, Engine};
 
-impl Engine {
+impl<R: Renderer> Engine<R> {
     pub fn buffer(&mut self, descriptor: BufferDescriptor) -> Buffer {
-        self.renderer.device.create_buffer(&descriptor)
+        self.renderer.device().create_buffer(&descriptor)
     }
 
     pub fn initialized_buffer(&mut self, descriptor: BufferInitDescriptor) -> Buffer {
-        self.renderer.device.create_buffer_init(&descriptor)
+        self.renderer.device().create_buffer_init(&descriptor)
     }
 
     pub fn vertex_buffer(&mut self, vertices: Vec<f32>) -> Buffer {

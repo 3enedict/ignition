@@ -6,7 +6,7 @@ use wgpu::{
 
 use winit::event_loop::ControlFlow;
 
-use crate::Engine;
+use crate::{manifestation::Screen, Engine};
 
 pub struct Commands {
     frame: SurfaceTexture,
@@ -16,7 +16,7 @@ pub struct Commands {
 }
 
 impl Commands {
-    pub fn ignite(engine: &mut Engine) -> Result<Self, ()> {
+    pub fn ignite(engine: &mut Engine<Screen>) -> Result<Self, ()> {
         let frame = create_frame(engine)?;
         let view = create_view(&frame);
 
@@ -50,7 +50,7 @@ impl Commands {
         })
     }
 
-    pub fn execute(self, engine: &Engine) -> Result<(), ()> {
+    pub fn execute(self, engine: &Engine<Screen>) -> Result<(), ()> {
         let command_buffer = Some(self.encoder.finish());
         engine.renderer.queue.submit(command_buffer);
 
@@ -60,18 +60,11 @@ impl Commands {
     }
 }
 
-pub fn create_frame(engine: &mut Engine) -> Result<SurfaceTexture, ()> {
-    match engine
-        .renderer
-        .screen
-        .as_ref()
-        .unwrap()
-        .surface
-        .get_current_texture()
-    {
+pub fn create_frame(engine: &mut Engine<Screen>) -> Result<SurfaceTexture, ()> {
+    match engine.renderer.surface.get_current_texture() {
         Ok(frame) => Ok(frame),
         Err(SurfaceError::Lost) => {
-            engine.resize(engine.renderer.screen.as_ref().unwrap().size);
+            engine.resize(engine.renderer.size);
             Err(())
         }
         Err(SurfaceError::OutOfMemory) => {
@@ -90,7 +83,7 @@ pub fn create_view(frame: &SurfaceTexture) -> TextureView {
     frame.texture.create_view(&TextureViewDescriptor::default())
 }
 
-pub fn create_command_encoder(engine: &Engine) -> CommandEncoder {
+pub fn create_command_encoder(engine: &Engine<Screen>) -> CommandEncoder {
     let descriptor = &CommandEncoderDescriptor { label: None };
     engine.renderer.device.create_command_encoder(descriptor)
 }
