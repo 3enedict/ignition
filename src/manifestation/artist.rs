@@ -24,41 +24,53 @@ impl Engine<Screen> {
     }
     */
 
-    pub fn event_loop<F>(mut self, closure: F)
+    pub fn event_loop<F>(self, closure: F)
     where
         F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
-        let event_loop = self.renderer.event_loop.take().unwrap();
-
         match self.config.any_thread {
-            true => self.run_return(event_loop, closure),
-            false => self.run(event_loop, closure),
+            true => self.run_return(closure),
+            false => self.run(closure),
         }
     }
 
-    pub fn run<F>(mut self, event_loop: EventLoop<()>, mut closure: F)
+    pub fn run<F>(mut self, mut closure: F)
     where
         F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
-        event_loop.run(move |event, _, control_flow| {
+        self.take_event_loop().run(move |event, _, control_flow| {
             self.event(event, control_flow, &mut closure);
         });
     }
 
-    pub fn run_return<F>(mut self, mut event_loop: EventLoop<()>, mut closure: F)
+    pub fn run_return<F>(mut self, mut closure: F)
     where
-        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
+        F: FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
-        while self.config.control_flow != ControlFlow::Exit {
-            event_loop.run_return(|event, _, control_flow| {
-                self.event(event, control_flow, &mut closure);
+        self.take_event_loop().run_return(|event, _, control_flow| {
+            self.event(event, control_flow, &mut closure);
+        });
+    }
+
+    pub fn run_once<F>(&mut self, mut closure: F)
+    where
+        F: FnMut(&mut Engine<Screen>) -> Result<(), ()>,
+    {
+        let mut event_loop = self.take_event_loop();
+
+        event_loop.run_return(|event, _, control_flow| {
+            self.event(event, control_flow, &mut |engine: &mut Engine<Screen>| {
+                engine.config.control_flow = ControlFlow::Exit;
+                closure(engine)
             });
-        }
+        });
+
+        self.renderer.event_loop = Some(event_loop);
     }
 
     pub fn event<F, T>(&mut self, event: Event<T>, control_flow: &mut ControlFlow, closure: &mut F)
     where
-        F: 'static + FnMut(&mut Engine<Screen>) -> Result<(), ()>,
+        F: FnMut(&mut Engine<Screen>) -> Result<(), ()>,
     {
         *control_flow = self.config.control_flow;
 
@@ -86,6 +98,10 @@ impl Engine<Screen> {
             }
             _ => {}
         }
+    }
+
+    pub fn take_event_loop(&mut self) -> EventLoop<()> {
+        self.renderer.event_loop.take().unwrap()
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
