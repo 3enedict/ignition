@@ -15,10 +15,9 @@ impl<R: Renderer> Engine<R> {
     }
 
     pub fn vertex_buffer(&mut self, vertices: Vec<f32>) -> Buffer {
-        // Note: Probably replaceable with .map()
-        let mut contents: Vec<u8> = Vec::new();
+        let mut contents: Vec<u8> = Vec::with_capacity(vertices.len() * std::mem::size_of::<f32>());
         for value in vertices.into_iter() {
-            contents.append(&mut bincode::serialize(&value).unwrap());
+            contents.append(&mut value.to_le_bytes().to_vec());
         }
 
         self.initialized_buffer(BufferInitDescriptor {
