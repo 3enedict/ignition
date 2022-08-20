@@ -6,7 +6,10 @@ use wgpu::{
 
 use winit::event_loop::ControlFlow;
 
-use crate::{manifestation::Screen, Engine};
+use crate::{
+    manifestation::{Renderer, Screen},
+    Engine,
+};
 
 pub struct Commands {
     frame: SurfaceTexture,
@@ -50,9 +53,9 @@ impl Commands {
         })
     }
 
-    pub fn execute(self, engine: &Engine<Screen>) -> Result<(), ()> {
+    pub fn execute(self, engine: &mut Engine<Screen>) -> Result<(), ()> {
         let command_buffer = Some(self.encoder.finish());
-        engine.renderer.queue.submit(command_buffer);
+        engine.renderer.queue().submit(command_buffer);
 
         self.frame.present();
 
@@ -83,7 +86,7 @@ pub fn create_view(frame: &SurfaceTexture) -> TextureView {
     frame.texture.create_view(&TextureViewDescriptor::default())
 }
 
-pub fn create_command_encoder(engine: &Engine<Screen>) -> CommandEncoder {
+pub fn create_command_encoder(engine: &mut Engine<Screen>) -> CommandEncoder {
     let descriptor = &CommandEncoderDescriptor { label: None };
-    engine.renderer.device.create_command_encoder(descriptor)
+    engine.renderer.device().create_command_encoder(descriptor)
 }

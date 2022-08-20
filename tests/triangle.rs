@@ -37,37 +37,7 @@ fn triangle() {
 #[ignore]
 #[test]
 fn headless() {
-    pollster::block_on(run());
-}
-
-async fn run() {
-    let mut engine = Configuration::default().headless();
-
-    let texture_size = 256u32;
-    let texture_desc = wgpu::TextureDescriptor {
-        size: wgpu::Extent3d {
-            width: texture_size,
-            height: texture_size,
-            depth_or_array_layers: 1,
-        },
-        mip_level_count: 1,
-        sample_count: 1,
-        dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Rgba8UnormSrgb,
-        usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::RENDER_ATTACHMENT,
-        label: None,
-    };
-    let (texture, texture_view) = engine.texture(&texture_desc);
-
-    let u32_size = std::mem::size_of::<u32>() as u32;
-    let output_buffer_size = (u32_size * texture_size * texture_size) as wgpu::BufferAddress;
-    let output_buffer_desc = wgpu::BufferDescriptor {
-        size: output_buffer_size,
-        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-        label: None,
-        mapped_at_creation: false,
-    };
-    let output_buffer = engine.buffer(output_buffer_desc);
+    let mut engine = Configuration::default().image();
 
     let vertices: Vec<f32> = vec![
         0.0, 0.5, 0.0, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
@@ -76,24 +46,24 @@ async fn run() {
     let vertex_buffer = engine.vertex_buffer(vertices);
     let pipeline = engine.pipeline(
         wgpu::include_wgsl!("shaders/gradient.wgsl"),
-        texture_desc.format,
+        engine.renderer.description.format,
     );
 
     let mut encoder = engine
         .renderer
-        .device
+        .device()
         .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
     let render_pass_desc = wgpu::RenderPassDescriptor {
         label: Some("Render Pass"),
         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-            view: &texture_view,
+            view: &engine.renderer.view,
             resolve_target: None,
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Clear(wgpu::Color {
-                    r: 0.1,
-                    g: 0.2,
-                    b: 0.3,
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
                     a: 1.0,
                 }),
                 store: true,
@@ -112,39 +82,42 @@ async fn run() {
     encoder.copy_texture_to_buffer(
         wgpu::ImageCopyTexture {
             aspect: wgpu::TextureAspect::All,
-            texture: &texture,
+            texture: &engine.renderer.texture,
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
         },
         wgpu::ImageCopyBuffer {
-            buffer: &output_buffer,
+            buffer: &engine.renderer.buffer,
             layout: wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: NonZeroU32::new(u32_size * texture_size),
-                rows_per_image: NonZeroU32::new(texture_size),
+                bytes_per_row: NonZeroU32::new(
+                    std::mem::size_of::<u32>() as u32 * engine.renderer.size,
+                ),
+                rows_per_image: NonZeroU32::new(engine.renderer.size),
             },
         },
-        texture_desc.size,
+        engine.renderer.description.size,
     );
 
-    engine.renderer.queue.submit(Some(encoder.finish()));
+    engine.renderer.queue().submit(Some(encoder.finish()));
 
     {
-        let buffer_slice = output_buffer.slice(..);
+        let buffer_slice = engine.renderer.buffer.slice(..);
 
         let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        engine.renderer.device.poll(wgpu::Maintain::Wait);
-        rx.receive().await.unwrap().unwrap();
+        engine.renderer.gpu.device.poll(wgpu::Maintain::Wait);
+        pollster::block_on(rx.receive()).unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
 
         use image::{ImageBuffer, Rgba};
         let buffer =
-            ImageBuffer::<Rgba<u8>, _>::from_raw(texture_size, texture_size, data).unwrap();
+            ImageBuffer::<Rgba<u8>, _>::from_raw(engine.renderer.size, engine.renderer.size, data)
+                .unwrap();
         buffer.save("image.png").unwrap();
     }
-    output_buffer.unmap();
+    engine.renderer.buffer.unmap();
 }

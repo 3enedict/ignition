@@ -1,6 +1,9 @@
 use log::info;
 
-use wgpu::{Adapter, Device, Instance, Queue, Surface, SurfaceConfiguration};
+use wgpu::{
+    Buffer, Device, Instance, Queue, Surface, SurfaceConfiguration, Texture, TextureDescriptor,
+    TextureView,
+};
 use winit::{dpi::PhysicalSize, event_loop::EventLoop, window::Window};
 
 use crate::{
@@ -23,6 +26,31 @@ pub trait Renderer {
     fn queue(&mut self) -> &Queue;
 }
 
+pub struct GPU {
+    pub device: Device,
+    pub queue: Queue,
+}
+
+impl Renderer for GPU {
+    fn new(config: &Configuration) -> Self {
+        let instance = Instance::new(config.backend);
+        let adapter = pollster::block_on(get_adapter(&instance, None));
+        let (device, queue) = pollster::block_on(get_headless_device(&adapter));
+
+        info!("Device name : {}", adapter.get_info().name);
+
+        Self { device, queue }
+    }
+
+    fn device(&mut self) -> &Device {
+        &self.device
+    }
+
+    fn queue(&mut self) -> &Queue {
+        &self.queue
+    }
+}
+
 pub struct Screen {
     pub event_loop: Option<EventLoop<()>>,
     pub window: Window,
@@ -30,14 +58,7 @@ pub struct Screen {
     pub surface: Surface,
     pub config: SurfaceConfiguration,
 
-    pub device: Device,
-    pub queue: Queue,
-}
-
-pub struct GPU {
-    pub adapter: Adapter,
-    pub device: Device,
-    pub queue: Queue,
+    pub gpu: GPU,
 }
 
 impl Renderer for Screen {
@@ -61,40 +82,76 @@ impl Renderer for Screen {
             surface,
             config,
 
-            device,
-            queue,
+            gpu: GPU { device, queue },
         }
     }
 
     fn device(&mut self) -> &Device {
-        &self.device
+        &self.gpu.device
     }
 
     fn queue(&mut self) -> &Queue {
-        &self.queue
+        &self.gpu.queue
     }
 }
 
-impl Renderer for GPU {
-    fn new(config: &Configuration) -> Self {
-        let instance = Instance::new(config.backend);
-        let adapter = pollster::block_on(get_adapter(&instance, None));
-        let (device, queue) = pollster::block_on(get_headless_device(&adapter));
+pub struct Image<'a> {
+    pub texture: Texture,
+    pub description: TextureDescriptor<'a>,
+    pub size: u32,
+    pub view: TextureView,
+    pub buffer: Buffer,
 
-        info!("Device name : {}", adapter.get_info().name);
+    pub gpu: GPU,
+}
+
+impl Renderer for Image<'_> {
+    fn new(config: &Configuration) -> Self {
+        let mut gpu = GPU::new(config);
+
+        let texture_size = 256u32;
+        let description = wgpu::TextureDescriptor {
+            size: wgpu::Extent3d {
+                width: texture_size,
+                height: texture_size,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::RENDER_ATTACHMENT,
+            label: None,
+        };
+        let texture = gpu.device().create_texture(&description);
+        let view = texture.create_view(&Default::default());
+
+        let u32_size = std::mem::size_of::<u32>() as u32;
+        let buffer_size = (u32_size * texture_size * texture_size) as wgpu::BufferAddress;
+        let buffer_desc = wgpu::BufferDescriptor {
+            size: buffer_size,
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            label: None,
+            mapped_at_creation: false,
+        };
+        let buffer = gpu.device().create_buffer(&buffer_desc);
 
         Self {
-            adapter,
-            device,
-            queue,
+            texture,
+            description,
+            size: texture_size,
+            view,
+            buffer,
+
+            gpu,
         }
     }
 
     fn device(&mut self) -> &Device {
-        &self.device
+        &self.gpu.device
     }
 
     fn queue(&mut self) -> &Queue {
-        &self.queue
+        &self.gpu.queue
     }
 }

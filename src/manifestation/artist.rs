@@ -118,6 +118,6 @@ impl Engine<Screen> {
     pub fn configure_surface(&mut self) {
         self.renderer
             .surface
-            .configure(&self.renderer.device, &self.renderer.config);
+            .configure(&self.renderer.gpu.device, &self.renderer.config);
     }
 }

@@ -1,7 +1,7 @@
 use wgpu::Backends;
 use winit::event_loop::ControlFlow;
 
-use crate::manifestation::{Renderer, Screen, GPU};
+use crate::manifestation::{Image, Renderer, Screen, GPU};
 
 pub mod manifestation;
 pub mod prelude;
@@ -26,6 +26,12 @@ impl Engine<Screen> {
 
 impl Engine<GPU> {
     pub fn headless() -> Self {
+        Self::configuration(Configuration::default())
+    }
+}
+
+impl Engine<Image<'static>> {
+    pub fn image() -> Self {
         Self::configuration(Configuration::default())
     }
 }
@@ -82,6 +88,10 @@ impl Configuration {
     }
 
     pub fn headless(self) -> Engine<GPU> {
+        Engine::configuration(self)
+    }
+
+    pub fn image(self) -> Engine<Image<'static>> {
         Engine::configuration(self)
     }
 
