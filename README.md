@@ -1,8 +1,7 @@
 Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefully....
 
-# TODO
-## Refactoring
-- Redo directory structure
+## TODO
+### Refactoring
 - More data-driven programming
 - Remove need for get_headless_device using config
 - Make race track functions easier to read (no generic closures)
@@ -10,14 +9,14 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - Add benches that compare performance with and without ignition
 - Error handling: Calling function in Engine that stops current frame and starts anew
 
-## ECS
+### ECS
 - Add entity
 - Add component
 - Remove component
 - Toggle component
 - Implement the idea behind RendererCommands using ECS
  
-# Code layout
+## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors
   - *manifestation.rs*: Definition of the Renderer trait
     - *lift_off.rs*: List of useful utilities for initializing a Renderer
