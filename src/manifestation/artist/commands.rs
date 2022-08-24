@@ -10,7 +10,10 @@ use wgpu::{
 use winit::event_loop::ControlFlow;
 
 use crate::{
-    manifestation::{Image, Renderer, Screen, GPU},
+    manifestation::{
+        lift_off::{headless::Headless, image::Image, screen::Screen},
+        Renderer,
+    },
     Engine,
 };
 
@@ -66,7 +69,7 @@ impl Engine<Screen> {
     }
 }
 
-impl Engine<GPU> {
+impl Engine<Headless> {
     pub fn encoder(&mut self) -> Result<CommandEncoder, ()> {
         Ok(create_command_encoder(self))
     }
@@ -149,7 +152,7 @@ pub fn create_frame(engine: &mut Engine<Screen>) -> Result<SurfaceTexture, ()> {
     match engine.renderer.surface.get_current_texture() {
         Ok(frame) => Ok(frame),
         Err(SurfaceError::Lost) => {
-            engine.resize(engine.renderer.size);
+            engine.resize(engine.config.size);
             Err(())
         }
         Err(SurfaceError::OutOfMemory) => {
