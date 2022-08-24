@@ -22,8 +22,10 @@ pub mod painting;
 pub trait Renderer {
     fn new(config: &Configuration) -> Self;
 
-    fn device(&mut self) -> &Device;
-    fn queue(&mut self) -> &Queue;
+    fn device(&self) -> &Device;
+    fn queue(&self) -> &Queue;
+    fn device_mut(&mut self) -> &mut Device;
+    fn queue_mut(&mut self) -> &mut Queue;
 }
 
 pub struct GPU {
@@ -42,12 +44,20 @@ impl Renderer for GPU {
         Self { device, queue }
     }
 
-    fn device(&mut self) -> &Device {
+    fn device(&self) -> &Device {
         &self.device
     }
 
-    fn queue(&mut self) -> &Queue {
+    fn queue(&self) -> &Queue {
         &self.queue
+    }
+
+    fn device_mut(&mut self) -> &mut Device {
+        &mut self.device
+    }
+
+    fn queue_mut(&mut self) -> &mut Queue {
+        &mut self.queue
     }
 }
 
@@ -86,12 +96,20 @@ impl Renderer for Screen {
         }
     }
 
-    fn device(&mut self) -> &Device {
+    fn device(&self) -> &Device {
         &self.gpu.device
     }
 
-    fn queue(&mut self) -> &Queue {
+    fn queue(&self) -> &Queue {
         &self.gpu.queue
+    }
+
+    fn device_mut(&mut self) -> &mut Device {
+        &mut self.gpu.device
+    }
+
+    fn queue_mut(&mut self) -> &mut Queue {
+        &mut self.gpu.queue
     }
 }
 
@@ -107,7 +125,7 @@ pub struct Image<'a> {
 
 impl Renderer for Image<'_> {
     fn new(config: &Configuration) -> Self {
-        let mut gpu = GPU::new(config);
+        let gpu = GPU::new(config);
 
         let texture_size = 256u32;
         let description = wgpu::TextureDescriptor {
@@ -147,11 +165,19 @@ impl Renderer for Image<'_> {
         }
     }
 
-    fn device(&mut self) -> &Device {
+    fn device(&self) -> &Device {
         &self.gpu.device
     }
 
-    fn queue(&mut self) -> &Queue {
+    fn queue(&self) -> &Queue {
         &self.gpu.queue
+    }
+
+    fn device_mut(&mut self) -> &mut Device {
+        &mut self.gpu.device
+    }
+
+    fn queue_mut(&mut self) -> &mut Queue {
+        &mut self.gpu.queue
     }
 }

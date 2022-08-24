@@ -21,6 +21,6 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
     - *lift_off.rs*: List of useful functions for initializing the link to our nice gpu (used in *manifestation.rs*)
     - *nostalgia.rs*: Everything to do with allocating memory on the gpu (think buffers)
     - *painting.rs*: Textures  (may be moved to nostalgia in the future) 
-    - *artist.rs*: This is where the actual rendering happens (this particular file groups utilities for dealing with event_loops, which might be moved to a potential *events.rs*)
+    - *artist.rs*: This is where the actual rendering happens (this particular file groups utilities for dealing with event_loops, which might be moved to a potential *race_track.rs*)
       - *commands.rs*: Record a command buffer (which regroups all the necessary steps that the gpu has to take to render everything)
       - *pipeline.rs*: Create a pipeline (which describes how a particular object should be rendered)
