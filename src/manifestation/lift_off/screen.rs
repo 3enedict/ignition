@@ -28,7 +28,7 @@ impl Renderer for Screen {
         let instance = create_instance(config);
         let (event_loop, window, surface) = create_screen(config, &instance);
 
-        let adapter = get_adapter(&instance, Some(&surface));
+        let adapter = get_adapter(&instance, config, Some(&surface));
         let (device, queue) = get_device(&adapter);
 
         let config = configure_surface(&surface, &adapter, &device, &config);

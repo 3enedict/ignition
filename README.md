@@ -4,7 +4,6 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 ### Refactoring
 - More data-driven programming
 - Remove need for get_headless_device using config
-- Make race track functions easier to read (no generic closures)
 - Add back VertexGroups
 - Add benches that compare performance with and without ignition
 - Error handling: Calling function in Engine that stops current frame and starts anew

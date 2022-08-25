@@ -1,5 +1,5 @@
 use wgpu::{
-    Adapter, Device, DeviceDescriptor, Features, Instance, PowerPreference, PresentMode, Queue,
+    Adapter, Device, DeviceDescriptor, Features, Instance, PresentMode, Queue,
     RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
 };
 
@@ -46,19 +46,19 @@ pub fn create_window(event_loop: &EventLoop<()>, config: &Configuration) -> Wind
         .expect("Error: Unable to create window - Ignition")
 }
 
-pub fn get_adapter(instance: &Instance, surface: Option<&Surface>) -> Adapter {
-    let config = &adapter_config(surface);
-
-    pollster::block_on(instance.request_adapter(config))
-        .expect("Error: Failed to find an appropriate adapter - Ignition")
-}
-
-pub fn adapter_config(surface: Option<&Surface>) -> RequestAdapterOptions {
-    RequestAdapterOptions {
-        power_preference: PowerPreference::default(),
+pub fn get_adapter(
+    instance: &Instance,
+    config: &Configuration,
+    surface: Option<&Surface>,
+) -> Adapter {
+    let options = RequestAdapterOptions {
+        power_preference: config.power_preference,
         compatible_surface: surface,
-        force_fallback_adapter: false,
-    }
+        force_fallback_adapter: config.force_fallback_adapter,
+    };
+
+    pollster::block_on(instance.request_adapter(&options))
+        .expect("Error: Failed to find an appropriate adapter - Ignition")
 }
 
 pub fn get_device(adapter: &Adapter) -> (Device, Queue) {

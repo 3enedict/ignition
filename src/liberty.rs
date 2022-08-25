@@ -1,4 +1,4 @@
-use wgpu::Backends;
+use wgpu::{Backends, PowerPreference};
 use winit::{dpi::PhysicalSize, event_loop::ControlFlow};
 
 use crate::{
@@ -29,7 +29,10 @@ impl Default for RuntimeConfiguration {
 
 pub struct Configuration {
     pub title: &'static str,
+
     pub backend: Backends,
+    pub power_preference: PowerPreference,
+    pub force_fallback_adapter: bool,
 
     pub runtime_config: RuntimeConfiguration,
 }
@@ -38,7 +41,10 @@ impl Default for Configuration {
     fn default() -> Self {
         Self {
             title: "Darkweb",
+
             backend: Backends::all(),
+            power_preference: PowerPreference::default(),
+            force_fallback_adapter: false,
 
             runtime_config: RuntimeConfiguration::default(),
         }

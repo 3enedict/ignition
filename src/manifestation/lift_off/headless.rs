@@ -17,7 +17,7 @@ pub struct Headless {
 impl Renderer for Headless {
     fn new(config: &mut Configuration) -> Self {
         let instance = create_instance(config);
-        let adapter = get_adapter(&instance, None);
+        let adapter = get_adapter(&instance, config, None);
         let (device, queue) = get_headless_device(&adapter);
 
         info!("Device name : {}", adapter.get_info().name);
