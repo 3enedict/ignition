@@ -1,4 +1,6 @@
-use wgpu::{Backends, DeviceDescriptor, PowerPreference};
+use wgpu::{
+    Backends, DeviceDescriptor, Features, Limits, PowerPreference, PresentMode, TextureUsages,
+};
 use winit::{dpi::PhysicalSize, event_loop::ControlFlow};
 
 use crate::{
@@ -31,11 +33,11 @@ pub struct Configuration<'a> {
     pub title: &'static str,
 
     pub backend: Backends,
-
+    pub device_options: DeviceDescriptor<'a>,
     pub power_preference: PowerPreference,
     pub force_fallback_adapter: bool,
-
-    pub device_options: DeviceDescriptor<'a>,
+    pub texture_usages: TextureUsages,
+    pub present_mode: PresentMode,
 
     pub runtime_config: RuntimeConfiguration,
 }
@@ -49,6 +51,8 @@ impl Default for Configuration<'_> {
             device_options: DeviceDescriptor::default(),
             power_preference: PowerPreference::default(),
             force_fallback_adapter: false,
+            texture_usages: TextureUsages::RENDER_ATTACHMENT,
+            present_mode: PresentMode::Fifo,
 
             runtime_config: RuntimeConfiguration::default(),
         }
@@ -75,6 +79,36 @@ impl Configuration<'_> {
 
     pub fn backend(mut self, backend: Backends) -> Self {
         self.backend = backend;
+        self
+    }
+
+    pub fn features(mut self, features: Features) -> Self {
+        self.device_options.features = features;
+        self
+    }
+
+    pub fn limits(mut self, limits: Limits) -> Self {
+        self.device_options.limits = limits;
+        self
+    }
+
+    pub fn power_preference(mut self, power_preference: PowerPreference) -> Self {
+        self.power_preference = power_preference;
+        self
+    }
+
+    pub fn force_fallback_adapter(mut self) -> Self {
+        self.force_fallback_adapter = true;
+        self
+    }
+
+    pub fn texture_usages(mut self, texture_usages: TextureUsages) -> Self {
+        self.texture_usages = texture_usages;
+        self
+    }
+
+    pub fn present_mode(mut self, present_mode: PresentMode) -> Self {
+        self.present_mode = present_mode;
         self
     }
 

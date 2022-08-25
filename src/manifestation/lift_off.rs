@@ -1,6 +1,5 @@
 use wgpu::{
-    Adapter, Device, Instance, PresentMode, Queue, RequestAdapterOptions, Surface,
-    SurfaceConfiguration, TextureUsages,
+    Adapter, Device, Instance, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
 };
 
 use winit::{
@@ -84,10 +83,10 @@ pub fn generate_default_configuration(
     config: &Configuration,
 ) -> SurfaceConfiguration {
     SurfaceConfiguration {
-        usage: TextureUsages::RENDER_ATTACHMENT,
+        usage: config.texture_usages,
         format: surface.get_supported_formats(&adapter)[0],
         width: config.runtime_config.size.width,
         height: config.runtime_config.size.height,
-        present_mode: PresentMode::Fifo,
+        present_mode: config.present_mode,
     }
 }
