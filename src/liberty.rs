@@ -1,4 +1,4 @@
-use wgpu::{Backends, PowerPreference};
+use wgpu::{Backends, DeviceDescriptor, PowerPreference};
 use winit::{dpi::PhysicalSize, event_loop::ControlFlow};
 
 use crate::{
@@ -27,22 +27,26 @@ impl Default for RuntimeConfiguration {
     }
 }
 
-pub struct Configuration {
+pub struct Configuration<'a> {
     pub title: &'static str,
 
     pub backend: Backends,
+
     pub power_preference: PowerPreference,
     pub force_fallback_adapter: bool,
+
+    pub device_options: DeviceDescriptor<'a>,
 
     pub runtime_config: RuntimeConfiguration,
 }
 
-impl Default for Configuration {
+impl Default for Configuration<'_> {
     fn default() -> Self {
         Self {
             title: "Darkweb",
 
             backend: Backends::all(),
+            device_options: DeviceDescriptor::default(),
             power_preference: PowerPreference::default(),
             force_fallback_adapter: false,
 
@@ -51,7 +55,7 @@ impl Default for Configuration {
     }
 }
 
-impl Configuration {
+impl Configuration<'_> {
     pub fn ignite(self) -> Engine<Screen> {
         Engine::configuration(self)
     }

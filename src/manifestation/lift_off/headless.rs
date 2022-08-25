@@ -4,7 +4,7 @@ use wgpu::{Device, Queue};
 use crate::{
     liberty::Configuration,
     manifestation::{
-        lift_off::{create_instance, get_adapter, get_headless_device},
+        lift_off::{create_instance, get_adapter, get_device},
         Renderer,
     },
 };
@@ -18,7 +18,7 @@ impl Renderer for Headless {
     fn new(config: &mut Configuration) -> Self {
         let instance = create_instance(config);
         let adapter = get_adapter(&instance, config, None);
-        let (device, queue) = get_headless_device(&adapter);
+        let (device, queue) = get_device(&adapter, config);
 
         info!("Device name : {}", adapter.get_info().name);
 

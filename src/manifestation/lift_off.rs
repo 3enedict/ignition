@@ -1,6 +1,6 @@
 use wgpu::{
-    Adapter, Device, DeviceDescriptor, Features, Instance, PresentMode, Queue,
-    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
+    Adapter, Device, Instance, PresentMode, Queue, RequestAdapterOptions, Surface,
+    SurfaceConfiguration, TextureUsages,
 };
 
 use winit::{
@@ -61,22 +61,8 @@ pub fn get_adapter(
         .expect("Error: Failed to find an appropriate adapter - Ignition")
 }
 
-pub fn get_device(adapter: &Adapter) -> (Device, Queue) {
-    let config = DeviceDescriptor {
-        features: Features::empty(),
-        limits: wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits()),
-        label: None,
-    };
-
-    get_configured_device(adapter, &config)
-}
-
-pub fn get_headless_device(adapter: &Adapter) -> (Device, Queue) {
-    get_configured_device(adapter, &Default::default())
-}
-
-pub fn get_configured_device(adapter: &Adapter, config: &DeviceDescriptor) -> (Device, Queue) {
-    pollster::block_on(adapter.request_device(config, None))
+pub fn get_device(adapter: &Adapter, config: &Configuration) -> (Device, Queue) {
+    pollster::block_on(adapter.request_device(&config.device_options, None))
         .expect("Error: Failed to create device - Ignition")
 }
 
