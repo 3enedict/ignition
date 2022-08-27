@@ -2,11 +2,9 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 ### Refactoring
-- More data-driven programming
-- Remove need for get_headless_device using config
-- Add back VertexGroups
 - Add benches that compare performance with and without ignition
-- Error handling: Calling function in Engine that stops current frame and starts anew
+- Try loading shaders in a more friendly way
+- Add back VertexGroups
 
 ### ECS
 - Add entity
@@ -14,6 +12,9 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - Remove component
 - Toggle component
 - Implement the idea behind RendererCommands using ECS
+
+### Refactoring
+- More data-driven programming
  
 ## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors

@@ -2,7 +2,7 @@ use std::num::NonZeroU32;
 
 use log::error;
 use wgpu::{
-    Color, CommandEncoder, CommandEncoderDescriptor, ImageCopyBuffer, ImageCopyTexture,
+    BufferView, Color, CommandEncoder, CommandEncoderDescriptor, ImageCopyBuffer, ImageCopyTexture,
     ImageDataLayout, LoadOp, Operations, Origin3d, RenderPass, RenderPassColorAttachment,
     RenderPassDescriptor, SurfaceError, SurfaceTexture, TextureAspect, TextureView,
     TextureViewDescriptor,
@@ -100,7 +100,7 @@ impl Engine<Image<'static>> {
         })
     }
 
-    pub fn render(&mut self, mut encoder: CommandEncoder, name: &str) -> Result<(), ()> {
+    pub fn render_to_file(&mut self, mut encoder: CommandEncoder, name: &str) -> Result<(), ()> {
         encoder.copy_texture_to_buffer(
             ImageCopyTexture {
                 aspect: TextureAspect::All,
@@ -145,6 +145,42 @@ impl Engine<Image<'static>> {
 
         self.renderer.buffer.unmap();
         Ok(())
+    }
+
+    pub fn render(&mut self, mut encoder: CommandEncoder) -> Result<BufferView, ()> {
+        encoder.copy_texture_to_buffer(
+            ImageCopyTexture {
+                aspect: TextureAspect::All,
+                texture: &self.renderer.texture,
+                mip_level: 0,
+                origin: Origin3d::ZERO,
+            },
+            ImageCopyBuffer {
+                buffer: &self.renderer.buffer,
+                layout: ImageDataLayout {
+                    offset: 0,
+                    bytes_per_row: NonZeroU32::new(
+                        std::mem::size_of::<u32>() as u32 * self.renderer.size,
+                    ),
+                    rows_per_image: NonZeroU32::new(self.renderer.size),
+                },
+            },
+            self.renderer.description.size,
+        );
+
+        self.renderer.queue().submit(Some(encoder.finish()));
+
+        let buffer_slice = self.renderer.buffer.slice(..);
+
+        let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
+        buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+            tx.send(result).unwrap();
+        });
+
+        self.renderer.gpu.device.poll(wgpu::Maintain::Wait);
+        pollster::block_on(rx.receive()).unwrap().unwrap();
+
+        Ok(buffer_slice.get_mapped_range())
     }
 }
 

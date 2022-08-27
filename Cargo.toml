@@ -16,6 +16,8 @@ futures-intrusive = "0.4"
 
 [dev-dependencies]
 criterion = "0.3"
+bytemuck = "1.12" 
+bytemuck_derive = "1.1"
 
 [[bench]]
 name = "triangle"

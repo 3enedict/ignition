@@ -10,6 +10,8 @@ pub mod liberty;
 pub mod manifestation;
 
 pub mod prelude {
+    pub use wgpu::include_wgsl;
+
     pub use crate::{
         liberty::Configuration,
         manifestation::{

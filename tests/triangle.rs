@@ -55,5 +55,5 @@ fn headless() {
     render_pass.draw(0..3, 0..1);
 
     drop(render_pass);
-    engine.render(commands, "image.png").unwrap();
+    engine.render_to_file(commands, "image.png").unwrap();
 }
