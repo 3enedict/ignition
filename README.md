@@ -1,12 +1,9 @@
 Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefully....
 
 ## TODO
-### Refactoring
-- Add benches that compare performance with and without ignition
-- Try loading shaders in a more friendly way
-- Add back VertexGroups
 
 ### ECS
+- Add indexing system
 - Add entity
 - Add component
 - Remove component
@@ -15,6 +12,8 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ### Refactoring
 - More data-driven programming
+- Try loading shaders in a more friendly way
+- Add back VertexGroups
  
 ## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors

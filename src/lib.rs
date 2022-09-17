@@ -1,3 +1,5 @@
+extern crate component_derive;
+
 use crate::{
     liberty::{Configuration, RuntimeConfiguration},
     manifestation::{
@@ -7,6 +9,7 @@ use crate::{
 };
 
 pub mod liberty;
+pub mod life;
 pub mod manifestation;
 
 pub mod prelude {
