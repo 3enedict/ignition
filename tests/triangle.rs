@@ -1,6 +1,9 @@
 extern crate ignition;
 use ignition::prelude::*;
 
+#[derive(Component)]
+struct RGB {}
+
 #[ignore]
 #[test]
 fn triangle() {

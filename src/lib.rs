@@ -13,10 +13,12 @@ pub mod life;
 pub mod manifestation;
 
 pub mod prelude {
+    pub use component_derive::Component;
     pub use wgpu::include_wgsl;
 
     pub use crate::{
         liberty::Configuration,
+        life::Component,
         manifestation::{
             lift_off::{headless::Headless, image::Image, screen::Screen},
             Renderer,

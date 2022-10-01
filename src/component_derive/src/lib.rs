@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, fs};
+use std::{env, fs, io::prelude::*};
 
 use proc_macro::TokenStream;
 use quote::quote;
@@ -24,16 +24,42 @@ fn impl_component(ast: &syn::DeriveInput) -> TokenStream {
         },
     };
 
-    let mut ids: HashMap<&str, usize> = HashMap::new();
-    data.lines().for_each(|x| {
-        let id: Vec<&str> = x.split(" ").collect();
-        ids.insert(id[0], id[1].parse::<usize>().unwrap());
-    });
+    let mut id = -1;
+    let mut last_id = -1;
+    for line in data.lines() {
+        let component: Vec<&str> = line.split(" ").collect();
+        let component_name = component[0];
+        last_id = component[1].parse::<i32>().unwrap();
 
+        if component_name == name.to_string() {
+            id = last_id;
+            break;
+        }
+    }
+
+    if id == -1 {
+        id = last_id + 1;
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .append(true)
+            .create(true)
+            .open("components.toml")
+            .unwrap();
+
+        if let Err(e) = writeln!(file, "{} {}", name.to_string(), id) {
+            eprintln!("Couldn't write to file: {}", e);
+        }
+
+        if let Err(_) = fs::copy("components.toml", tempfile) {
+            println!("Unable to copy list of components to temporary file");
+        }
+    }
+
+    let final_id = id as usize;
     let gen = quote! {
         impl Component for #name {
             fn id() -> usize {
-                return 0;
+                return #final_id;
             }
         }
     };
