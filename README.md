@@ -9,6 +9,7 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - Remove component
 - Toggle component
 - Implement the idea behind RendererCommands using ECS
+- Add [] operators for Scene
 
 ### Refactoring
 - More data-driven programming

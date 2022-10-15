@@ -1,5 +1,29 @@
 extern crate component_derive;
 
+macro_rules! unwrap {
+    ($expression:expr) => {
+        match $expression {
+            Ok(value) => value,
+            Err(e) => {
+                log::warn!("{}", e);
+                return;
+            }
+        }
+    };
+}
+
+macro_rules! unwrap_or {
+    ($expression:expr, $return_value:expr) => {
+        match $expression {
+            Ok(value) => value,
+            Err(e) => {
+                log::warn!("{}", e);
+                return $return_value;
+            }
+        }
+    };
+}
+
 use crate::{
     liberty::{Configuration, RuntimeConfiguration},
     manifestation::{
