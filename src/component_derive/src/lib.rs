@@ -1,68 +1,61 @@
-use std::{env, fs, io::prelude::*};
+use std::{env, fs, io::prelude::*, path::PathBuf};
 
 use proc_macro::TokenStream;
-use quote::quote;
 use syn;
 
-#[proc_macro_derive(Component)]
-pub fn hello_macro_derive(input: TokenStream) -> TokenStream {
-    let ast = syn::parse(input).unwrap();
-    impl_component(&ast)
+#[proc_macro_attribute]
+pub fn component(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    let name = get_struct_name(&input);
+    let data = get_list_of_components_from_file();
+
+    if data.find(&name) != None {
+        write_component_name_to_file(name);
+    }
+
+    input
 }
 
-fn impl_component(ast: &syn::DeriveInput) -> TokenStream {
-    let name = &ast.ident;
+//-----------------------------------------------------------
 
+fn tempfile() -> PathBuf {
     let mut tempfile = env::temp_dir();
     tempfile.push("components.toml");
 
-    let data = match fs::read_to_string("components.toml") {
+    tempfile
+}
+
+fn get_struct_name(input: &TokenStream) -> String {
+    let ast: syn::ItemStruct = syn::parse(input.clone()).unwrap();
+    let name = ast.ident;
+
+    name.to_string()
+}
+
+fn get_list_of_components_from_file() -> String {
+    match fs::read_to_string("components.toml") {
         Ok(ids) => ids,
-        Err(_) => match fs::read_to_string(tempfile.as_path()) {
+        Err(_) => match fs::read_to_string(tempfile().as_path()) {
             Ok(ids) => ids,
             Err(_) => String::new(),
         },
-    };
+    }
+}
 
-    let mut id = -1;
-    let mut last_id = -1;
-    for line in data.lines() {
-        let component: Vec<&str> = line.split(" ").collect();
-        let component_name = component[0];
-        last_id = component[1].parse::<i32>().unwrap();
+fn components_file() -> fs::File {
+    fs::OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open("components.toml")
+        .unwrap()
+}
 
-        if component_name == name.to_string() {
-            id = last_id;
-            break;
-        }
+fn write_component_name_to_file(name: String) {
+    if let Err(e) = writeln!(components_file(), "{}", name) {
+        eprintln!("Couldn't write to file: {}", e);
     }
 
-    if id == -1 {
-        id = last_id + 1;
-        let mut file = fs::OpenOptions::new()
-            .write(true)
-            .append(true)
-            .create(true)
-            .open("components.toml")
-            .unwrap();
-
-        if let Err(e) = writeln!(file, "{} {}", name.to_string(), id) {
-            eprintln!("Couldn't write to file: {}", e);
-        }
-
-        if let Err(_) = fs::copy("components.toml", tempfile) {
-            println!("Unable to copy list of components to temporary file");
-        }
+    if let Err(_) = fs::copy("components.toml", tempfile()) {
+        println!("Unable to copy list of components to temporary file");
     }
-
-    let final_id = id as usize;
-    let gen = quote! {
-        impl Component for #name {
-            fn id() -> usize {
-                return #final_id;
-            }
-        }
-    };
-
-    gen.into()
 }
