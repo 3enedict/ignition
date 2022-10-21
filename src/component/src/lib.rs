@@ -8,7 +8,7 @@ pub fn component(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let name = get_struct_name(&input);
     let data = get_list_of_components_from_file();
 
-    if data.find(&name) != None {
+    if data.find(&name) == None {
         write_component_name_to_file(name);
     }
 

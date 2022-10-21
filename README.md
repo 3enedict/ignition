@@ -15,6 +15,8 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - More data-driven programming
 - Try loading shaders in a more friendly way
 - Add back VertexGroups
+- Ignite macro take parameters
+- Add macro directory for storing common functions in utils crate
  
 ## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors
