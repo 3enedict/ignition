@@ -4,57 +4,31 @@ use crate::life::{
     gizmos::PoolToolbox, glitch::LifeError, Component, ComponentPool, ComponentPoolTrait, Scene,
 };
 
-impl Scene {
-    pub fn get_trait<G: 'static + Component>(
-        &self,
-    ) -> Result<&Box<dyn ComponentPoolTrait>, LifeError> {
-        self.component_pools
-            .get(G::id())
-            .ok_or(LifeError::NoComponentPool(type_name::<G>()))?
-            .as_ref()
-            .ok_or(LifeError::NoComponentPool(type_name::<G>()))
+impl<P> Scene<P> {
+    pub fn get<G: 'static + Component<P>>(&self) -> &ComponentPool<G> {
+        G::get_from(&self.component_pools)
     }
 
-    pub fn get_trait_mut<G: 'static + Component>(
-        &mut self,
-    ) -> Result<&mut Box<dyn ComponentPoolTrait>, LifeError> {
-        self.component_pools
-            .get_mut(G::id())
-            .ok_or(LifeError::NoComponentPool(type_name::<G>()))?
-            .as_mut()
-            .ok_or(LifeError::NoComponentPool(type_name::<G>()))
+    pub fn get_mut<G: 'static + Component<P>>(&mut self) -> &mut ComponentPool<G> {
+        G::get_mut_from(&mut self.component_pools)
     }
 
-    pub fn get<G: 'static + Component>(&self) -> Result<&ComponentPool<G>, LifeError> {
-        self.get_trait::<G>()?
-            .as_any()
-            .downcast_ref::<ComponentPool<G>>()
-            .ok_or(LifeError::Downcast(type_name::<G>()))
+    pub fn get_component<G: 'static + Component<P>>(&self, entity: usize) -> Result<&G, LifeError> {
+        self.get::<G>().get(entity)
     }
 
-    pub fn get_mut<G: 'static + Component>(&mut self) -> Result<&mut ComponentPool<G>, LifeError> {
-        self.get_trait_mut::<G>()?
-            .as_any_mut()
-            .downcast_mut::<ComponentPool<G>>()
-            .ok_or(LifeError::Downcast(type_name::<G>()))
-    }
-
-    pub fn get_component<G: 'static + Component>(&self, entity: usize) -> Result<&G, LifeError> {
-        self.get::<G>()?.get(entity)
-    }
-
-    pub fn get_component_mut<G: 'static + Component>(
+    pub fn get_component_mut<G: 'static + Component<P>>(
         &mut self,
         entity: usize,
     ) -> Result<&mut G, LifeError> {
-        self.get_mut::<G>()?.get_mut(entity)
+        self.get_mut::<G>().get_mut(entity)
     }
 
-    pub fn take_component<G: 'static + Component>(
+    pub fn take_component<G: 'static + Component<P>>(
         &mut self,
         entity: usize,
     ) -> Result<G, LifeError> {
-        self.get_mut::<G>()?.take_entity(entity)
+        self.get_mut::<G>().take_entity(entity)
     }
 
     pub fn get_current_entity(&self) -> usize {
@@ -98,18 +72,18 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::life::Scene;
+    use crate::{life::Scene, ComponentPools};
 
     #[test]
     fn calling_get_current_entity_returns_correct_id() {
-        let scene = Scene::new();
+        let mut scene: Scene<ComponentPools> = Scene::new();
 
         assert_eq!(0, scene.get_current_entity());
     }
 
     #[test]
     fn calling_get_current_entity_returns_correct_id_even_with_recycled_entities() {
-        let mut scene = Scene::new();
+        let mut scene: Scene<ComponentPools> = Scene::new();
 
         let entity = scene.entity();
         scene.entity();

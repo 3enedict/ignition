@@ -4,19 +4,19 @@ use wgpu::{
     RenderPipelineDescriptor, ShaderModuleDescriptor, TextureFormat, VertexState,
 };
 
-use crate::{manifestation::Renderer, Engine};
+use crate::Engine;
 
-impl<R: Renderer> Engine<R> {
+impl Engine {
     pub fn pipeline<'a>(
         &mut self,
         shaders: ShaderModuleDescriptor,
         format: TextureFormat,
     ) -> RenderPipeline {
-        let shader = self.renderer.device().create_shader_module(shaders);
+        let shader = self.renderer.device.create_shader_module(shaders);
 
         let pipeline_layout =
             self.renderer
-                .device()
+                .device
                 .create_pipeline_layout(&PipelineLayoutDescriptor {
                     label: None,
                     bind_group_layouts: &[],
@@ -25,7 +25,7 @@ impl<R: Renderer> Engine<R> {
 
         let pipeline = self
             .renderer
-            .device()
+            .device
             .create_render_pipeline(&RenderPipelineDescriptor {
                 label: None,
                 layout: Some(&pipeline_layout),

@@ -1,6 +1,6 @@
 use crate::life::{ComponentPool, Scene};
 
-impl Scene {
+impl<P> Scene<P> {
     pub fn entity(&mut self) -> usize {
         if self.available_entities.len() == 1 {
             self.generate_new_entity()
@@ -46,11 +46,14 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::life::{genesis::entity::EntityConstructor, ComponentPool, Scene};
+    use crate::{
+        life::{genesis::entity::EntityConstructor, ComponentPool, Scene},
+        ComponentPools,
+    };
 
     #[test]
     fn creating_an_entity_increments_an_id() {
-        let mut scene = Scene::new();
+        let mut scene: Scene<ComponentPools> = Scene::new();
         let mut entities: Vec<usize> = Vec::new();
 
         for _i in 0..10 {
@@ -62,7 +65,7 @@ mod tests {
 
     #[test]
     fn creating_an_entity_after_having_deleted_one_uses_recycled_id() {
-        let mut scene = Scene::new();
+        let mut scene: Scene<ComponentPools> = Scene::new();
 
         let entity = scene.entity();
         scene.delete(entity);

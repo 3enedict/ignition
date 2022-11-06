@@ -2,14 +2,9 @@ use std::any::type_name;
 
 use crate::life::{glitch::LifeError, Component, ComponentPool, Scene};
 
-impl Scene {
-    pub fn component_pool_exists<G: 'static + Component>(&mut self) -> bool {
-        G::id() < self.component_pools.len()
-    }
-
-    pub fn component_exists<G: 'static + Component>(&mut self, entity: usize) -> bool {
-        // No need for error handling because unwrap() can't fail since `self.component_pool_exists::<G>()` is called before it
-        self.component_pool_exists::<G>() && self.get::<G>().unwrap().has_component(entity)
+impl<P> Scene<P> {
+    pub fn component_exists<G: 'static + Component<P>>(&mut self, entity: usize) -> bool {
+        self.get::<G>().has_component(entity)
     }
 }
 

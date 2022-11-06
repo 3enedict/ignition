@@ -4,33 +4,33 @@ use winit::{
     platform::run_return::EventLoopExtRunReturn,
 };
 
-use crate::{manifestation::lift_off::screen::Screen, Engine};
+use crate::Engine;
 
-impl Engine<Screen> {
-    pub fn event_loop(self, closure: impl FnMut(&mut Engine<Screen>) -> Result<(), ()> + 'static) {
+impl Engine {
+    pub fn event_loop(self, closure: impl FnMut(&mut Engine) -> Result<(), ()> + 'static) {
         match self.config.any_thread {
             true => self.run_return(closure),
             false => self.run(closure),
         }
     }
 
-    pub fn run(mut self, mut closure: impl FnMut(&mut Engine<Screen>) -> Result<(), ()> + 'static) {
+    pub fn run(mut self, mut closure: impl FnMut(&mut Engine) -> Result<(), ()> + 'static) {
         self.take_event_loop().run(move |event, _, control_flow| {
             self.event(event, control_flow, &mut closure);
         });
     }
 
-    pub fn run_return(mut self, mut closure: impl FnMut(&mut Engine<Screen>) -> Result<(), ()>) {
+    pub fn run_return(mut self, mut closure: impl FnMut(&mut Engine) -> Result<(), ()>) {
         self.take_event_loop().run_return(|event, _, control_flow| {
             self.event(event, control_flow, &mut closure);
         });
     }
 
-    pub fn run_once(&mut self, mut closure: impl FnMut(&mut Engine<Screen>) -> Result<(), ()>) {
+    pub fn run_once(&mut self, mut closure: impl FnMut(&mut Engine) -> Result<(), ()>) {
         let mut event_loop = self.take_event_loop();
 
         event_loop.run_return(|event, _, control_flow| {
-            self.event(event, control_flow, &mut |engine: &mut Engine<Screen>| {
+            self.event(event, control_flow, &mut |engine: &mut Engine| {
                 engine.config.control_flow = ControlFlow::Exit;
                 closure(engine)
             });
@@ -43,7 +43,7 @@ impl Engine<Screen> {
         &mut self,
         event: Event<T>,
         control_flow: &mut ControlFlow,
-        closure: &mut impl FnMut(&mut Engine<Screen>) -> Result<(), ()>,
+        closure: &mut impl FnMut(&mut Engine) -> Result<(), ()>,
     ) {
         *control_flow = self.config.control_flow;
 

@@ -17,6 +17,7 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - Add back VertexGroups
 - Ignite macro take parameters
 - Add macro directory for storing common functions in utils crate
+- Divide into workspaces
  
 ## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors

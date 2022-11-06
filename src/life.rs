@@ -10,9 +10,16 @@ pub mod ghost;
 pub mod gizmos;
 pub mod glitch;
 
-pub struct Scene {
+use component::component;
+
+#[component]
+pub struct Test {
+    test: i32,
+}
+
+pub struct Scene<P> {
     pub available_entities: Vec<usize>,
-    pub component_pools: Vec<Option<Box<dyn ComponentPoolTrait>>>,
+    pub component_pools: P,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -31,6 +38,17 @@ pub trait ComponentPoolTrait:
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
 }
 
-pub trait Component {
-    fn id() -> usize;
+pub trait Component<G> {
+    fn get_from(component_pools: &G) -> &ComponentPool<Self>
+    where
+        Self: Sized;
+
+    fn get_mut_from(component_pools: &mut G) -> &mut ComponentPool<Self>
+    where
+        Self: Sized;
+}
+
+pub trait ComponentPoolsTrait {
+    fn new() -> Self;
+    fn delete_entity(&mut self, entity: usize);
 }

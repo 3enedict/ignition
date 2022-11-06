@@ -1,9 +1,7 @@
 extern crate ignition;
 use ignition::prelude::*;
 
-#[derive(Component)]
-struct RGB {}
-
+/*
 #[ignore]
 #[test]
 fn triangle() {
@@ -60,3 +58,4 @@ fn headless() {
     drop(render_pass);
     engine.render_to_file(commands, "image.png").unwrap();
 }
+*/

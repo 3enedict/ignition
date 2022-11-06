@@ -1,17 +1,15 @@
-use crate::life::{gizmos::PoolToolbox, glitch::LifeError, ComponentPool, Scene};
+use crate::life::{
+    gizmos::PoolToolbox, glitch::LifeError, ComponentPool, ComponentPoolsTrait, Scene,
+};
 
-impl Scene {
+impl<P: ComponentPoolsTrait> Scene<P> {
     pub fn delete(&mut self, entity: usize) {
         self.available_entities.push(entity);
         self.delete_entity_from_each_component_pool(entity);
     }
 
     pub fn delete_entity_from_each_component_pool(&mut self, entity: usize) {
-        for component_pool_option in self.component_pools.iter_mut() {
-            if let Some(component_pool) = component_pool_option {
-                component_pool.delete_entity(entity);
-            }
-        }
+        self.component_pools.delete_entity(entity);
     }
 }
 

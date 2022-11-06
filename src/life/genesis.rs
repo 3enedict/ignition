@@ -1,13 +1,13 @@
 pub mod component;
 pub mod entity;
 
-use crate::life::{ComponentPool, Scene};
+use crate::life::{ComponentPool, ComponentPoolsTrait, Scene};
 
-impl Scene {
+impl<P: ComponentPoolsTrait> Scene<P> {
     pub fn new() -> Self {
         Self {
             available_entities: vec![0],
-            component_pools: Vec::new(),
+            component_pools: P::new(),
         }
     }
 }

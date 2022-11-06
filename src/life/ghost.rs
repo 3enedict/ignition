@@ -1,16 +1,16 @@
 use crate::life::{gizmos::PoolToolbox, Component, ComponentPool, Scene};
 
-impl Scene {
-    pub fn toggle<G: 'static + Component>(&mut self, entity: usize) {
-        unwrap!(self.get_trait_mut::<G>()).toggle_entity(entity);
+impl<P> Scene<P> {
+    pub fn toggle<G: 'static + Component<P>>(&mut self, entity: usize) {
+        self.get_mut::<G>().toggle_entity(entity);
     }
 
-    pub fn enable<G: 'static + Component>(&mut self, entity: usize) {
-        unwrap!(self.get_trait_mut::<G>()).enable_entity(entity);
+    pub fn enable<G: 'static + Component<P>>(&mut self, entity: usize) {
+        self.get_mut::<G>().enable_entity(entity);
     }
 
-    pub fn disable<G: 'static + Component>(&mut self, entity: usize) {
-        unwrap!(self.get_trait_mut::<G>()).disable_entity(entity);
+    pub fn disable<G: 'static + Component<P>>(&mut self, entity: usize) {
+        self.get_mut::<G>().disable_entity(entity);
     }
 }
 

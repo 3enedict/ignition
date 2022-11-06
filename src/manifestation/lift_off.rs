@@ -1,67 +1,44 @@
 use wgpu::{
-    Adapter, Device, Instance, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
+    Adapter, Backends, Device, DeviceDescriptor, Instance, PowerPreference, PresentMode, Queue,
+    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
 };
 
 use winit::{
     event_loop::EventLoop,
-    platform::unix::EventLoopExtUnix,
     window::{Window, WindowBuilder},
 };
 
-pub mod headless;
-pub mod image;
-pub mod screen;
-
-use crate::Configuration;
-
-pub fn create_instance(config: &Configuration) -> Instance {
-    Instance::new(config.backend)
+pub fn create_instance() -> Instance {
+    Instance::new(Backends::all())
 }
 
-pub fn create_screen(
-    config: &mut Configuration,
-    instance: &Instance,
-) -> (EventLoop<()>, Window, Surface) {
-    let event_loop = create_event_loop(config);
-    let window = create_window(&event_loop, config);
+pub fn create_screen(instance: &Instance) -> (EventLoop<()>, Window, Surface) {
+    let event_loop = EventLoop::new();
+    let window = create_window(&event_loop);
     let surface = unsafe { instance.create_surface(&window) };
-
-    config.runtime_config.size = window.inner_size();
 
     (event_loop, window, surface)
 }
 
-pub fn create_event_loop(config: &Configuration) -> EventLoop<()> {
-    match config.runtime_config.any_thread {
-        false => EventLoop::new(),
-        true => EventLoop::new_any_thread(),
-    }
-}
-
-pub fn create_window(event_loop: &EventLoop<()>, config: &Configuration) -> Window {
+pub fn create_window(event_loop: &EventLoop<()>) -> Window {
     WindowBuilder::new()
-        .with_title(config.title)
         .build(event_loop)
         .expect("Error: Unable to create window - Ignition")
 }
 
-pub fn get_adapter(
-    instance: &Instance,
-    config: &Configuration,
-    surface: Option<&Surface>,
-) -> Adapter {
+pub fn get_adapter(instance: &Instance, surface: &Surface) -> Adapter {
     let options = RequestAdapterOptions {
-        power_preference: config.power_preference,
-        compatible_surface: surface,
-        force_fallback_adapter: config.force_fallback_adapter,
+        power_preference: PowerPreference::default(),
+        compatible_surface: Some(surface),
+        force_fallback_adapter: false,
     };
 
     pollster::block_on(instance.request_adapter(&options))
         .expect("Error: Failed to find an appropriate adapter - Ignition")
 }
 
-pub fn get_device(adapter: &Adapter, config: &Configuration) -> (Device, Queue) {
-    pollster::block_on(adapter.request_device(&config.device_options, None))
+pub fn get_device(adapter: &Adapter) -> (Device, Queue) {
+    pollster::block_on(adapter.request_device(&DeviceDescriptor::default(), None))
         .expect("Error: Failed to create device - Ignition")
 }
 
@@ -69,9 +46,8 @@ pub fn configure_surface(
     surface: &Surface,
     adapter: &Adapter,
     device: &Device,
-    config: &Configuration,
 ) -> SurfaceConfiguration {
-    let config = generate_default_configuration(surface, adapter, &config);
+    let config = generate_default_configuration(surface, adapter);
     surface.configure(&device, &config);
 
     config
@@ -80,13 +56,12 @@ pub fn configure_surface(
 pub fn generate_default_configuration(
     surface: &Surface,
     adapter: &Adapter,
-    config: &Configuration,
 ) -> SurfaceConfiguration {
     SurfaceConfiguration {
-        usage: config.texture_usages,
+        usage: TextureUsages::RENDER_ATTACHMENT,
         format: surface.get_supported_formats(&adapter)[0],
-        width: config.runtime_config.size.width,
-        height: config.runtime_config.size.height,
-        present_mode: config.present_mode,
+        width: 1920,
+        height: 1080,
+        present_mode: PresentMode::Fifo,
     }
 }

@@ -1,5 +1,3 @@
-extern crate component_derive;
-
 macro_rules! unwrap {
     ($expression:expr) => {
         match $expression {
@@ -12,83 +10,32 @@ macro_rules! unwrap {
     };
 }
 
-macro_rules! unwrap_or {
-    ($expression:expr, $return_value:expr) => {
-        match $expression {
-            Ok(value) => value,
-            Err(e) => {
-                log::warn!("{}", e);
-                return $return_value;
-            }
-        }
-    };
-}
-
-use crate::{
-    liberty::{Configuration, RuntimeConfiguration},
-    manifestation::{
-        lift_off::{headless::Headless, image::Image, screen::Screen},
-        Renderer,
-    },
-};
+extern crate component;
+extern crate engine;
 
 pub mod liberty;
 pub mod life;
 pub mod manifestation;
 
 pub mod prelude {
-    pub use component_derive::Component;
+    pub use component::component;
     pub use wgpu::include_wgsl;
 
-    pub use crate::{
-        liberty::Configuration,
-        life::Component,
-        manifestation::{
-            lift_off::{headless::Headless, image::Image, screen::Screen},
-            Renderer,
-        },
-        Engine,
-    };
+    pub use crate::{life::Component, Engine};
 }
 
-pub struct Engine<R: Renderer> {
-    pub renderer: R,
+use crate::{
+    liberty::RuntimeConfiguration,
+    life::{annihilation::EntityDestructor, Component, ComponentPool, ComponentPoolsTrait, Scene},
+    manifestation::Screen,
+};
+use component::component;
+use engine::engine;
 
-    pub config: RuntimeConfiguration,
+#[component]
+#[derive(Debug, PartialEq)]
+pub struct Number {
+    num: i32,
 }
 
-impl Engine<Screen> {
-    pub fn ignite() -> Self {
-        Self::configuration(Configuration::default())
-    }
-}
-
-impl Engine<Headless> {
-    pub fn headless() -> Self {
-        Self::configuration(Configuration::default())
-    }
-}
-
-impl Engine<Image<'static>> {
-    pub fn image() -> Self {
-        Self::configuration(Configuration::default())
-    }
-}
-
-impl<R: Renderer> Engine<R> {
-    pub fn configuration(mut config: Configuration) -> Self {
-        logger();
-
-        Engine {
-            renderer: R::new(&mut config),
-
-            config: config.runtime_config,
-        }
-    }
-}
-
-pub fn logger() {
-    if env_logger::try_init().is_err() {
-        println!("Warning: Unable to start logger (this may be because it has already been started, especially during tests) - Ignition");
-    }
-}
+engine!();
