@@ -38,4 +38,22 @@ pub struct Number {
     num: i32,
 }
 
+use cgmath::*;
+
+#[component]
+#[derive(Copy, Clone)]
+pub struct Transform(pub Matrix4<f32>);
+
+#[component]
+#[derive(Copy, Clone)]
+pub struct Position(pub Vector3<f32>);
+
+#[component]
+#[derive(Copy, Clone)]
+pub struct Rotation(pub Vector3<f32>);
+
+#[component]
+#[derive(Copy, Clone)]
+pub struct Velocity(pub Vector3<f32>);
+
 engine!();

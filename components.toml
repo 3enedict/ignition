@@ -1,5 +1,7 @@
-[[ignition.1667750247]]
+[[ignition.1668362071]]
 Number = ""
+Transform = ""
+Position = ""
+Rotation = ""
+Velocity = ""
 Test = "use ignition::life::{Test, TestTrait};"
-s::component::Number"
-ber"

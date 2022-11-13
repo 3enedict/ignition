@@ -1,7 +1,101 @@
-use bytemuck_derive::{Pod, Zeroable};
-use std::num::NonZeroU32;
+use criterion::{criterion_group, criterion_main, Criterion};
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use cgmath::*;
+use ignition::{life::Scene, ComponentPools, Position, Rotation, Transform, Velocity};
+use legion::World as LegionWorld;
+use legion::*;
+use specs::prelude::*;
+use specs::World as SpecsWorld;
+use specs_derive::*;
+
+#[derive(Copy, Clone)]
+struct LTransform(Matrix4<f32>);
+
+#[derive(Copy, Clone)]
+struct LPosition(Vector3<f32>);
+
+#[derive(Copy, Clone)]
+struct LRotation(Vector3<f32>);
+
+#[derive(Copy, Clone)]
+struct LVelocity(Vector3<f32>);
+
+#[derive(Copy, Clone, Component)]
+#[storage(VecStorage)]
+struct STransform(Matrix4<f32>);
+
+#[derive(Copy, Clone, Component)]
+#[storage(VecStorage)]
+struct SPosition(Vector3<f32>);
+
+#[derive(Copy, Clone, Component)]
+#[storage(VecStorage)]
+struct SRotation(Vector3<f32>);
+
+#[derive(Copy, Clone, Component)]
+#[storage(VecStorage)]
+struct SVelocity(Vector3<f32>);
+
+pub fn legion_simple_insert() {
+    let mut world = LegionWorld::default();
+
+    world.extend(
+        (
+            vec![LTransform(Matrix4::from_scale(1.0)); 10000],
+            vec![LPosition(Vector3::unit_x()); 10000],
+            vec![LRotation(Vector3::unit_x()); 10000],
+            vec![LVelocity(Vector3::unit_x()); 10000],
+        )
+            .into_soa(),
+    );
+}
+
+pub fn specs_simple_insert() {
+    let mut world = SpecsWorld::new();
+    world.register::<STransform>();
+    world.register::<SPosition>();
+    world.register::<SRotation>();
+    world.register::<SVelocity>();
+    (0..10000).for_each(|_| {
+        world
+            .create_entity()
+            .with(STransform(Matrix4::<f32>::from_scale(1.0)))
+            .with(SPosition(Vector3::unit_x()))
+            .with(SRotation(Vector3::unit_x()))
+            .with(SVelocity(Vector3::unit_x()))
+            .build();
+    });
+}
+
+pub fn ignition_simple_insert() {
+    let mut scene: Scene<ComponentPools> = Scene::new();
+
+    for i in 0..10000 {
+        let entity = scene.entity();
+        scene.component(entity, Transform(Matrix4::<f32>::from_scale(1.0)));
+        scene.component(entity, Position(Vector3::unit_x()));
+        scene.component(entity, Rotation(Vector3::unit_x()));
+        scene.component(entity, Velocity(Vector3::unit_x()));
+    }
+}
+
+fn bench_simple_insert(c: &mut Criterion) {
+    let mut group = c.benchmark_group("simple_insert");
+    group.bench_function("legion", |b| {
+        b.iter(move || legion_simple_insert());
+    });
+    group.bench_function("specs", |b| {
+        b.iter(move || specs_simple_insert());
+    });
+    group.bench_function("ignition", |b| {
+        b.iter(move || ignition_simple_insert());
+    });
+}
+
+criterion_group!(benches, bench_simple_insert);
+criterion_main!(benches);
+
+/*
 use ignition::prelude::*;
 use wgpu::{
     util::DeviceExt, Buffer, Device, Queue, RenderPipeline, Texture, TextureDescriptor, TextureView,
@@ -298,6 +392,4 @@ pub fn triangle_creation(c: &mut Criterion) {
         })
     });
 }
-
-criterion_group!(benches, record_command_buffers, triangle_creation);
-criterion_main!(benches);
+*/

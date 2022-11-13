@@ -151,7 +151,7 @@ fn get_components() -> Vec<(String, String)> {
                 int: i32,
             }
     */
-    let regex = Regex::new(r".*#\[component.*\].*\n(.*#.*\n)*.*struct (.*) \{").unwrap();
+    let regex = Regex::new(r".*#\[component.*\].*\n(.*#.*\n)*.*struct (.*)[\{\(]").unwrap();
 
     let mut components = Vec::new();
     scan_directory_for_components(&source_directory, &regex, &mut components);
@@ -204,7 +204,7 @@ fn get_components_from_file(path: &PathBuf, regex: &Regex, components: &mut Vec<
     let src = fs::read_to_string(path).unwrap();
 
     for cap in regex.captures_iter(&src) {
-        let name = String::from(&cap[2]);
+        let name = String::from(&cap[2]).trim_matches(' ').to_string();
         let mut module_path = String::new();
 
         if !src.contains("engine!(") {
@@ -227,7 +227,7 @@ fn get_components_from_file(path: &PathBuf, regex: &Regex, components: &mut Vec<
                 .replace(".rs", &format!("::{{{}, {}Trait}};", name, name)) // "use ignition::life::genesis::{Name, NameTrait};"
                 .replace("lib::", ""); // if "use ignition::lib::Name;" then "use ignition::Name;"
         }
-
+        
         components.push((name, module_path));
     }
 }
