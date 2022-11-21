@@ -1,7 +1,10 @@
-[[ignition.1668362071]]
-Number = ""
-Transform = ""
-Position = ""
-Rotation = ""
-Velocity = ""
-Test = "use ignition::life::{Test, TestTrait};"
+[[ignition.1668876691]]
+engine = ignition
+Number = "ignition::{Number, NumberTrait}"
+Transform = "ignition::{Transform, TransformTrait}"
+Position = "ignition::{Position, PositionTrait}"
+Rotation = "ignition::{Rotation, RotationTrait}"
+Velocity = "ignition::{Velocity, VelocityTrait}"
+Test = "ignition::life::{Test, TestTrait}"
+b::{Velocity, VelocityTrait}"
+Test = "ignition::life::{Test, TestTrait}"

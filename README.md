@@ -2,22 +2,19 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 
-### ECS
-- Add indexing system
-- Add entity
-- Add component
-- Remove component
-- Toggle component
-- Implement the idea behind RendererCommands using ECS
-- Add [] operators for Scene
-
 ### Refactoring
+- Revamp everything
+- Make components macro derive macro
 - More data-driven programming
 - Try loading shaders in a more friendly way
 - Add back VertexGroups
 - Ignite macro take parameters
 - Add macro directory for storing common functions in utils crate
 - Divide into workspaces
+
+### ECS
+- Implement the idea behind RendererCommands using ECS
+- Add [] operators for Scene
  
 ## Code layout
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors

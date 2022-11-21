@@ -15,8 +15,8 @@ pollster = "0.2"
 thiserror = "1.0"
 futures-intrusive = "0.4"
 
-component = { path = "src/component" }
-engine = { path = "src/engine" }
+component = { path = "src/macros/component" }
+engine = { path = "src/macros/engine" }
 
 [dev-dependencies]
 criterion = "0.3"

@@ -12,3 +12,5 @@ syn = "1.0"
 proc-macro2 = "1.0"
 regex = "1.6"
 heck = "0.4"
+
+utils = { path = "../utils" }
