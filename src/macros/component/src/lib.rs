@@ -7,7 +7,7 @@ use utils::*;
 
 #[proc_macro_attribute]
 pub fn component(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    update_components(false);
+    update_components();
 
     let ast: syn::ItemStruct = syn::parse(input.clone()).unwrap();
     let (ident, ident_trait, name, name_mut) = get_data(&ast);

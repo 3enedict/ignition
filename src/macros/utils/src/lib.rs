@@ -1,4 +1,7 @@
-use std::{env, ffi::OsStr, fs, io::prelude::*, path::PathBuf, time::SystemTime};
+use std::{
+    env, ffi::OsStr, fs, fs::OpenOptions, io::prelude::*, path::Path, path::PathBuf,
+    time::SystemTime,
+};
 
 use heck::AsSnakeCase;
 use lazy_static::lazy_static;
@@ -125,7 +128,7 @@ pub fn add_component_to_module_path(mut module_path: String, name: &String) -> S
     module_path
 }
 
-pub fn get_time_since_last_component_update() -> u64 {
+pub fn get_time_since_last_update() -> u64 {
     let regex = Regex::new(r"\[\[ignition.(\d*)\]\]").unwrap();
 
     let mut time_of_previous_sync = 0;
@@ -156,14 +159,12 @@ pub fn format_components(components: &Vec<(String, String)>) -> String {
     formatted_components
 }
 
-pub fn generate_components_list(formatted_components: String) -> String {
-    let regex = Regex::new(r"(?s)\[\[ignition.\d*\]\]\n\n.*\[*").unwrap();
+pub fn generate_components_list(formatted: String) -> String {
+    let regex = Regex::new(r"(?s)\[\[ignition.\d*\]\]\n.*\[*").unwrap();
 
     let full_components_list = match regex.is_match(&get_components()) {
-        true => regex
-            .replace(&get_components(), formatted_components)
-            .to_string(),
-        false => formatted_components,
+        true => regex.replace(&get_components(), formatted).to_string(),
+        false => formatted,
     };
 
     full_components_list
@@ -179,19 +180,28 @@ pub fn write_to_component_file(components: String) {
     }
 }
 
-pub fn update_components(is_engine_macro: bool) -> Option<Vec<(String, String)>> {
+pub fn update_components() -> Option<Vec<(String, String)>> {
     let mut components: Option<Vec<(String, String)>> = None;
 
-    let time = get_current_time() - get_time_since_last_component_update();
-    let contains_engine = get_components().contains(&format!("engine = {}", get_current_crate()));
+    if !Path::new("components.lock").exists() {
+        let _lock = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open("components.lock")
+            .expect(
+                "Unable to create components.lock file. This could be because it already exists.",
+            );
 
-    // The last condition is to prioritize the engine macro over the component macro when searching all source file for components
-    if time > 2 || !is_engine_macro && contains_engine {
-        components = Some(find_components());
-        let formatted_components = format_components(components.as_ref().unwrap());
-        let full_components_list = generate_components_list(formatted_components);
+        if get_current_time() - get_time_since_last_update() > 2 {
+            components = Some(find_components());
+            let formatted_components = format_components(components.as_ref().unwrap());
+            let full_components_list = generate_components_list(formatted_components);
+            eprintln!("{}", full_components_list);
 
-        write_to_component_file(full_components_list);
+            write_to_component_file(full_components_list);
+        }
+
+        fs::remove_file("components.lock").unwrap();
     }
 
     components

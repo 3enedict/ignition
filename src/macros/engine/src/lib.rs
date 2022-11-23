@@ -9,7 +9,7 @@ use utils::*;
 
 #[proc_macro]
 pub fn engine(_input: TokenStream) -> TokenStream {
-    let components = update_components(true).unwrap_or(parse_components());
+    let components = update_components().unwrap_or(parse_components());
 
     let types = convert_type_names(&components, |x| to_ident(x));
         let types_trait = convert_type_names(&components, |x| to_ident(&format!("{}Trait", x)));
