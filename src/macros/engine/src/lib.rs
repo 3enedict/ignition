@@ -1,24 +1,21 @@
 use proc_macro::TokenStream;
-use proc_macro2::Ident;
 use quote::quote;
 
 use regex::Regex;
-use syn::ItemUse;
+use syn::{Ident, ItemUse};
 
-use utils::{parsing::*, update_components, accessors::get_current_crate};
+use utils::{accessors::get_current_crate, parsing::*, update_components};
 
 #[proc_macro]
 pub fn engine(_input: TokenStream) -> TokenStream {
     let components = update_components().unwrap_or(parse_components());
 
     let types = convert_type_names(&components, |x| to_ident(x));
-        let types_trait = convert_type_names(&components, |x| to_ident(&format!("{}Trait", x)));
+    let types_trait = convert_type_names(&components, |x| to_ident(&format!("{}Trait", x)));
     let names = convert_type_names(&components, |x| to_snakecased_ident(&x));
     let names_mut = convert_type_names(&components, |x| to_snakecased_ident(&format!("{}_mut", x)));
 
-    let regex = Regex::new(&format!(r"{}::\{{.*\}}", get_path_of_engine_in_current_crate())).unwrap();
-    let paths: Vec<ItemUse> = components.iter().filter(|(_x, y)| !regex.is_match(y)).map(|(_x, y)| syn::parse_str::<ItemUse>(&format!("use {};", y.replace(&get_current_crate(), "crate"))).unwrap()).collect();
-
+    let paths = finish_formatting_paths(&components);
 
     quote! {
         #(#paths)*
@@ -38,8 +35,16 @@ pub fn engine(_input: TokenStream) -> TokenStream {
                 #(self.#names.delete_entity(entity);)*
             }
         }
-        
-        #(impl #types_trait for ComponentPools { fn #names(&self) -> &ComponentPool<#types> { &self.#names } fn #names_mut(&mut self) -> &mut ComponentPool<#types> { &mut self.#names }})*
+
+        #(impl #types_trait for ComponentPools {
+            fn #names(&self) -> &ComponentPool<#types> {
+                &self.#names
+            }
+
+            fn #names_mut(&mut self) -> &mut ComponentPool<#types> {
+                &mut self.#names
+            }
+        })*
 
         pub struct Engine {
             pub renderer: Screen,
@@ -68,10 +73,25 @@ pub fn engine(_input: TokenStream) -> TokenStream {
     .into()
 }
 
+fn convert_type_names(
+    components: &Vec<(String, String)>,
+    closure: impl Fn(&String) -> Ident,
+) -> Vec<Ident> {
+    components.iter().map(|(x, _y)| closure(x)).collect()
+}
 
-fn convert_type_names(components: &Vec<(String, String)>, closure: impl Fn(&String) -> Ident) -> Vec<Ident> {
+fn finish_formatting_paths(components: &Vec<(String, String)>) -> Vec<ItemUse> {
+    let engine_path = get_path_of_engine_in_current_crate();
+    let regex = Regex::new(&format!(r"{}::\{{.*\}}", engine_path)).unwrap();
+
     components
         .iter()
-        .map(|(x, _y)| closure(x))
+        .filter(|(_x, y)| !regex.is_match(y))
+        .map(|(_x, y)| format_path(y))
         .collect()
+}
+
+fn format_path(path: &String) -> ItemUse {
+    let path = path.replace(&get_current_crate(), "crate");
+    syn::parse_str::<ItemUse>(&format!("use {};", path)).unwrap()
 }
