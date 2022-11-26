@@ -1,5 +1,11 @@
 use std::{
-    env, ffi::OsStr, fs, fs::OpenOptions, io::prelude::*, path::Path, path::PathBuf,
+    env,
+    ffi::OsStr,
+    fs::OpenOptions,
+    fs::{self, File},
+    io::prelude::*,
+    path::Path,
+    path::PathBuf,
     time::SystemTime,
 };
 
@@ -159,15 +165,16 @@ pub fn format_components(components: &Vec<(String, String)>) -> String {
     formatted_components
 }
 
-pub fn generate_components_list(formatted: String) -> String {
+pub fn replace_components_in_file(formatted: String) -> String {
     let regex = Regex::new(r"(?s)\[\[ignition.\d*\]\]\n.*\[*").unwrap();
+    let old_components_file = get_components();
 
-    let full_components_list = match regex.is_match(&get_components()) {
-        true => regex.replace(&get_components(), formatted).to_string(),
+    let new_components_file = match regex.is_match(&old_components_file) {
+        true => regex.replace(&old_components_file, formatted).to_string(),
         false => formatted,
     };
 
-    full_components_list
+    new_components_file
 }
 
 pub fn write_to_component_file(components: String) {
@@ -180,31 +187,43 @@ pub fn write_to_component_file(components: String) {
     }
 }
 
-pub fn update_components() -> Option<Vec<(String, String)>> {
-    let mut components: Option<Vec<(String, String)>> = None;
+pub fn components_are_locked() -> bool {
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open("components.lock")
+        .is_err()
+}
 
-    if !Path::new("components.lock").exists() {
-        let _lock = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open("components.lock")
-            .expect(
-                "Unable to create components.lock file. This could be because it already exists.",
-            );
+pub fn package_components_for_filing(components: &Vec<(String, String)>) -> String {
+    let formatted_components = format_components(&components);
+    let components_file = replace_components_in_file(formatted_components);
+    eprintln!("{}", components_file);
 
-        if get_current_time() - get_time_since_last_update() > 2 {
-            components = Some(find_components());
-            let formatted_components = format_components(components.as_ref().unwrap());
-            let full_components_list = generate_components_list(formatted_components);
-            eprintln!("{}", full_components_list);
+    components_file
+}
 
-            write_to_component_file(full_components_list);
-        }
+pub fn search_and_rescue_components() -> Option<Vec<(String, String)>> {
+    if get_current_time() - get_time_since_last_update() > 2 {
+        let components = find_components();
+        let components_file = package_components_for_filing(&components);
+        write_to_component_file(components_file);
 
-        fs::remove_file("components.lock").unwrap();
+        return Some(components);
     }
 
-    components
+    None
+}
+
+pub fn update_components() -> Option<Vec<(String, String)>> {
+    if !components_are_locked() {
+        let components = search_and_rescue_components();
+        fs::remove_file("components.lock").unwrap();
+
+        return components;
+    }
+
+    None
 }
 
 pub fn parse_components() -> Vec<(String, String)> {
