@@ -31,7 +31,8 @@ pub fn search_and_rescue_components() -> Option<Vec<(String, String)>> {
         let components_file = package_components_for_filing(&components);
         write_to_component_file(components_file);
 
-        return Some(components);
+        let components = components.into_iter().filter(|(_x, y)| y.contains('"'));
+        return Some(components.collect());
     }
 
     None

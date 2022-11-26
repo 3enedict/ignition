@@ -2,7 +2,6 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 
-- Make components macro a derive macro
 - Fix update_components to not add the engine macro as a component
 - Fix replace_components_in_file to not overwrite a preexisting crate's components
 - Make ecs work in external crate
