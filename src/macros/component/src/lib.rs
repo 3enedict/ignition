@@ -3,7 +3,7 @@ use proc_macro2::Ident;
 use quote::quote;
 use syn;
 
-use utils::*;
+use utils::{parsing::*, update_components};
 
 #[proc_macro_attribute]
 pub fn component(_attr: TokenStream, input: TokenStream) -> TokenStream {

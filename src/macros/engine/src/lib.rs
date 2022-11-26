@@ -5,7 +5,7 @@ use quote::quote;
 use regex::Regex;
 use syn::ItemUse;
 
-use utils::*;
+use utils::{parsing::*, update_components, accessors::get_current_crate};
 
 #[proc_macro]
 pub fn engine(_input: TokenStream) -> TokenStream {
