@@ -10,9 +10,9 @@ pub mod ghost;
 pub mod gizmos;
 pub mod glitch;
 
-use component::component;
+use component::Component;
 
-#[component]
+#[derive(Component)]
 pub struct Test {
     test: i32,
 }

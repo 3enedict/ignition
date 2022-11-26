@@ -1,53 +1,51 @@
 use std::{ffi::OsStr, fs, path::PathBuf};
 
+use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
 use crate::accessors::{get_component_module_path, get_module_path, source_dir};
 
 pub fn find_components() -> Vec<(String, String)> {
-    /* Catches names of structs definitions similar to:
-            #[conponent]  // .*#\[component.*\].*\n
-            #[derive(Debug)] // (.*#.*\n)*
-            pub struct Int { // .*struct (.*) \{
-                int: i32,
-            }
-    */
-    let regex = Regex::new(r".*#\[component.*\].*\n(.*#.*\n)*.*struct (.*)[\{\(]").unwrap();
-
     let mut components = Vec::new();
-    scan_dir_for_components(&source_dir(), &regex, &mut components);
+    scan_dir_for_components(&source_dir(), &mut components);
 
     components
 }
 
-pub fn scan_dir_for_components(
-    dir: &PathBuf,
-    regex: &Regex,
-    components: &mut Vec<(String, String)>,
-) {
+pub fn scan_dir_for_components(dir: &PathBuf, components: &mut Vec<(String, String)>) {
     for entry in fs::read_dir(dir).unwrap() {
         let path = entry.unwrap().path();
 
         if path.is_file() {
-            get_components_from_file(&path, &regex, components);
+            get_components_from_file(&path, components);
         } else if path.file_name() != Some(OsStr::new("macros")) {
-            scan_dir_for_components(&path, &regex, components);
+            scan_dir_for_components(&path, components);
         }
     }
 }
 
-pub fn get_components_from_file(
-    path: &PathBuf,
-    regex: &Regex,
-    components: &mut Vec<(String, String)>,
-) {
+pub fn get_components_from_file(path: &PathBuf, components: &mut Vec<(String, String)>) {
+    /* Catches names of structs definitions similar to:
+            #[derive(Debug, Conponent)] // .*#\[derive(.*Conponent.*)\].*\n
+            pub struct Int { // .*struct (.*)[\{\(]
+                int: i32,
+            }
+
+            #[derive(Debug, Conponent)] // .*#\[derive(.*Conponent.*)\].*\n
+            pub struct Float(f32) // .*struct (.*)[\{\(]
+    */
+    lazy_static! {
+        static ref RE: Regex =
+            Regex::new(r".*#\[derive(.*Component.*)\].*\n.*struct (.*)[\{\(]").unwrap();
+    }
+
     let src = fs::read_to_string(path).unwrap();
 
     if src.contains("engine!(") {
         components.push((String::from("engine"), get_module_path(&path)));
     }
 
-    for cap in regex.captures_iter(&src) {
+    for cap in RE.captures_iter(&src) {
         let name = get_component_name(cap);
         let module_path = get_component_module_path(&path, &name);
 

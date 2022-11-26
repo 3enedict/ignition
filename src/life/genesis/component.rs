@@ -33,7 +33,7 @@ mod tests {
 
         assert_eq!(
             scene.get::<Number>().iter().collect::<Vec<&Number>>(),
-            vec![&Number { num: 34 }]
+            vec![&Number { num: 4 }]
         );
     }
 

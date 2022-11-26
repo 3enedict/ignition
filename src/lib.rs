@@ -18,7 +18,7 @@ pub mod life;
 pub mod manifestation;
 
 pub mod prelude {
-    pub use component::component;
+    pub use component::Component;
     pub use wgpu::include_wgsl;
 
     pub use crate::{life::Component, Engine};
@@ -29,31 +29,26 @@ use crate::{
     life::{annihilation::EntityDestructor, Component, ComponentPool, ComponentPoolsTrait, Scene},
     manifestation::Screen,
 };
-use component::component;
+use component::Component;
 use engine::engine;
 
-#[component]
-#[derive(Debug, PartialEq)]
+#[derive(Component, Debug, PartialEq)]
 pub struct Number {
     num: i32,
 }
 
 use cgmath::*;
 
-#[component]
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub struct Transform(pub Matrix4<f32>);
 
-#[component]
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub struct Position(pub Vector3<f32>);
 
-#[component]
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub struct Rotation(pub Vector3<f32>);
 
-#[component]
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub struct Velocity(pub Vector3<f32>);
 
 engine!();

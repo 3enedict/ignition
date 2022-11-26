@@ -2,21 +2,21 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 
-### Refactoring
-- Revamp everything
-- Make components macro derive macro
-- More data-driven programming
+- Make components macro a derive macro
+- Fix update_components to not add the engine macro as a component
+- Fix replace_components_in_file to not overwrite a preexisting crate's components
+- Make ecs work in external crate
+- Subdivide engine macro into engine!() and ecs!()
+- Add parameters for engine macro (name, headless: Hydrogen, screen: Diesel, default: Engine)
+- Make triangle test work
 - Try loading shaders in a more friendly way
 - Add back VertexGroups
-- Ignite macro take parameters
-- Add macro directory for storing common functions in utils crate
-- Divide into workspaces
-
-### ECS
 - Implement the idea behind RendererCommands using ECS
 - Add [] operators for Scene
+- Divide into workspaces
+- Redo code layout
  
-## Code layout
+## Code layout (**deprecated**)
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors
   - *manifestation.rs*: Definition of the Renderer trait
     - *lift_off.rs*: List of useful utilities for initializing a Renderer
