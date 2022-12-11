@@ -32,11 +32,6 @@ use crate::{
 use component::Component;
 use engine::engine;
 
-#[derive(Component, Debug, PartialEq)]
-pub struct Number {
-    num: i32,
-}
-
 use cgmath::*;
 
 #[derive(Component, Copy, Clone)]

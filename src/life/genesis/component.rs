@@ -22,7 +22,7 @@ impl<G: 'static> ComponentPool<G> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{life::Scene, ComponentPools, Number};
+    use crate::{life::Number, life::Scene, ComponentPools};
 
     #[test]
     fn creating_new_component_pool_updates_scene() {

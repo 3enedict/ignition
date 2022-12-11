@@ -2,9 +2,10 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 
-- Fix update_components to not add the engine macro as a component
 - Fix replace_components_in_file to not overwrite a preexisting crate's components
 - Make ecs work in external crate
+- Add tests to ecs macros
+- Add function to check components.toml hasn't been tampered with
 - Subdivide engine macro into engine!() and ecs!()
 - Add parameters for engine macro (name, headless: Hydrogen, screen: Diesel, default: Engine)
 - Make triangle test work

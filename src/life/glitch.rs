@@ -1,5 +1,5 @@
 use thiserror::Error;
-
+/*
 #[cfg(test)]
 macro_rules! assert_err {
     ($expression:expr, $($error:tt)+) => {
@@ -18,6 +18,7 @@ macro_rules! assert_contains {
         }
     };
 }
+*/
 
 mod get;
 mod get_component;

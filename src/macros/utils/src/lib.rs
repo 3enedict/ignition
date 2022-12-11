@@ -1,4 +1,4 @@
-use std::{fs, io::prelude::*};
+use std::fs;
 
 use regex::Regex;
 
@@ -8,7 +8,7 @@ pub mod search_logic;
 
 use crate::{
     accessors::{
-        components_are_locked, components_toml, get_components, get_current_time,
+        components_are_locked, get_components, get_current_crate, get_current_time,
         get_time_since_last_update, tempfile,
     },
     search_logic::find_components,
@@ -31,7 +31,7 @@ pub fn search_and_rescue_components() -> Option<Vec<(String, String)>> {
         let components_file = package_components_for_filing(&components);
         write_to_component_file(components_file);
 
-        let components = components.into_iter().filter(|(_x, y)| y.contains('"'));
+        let components = components.into_iter().filter(|(_x, y)| y.contains("'"));
         return Some(components.collect());
     }
 
@@ -41,7 +41,6 @@ pub fn search_and_rescue_components() -> Option<Vec<(String, String)>> {
 pub fn package_components_for_filing(components: &Vec<(String, String)>) -> String {
     let formatted_components = format_components(&components);
     let components_file = replace_components_in_file(formatted_components);
-    eprintln!("{}", components_file);
 
     components_file
 }
@@ -60,19 +59,25 @@ pub fn format_components(components: &Vec<(String, String)>) -> String {
 }
 
 pub fn replace_components_in_file(formatted: String) -> String {
-    let regex = Regex::new(r"(?s)\[\[ignition.\d*\]\]\n.*\[*").unwrap();
     let old_components_file = get_components();
+
+    if old_components_file.is_empty() {
+        return formatted;
+    }
+
+    let cur_crate = get_current_crate();
+    let regex = Regex::new(&format!(r"\[\[{}.\d*\]\]\n(?:.* = .*\n)*", cur_crate)).unwrap();
 
     let new_components_file = match regex.is_match(&old_components_file) {
         true => regex.replace(&old_components_file, formatted).to_string(),
-        false => formatted,
+        false => old_components_file + "\n" + &formatted,
     };
 
     new_components_file
 }
 
 pub fn write_to_component_file(components: String) {
-    if let Err(_) = components_toml().write_all(components.as_bytes()) {
+    if let Err(_) = fs::write("components.toml", components) {
         println!("Unable to write to components.toml")
     }
 

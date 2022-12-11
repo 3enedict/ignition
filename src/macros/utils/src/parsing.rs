@@ -9,7 +9,7 @@ pub fn parse_components() -> Vec<(String, String)> {
     let components = get_components();
 
     lazy_static! {
-        static ref RE: Regex = Regex::new("(.*) = \"(.*)\"").unwrap();
+        static ref RE: Regex = Regex::new(r"(.*) = '(.*)'").unwrap();
     }
 
     RE.captures_iter(&components)

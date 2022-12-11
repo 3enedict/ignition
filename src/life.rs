@@ -12,9 +12,9 @@ pub mod glitch;
 
 use component::Component;
 
-#[derive(Component)]
-pub struct Test {
-    test: i32,
+#[derive(Component, Debug, PartialEq, Eq)]
+pub struct Number {
+    num: i32,
 }
 
 pub struct Scene<P> {

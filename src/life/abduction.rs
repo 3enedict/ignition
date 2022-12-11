@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn calling_get_current_entity_returns_correct_id() {
-        let mut scene: Scene<ComponentPools> = Scene::new();
+        let scene: Scene<ComponentPools> = Scene::new();
 
         assert_eq!(0, scene.get_current_entity());
     }

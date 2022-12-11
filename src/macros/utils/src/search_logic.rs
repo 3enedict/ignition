@@ -49,7 +49,7 @@ pub fn get_components_from_file(path: &PathBuf, components: &mut Vec<(String, St
         let name = get_component_name(cap);
         let module_path = get_component_module_path(&path, &name);
 
-        components.push((name, format!("\"{}\"", module_path)));
+        components.push((name, format!("\'{}\'", module_path)));
     }
 }
 
