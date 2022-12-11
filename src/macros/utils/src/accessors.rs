@@ -66,6 +66,7 @@ pub fn get_module_path(path: &PathBuf) -> String {
         .replace(".::src", &format!("{}", &get_current_crate())) // "ignition::life::genesis.rs"
         .replace(".rs", "") // "ignition::life::genesis"
         .replace("::lib", "") // if "use ignition::lib" then "use ignition"
+        .replace("::main", "") // if "use application::main" then "use application"
 }
 
 /* INFORMATION */
@@ -78,7 +79,7 @@ pub fn get_current_time() -> u64 {
 }
 
 pub fn get_time_since_last_update() -> u64 {
-    let regex = Regex::new(r"\[\[ignition.(\d*)\]\]").unwrap();
+    let regex = Regex::new(&format!(r"\[\[{}.(\d*)\]\]", get_current_crate())).unwrap();
 
     let mut time_of_previous_sync = 0;
     if let Some(cap) = regex.captures(&get_components()) {

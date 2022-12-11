@@ -19,7 +19,7 @@ impl<G: 'static> ComponentPool<G> {
         }
     }
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use crate::{life::Number, life::Scene, ComponentPools};
@@ -67,3 +67,4 @@ mod tests {
         );
     }
 }
+*/

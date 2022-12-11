@@ -69,7 +69,7 @@ impl<G: 'static> ComponentPoolTrait for ComponentPool<G> {
         self as &mut dyn std::any::Any
     }
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use crate::{life::Scene, ComponentPools};
@@ -93,3 +93,4 @@ mod tests {
         assert_eq!(0, scene.get_current_entity());
     }
 }
+*/

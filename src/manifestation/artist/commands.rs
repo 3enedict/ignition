@@ -5,7 +5,7 @@ use wgpu::{
     TextureViewDescriptor,
 };
 use winit::event_loop::ControlFlow;
-
+/*
 use crate::Engine;
 
 pub struct ScreenEncoder {
@@ -87,3 +87,4 @@ pub fn create_command_encoder(engine: &mut Engine) -> CommandEncoder {
     let descriptor = &CommandEncoderDescriptor { label: None };
     engine.renderer.device.create_command_encoder(descriptor)
 }
+*/

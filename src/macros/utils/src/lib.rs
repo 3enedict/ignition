@@ -52,7 +52,10 @@ pub fn format_components(components: &Vec<(String, String)>) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    formatted_components.insert_str(0, &format!("[[ignition.{}]]\n", get_current_time()));
+    let crate_name = get_current_crate();
+    let time = get_current_time();
+
+    formatted_components.insert_str(0, &format!("[[{}.{}]]\n", crate_name, time));
     formatted_components.push('\n');
 
     formatted_components

@@ -43,7 +43,7 @@ impl<G: 'static> EntityConstructor for ComponentPool<G> {
         self.sparse_array.push(-1);
     }
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -107,3 +107,4 @@ mod tests {
         );
     }
 }
+*/

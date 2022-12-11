@@ -11,11 +11,12 @@ pub mod gizmos;
 pub mod glitch;
 
 use component::Component;
-
-#[derive(Component, Debug, PartialEq, Eq)]
+/*
+[derive(Component, Debug, PartialEq, Eq)]
 pub struct Number {
     num: i32,
 }
+*/
 
 pub struct Scene<P> {
     pub available_entities: Vec<usize>,

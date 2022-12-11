@@ -2,12 +2,14 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 
 ## TODO
 
-- Fix replace_components_in_file to not overwrite a preexisting crate's components
-- Make ecs work in external crate
-- Add tests to ecs macros
+- Test if ecs works in external crates
+- Add tests for ecs macros
+- Add comments to explain all f****** regexes
+- Replace check_if_components_locked with file check
 - Add function to check components.toml hasn't been tampered with
-- Subdivide engine macro into engine!() and ecs!()
-- Add parameters for engine macro (name, headless: Hydrogen, screen: Diesel, default: Engine)
+- Subdivide engine macro into engine!() and ecs!() for tests
+- Add engine trait
+- Add parameters for engine macro (name, headless: Hydrogen, screen: Diesel, default: Engine) perhaps by parsing it using syn::Punctuated
 - Make triangle test work
 - Try loading shaders in a more friendly way
 - Add back VertexGroups
@@ -15,6 +17,8 @@ Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefu
 - Add [] operators for Scene
 - Divide into workspaces
 - Redo code layout
+
+scene.components(|n| generate_entity_from_id(n)).components(...).entities(1000);
  
 ## Code layout (**deprecated**)
 - *lib.rs*: Home of the infamous **Engine** with it's configuration and constructors

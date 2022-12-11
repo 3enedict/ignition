@@ -1,7 +1,3 @@
-[[ignition.1670764953]]
+[[ignition.1670776400]]
 engine = ignition
-Transform = 'ignition::{Transform, TransformTrait}'
-Position = 'ignition::{Position, PositionTrait}'
-Rotation = 'ignition::{Rotation, RotationTrait}'
-Velocity = 'ignition::{Velocity, VelocityTrait}'
-Number = 'ignition::life::{Number, NumberTrait}'
+Int = 'ignition::{Int, IntTrait}'
