@@ -1,4 +1,4 @@
-Ignition is trying to be (one day), a beautifully simple graphics engine. Hopefully....
+Project put on pause.
 
 ## TODO
 
